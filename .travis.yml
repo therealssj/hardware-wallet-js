@@ -7,6 +7,7 @@ matrix:
       - linux
       - osx
     before_install:
+      - sudo apt-get update 
       - sudo apt install libudev-dev
       - sudo apt install libusb-1.0-0-dev
     before_script:
