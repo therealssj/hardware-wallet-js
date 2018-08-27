@@ -2,11 +2,13 @@ matrix:
   include:
   - language: node_js
     node_js:
-    - "8"
+      - "8"
     os:
-        - linux
-        - osx
+      - linux
+      - osx
+    before_install:
+      - sudo apt install libusb-1.0-0-dev
     before_script:
-        - npm install
+      - npm install
     script:
-        - npm run eslint
+      - npm run eslint
