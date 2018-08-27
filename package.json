@@ -1,0 +1,23 @@
+{
+  "name": "hardware-wallet-js",
+  "version": "1.0.0",
+  "description": "[![Build Status](https://travis-ci.com/skycoin/hardware-wallet-js.svg?branch=master)](https://travis-ci.com/skycoin/hardware-wallet-js)",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skycoin/hardware-wallet-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/skycoin/hardware-wallet-js/issues"
+  },
+  "homepage": "https://github.com/skycoin/hardware-wallet-js#readme",
+  "dependencies": {
+    "node-hid": "^0.7.3"
+  }
+}
