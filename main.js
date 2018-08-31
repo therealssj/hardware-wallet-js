@@ -21,6 +21,8 @@ if( deviceInfo ) {
   const failMsg = messages.Failure.create( {"message": "Ahyo"} );
   const buffer = messages.Failure.encode(failMsg).finish();
   const chunks = deviceWallet.makeTrezorMessage(buffer, 3);
-  // eslint-disable-next-line no-console
-  console.log(chunks);
+  if (chunks.length > 0) {
+    // eslint-disable-next-line no-console
+    console.log(chunks[0].toString());
+  }
 }

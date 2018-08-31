@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node main.js",
     "lint": "./node_modules/.bin/eslint ./*.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/*.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "protobufjs": "^6.8.8"
   },
   "devDependencies": {
-    "eslint": "^5.4.0"
+    "eslint": "^5.4.0",
+    "node-test": "^1.2.4"
   }
 }
