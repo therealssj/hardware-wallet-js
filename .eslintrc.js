@@ -164,6 +164,7 @@ module.exports = {
         "no-ternary": "error",
         "no-throw-literal": "error",
         "no-trailing-spaces": "error",
+        "no-undef": "off",
         "no-undef-init": "error",
         "no-undefined": "error",
         "no-underscore-dangle": "error",
