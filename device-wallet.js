@@ -64,7 +64,6 @@ module.exports = {
         const buffer = messages.SkycoinAddress.encode(msg).finish();
         return makeTrezorMessage(
             buffer,
-// eslint dot-notation: [ { "allowPattern": "^[a-zA-Z]+(_[a-zA-Z]+)+$" }]
             messages.MessageType.MessageType_SkycoinAddress
             );
     },
