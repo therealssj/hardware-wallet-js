@@ -1,7 +1,7 @@
 const messages = require('./protob/skycoin');
 const deviceWallet = require('./device-wallet');
 
-if( deviceWallet.getDevice() === null ) {
+if( deviceWallet.deviceAddressGen() === null ) {
   // eslint-disable-next-line no-console
   console.log("404 Skycoin hardware NOT FOUND");
   const failMsg = messages.Failure.create( {"message": "Ahyo"} );
@@ -14,4 +14,6 @@ if( deviceWallet.getDevice() === null ) {
 } else {
   // eslint-disable-next-line no-console
   console.log("Skycoin hardware is plugged in");
+  // eslint-disable-next-line no-console
+  console.log(deviceWallet.deviceAddressGen(0, 0));
 }
