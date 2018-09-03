@@ -1,4 +1,22 @@
+const HID = require('node-hid');
+
 module.exports = {
+    // Returns a handle to usbhid device
+    getDevice() {
+        const deviceInfo = HID.devices().find( function(d) {
+            const isTeensy = d.manufacturer == "SatoshiLabs";
+            return isTeensy;
+        });
+        if( deviceInfo ) {
+            const device = new HID.HID( deviceInfo.path );
+            device.on("data", function(data) {
+                // eslint-disable-next-line no-console
+                console.log("Received data", data);
+            });
+            return device;
+        }
+        return null;
+    },
     // Prepares buffer containing message to device
     // eslint-disable-next-line max-statements
     makeTrezorMessage(buffer, msgId) {
