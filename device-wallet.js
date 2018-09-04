@@ -3,19 +3,15 @@ const messages = require('./protob/skycoin');
 
 // Returns a handle to usbhid device
 const getDevice = function() {
-        const deviceInfo = HID.devices().find( function(d) {
-            const isTeensy = d.manufacturer == "SatoshiLabs";
-            return isTeensy;
-        });
-        if( deviceInfo ) {
-            const device = new HID.HID( deviceInfo.path );
-            device.on("data", function(data) {
-                // eslint-disable-next-line no-console
-                console.log("Received data", data);
-            });
-            return device;
-        }
-        return null;
+    const deviceInfo = HID.devices().find( function(d) {
+        const isTeensy = d.manufacturer == "SatoshiLabs";
+        return isTeensy;
+    });
+    if( deviceInfo ) {
+        const device = new HID.HID( deviceInfo.path );
+        return device;
+    }
+    return null;
 };
 
 // Prepares buffer containing message to device
@@ -47,32 +43,63 @@ const makeTrezorMessage = function(buffer, msgId) {
     return chunks;
 };
 
-module.exports = {
-    // Sends Address generation request
-    // eslint-disable-next-line max-statements
-    deviceAddressGen(addressN, startIndex) {
-        const dev = getDevice();
-        if (dev === null) {
-            // eslint-disable-next-line no-console
-            console.error("Device not connected");
-            return null;
+// Sends Address generation request
+// eslint-disable-next-line max-statements, max-lines-per-function
+const deviceAddressGen = function(addressN, startIndex) {
+    const dev = getDevice();
+    if (dev === null) {
+        // eslint-disable-next-line no-console
+        console.error("Device not connected");
+        return null;
+    }
+    const msgStructure = {
+        addressN,
+        startIndex
+    };
+    const msg = messages.SkycoinAddress.create(msgStructure);
+    const buffer = messages.SkycoinAddress.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_SkycoinAddress
+    );
+    const dataBytes = [];
+    chunks[0].forEach((elt, i) => {
+        dataBytes[i] = elt;
+    });
+    dev.write(dataBytes);
+
+    dev.read(function(err, data) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        const dv8 = new Uint8Array(data);
+        const kind = data[4];
+        // eslint-disable-next-line no-console
+        console.log(
+            "Received data", data, " msg kind: ",
+            messages.MessageType[kind]
+            );
+        if (kind == messages.MessageType.MessageType_Failure) {
+            try {
+                // eslint-disable-next-line no-console
+                console.log(dv8.slice(9, 39));
+                const failMsg = messages.Failure.decode(dv8.slice(9, 39));
+                // eslint-disable-next-line no-console
+                console.log(
+                    "Failure message code",
+                    failMsg.code, "message: ",
+                    failMsg.message
+                    );
+            } catch (e) {
+                // eslint-disable-next-line no-console
+                console.error("wire format is invalid");
+            }
         }
-        const msgStructure = {
-            addressN,
-            startIndex
-        };
-        const msg = messages.SkycoinAddress.create(msgStructure);
-        const buffer = messages.SkycoinAddress.encode(msg).finish();
-        const chunks = makeTrezorMessage(
-            buffer,
-            messages.MessageType.MessageType_SkycoinAddress
-        );
-        const dataBytes = [];
-        chunks[0].forEach((elt, i) => {
-            dataBytes[i] = elt;
-        });
-        dev.write(dataBytes);
-        return dataBytes;
-    },
+    });
+    dev.close();
+    return dataBytes;
+};
+
+module.exports = {
+    deviceAddressGen,
     makeTrezorMessage
 };

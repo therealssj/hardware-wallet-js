@@ -14,6 +14,12 @@ if( deviceWallet.deviceAddressGen() === null ) {
 } else {
   // eslint-disable-next-line no-console
   console.log("Skycoin hardware is plugged in");
+  const message = "Failure";
+  const msgStructure = {
+      message
+  };
+  const msg = messages.Failure.create(msgStructure);
+  const buffer = messages.Failure.encode(msg).finish();
   // eslint-disable-next-line no-console
-  console.log(deviceWallet.deviceAddressGen(0, 0));
+  console.log(buffer);
 }
