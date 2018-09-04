@@ -68,11 +68,13 @@ const deviceAddressGen = function(addressN, startIndex) {
     });
     dev.write(dataBytes);
 
+    // eslint-disable-next-line max-statements
     dev.read(function(err, data) {
         // eslint-disable-next-line no-console
         console.error(err);
         const dv8 = new Uint8Array(data);
         const kind = data[4];
+        const msgSize = data[6];
         // eslint-disable-next-line no-console
         console.log(
             "Received data", data, " msg kind: ",
@@ -81,8 +83,9 @@ const deviceAddressGen = function(addressN, startIndex) {
         if (kind == messages.MessageType.MessageType_Failure) {
             try {
                 // eslint-disable-next-line no-console
-                console.log(dv8.slice(9, 39));
-                const failMsg = messages.Failure.decode(dv8.slice(9, 39));
+                console.log(dv8.slice(9, 9 + msgSize));
+                const failMsg = messages.Failure.
+                                decode(dv8.slice(9, 9 + msgSize));
                 // eslint-disable-next-line no-console
                 console.log(
                     "Failure message code",
