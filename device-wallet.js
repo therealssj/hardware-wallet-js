@@ -70,39 +70,57 @@ const deviceAddressGen = function(addressN, startIndex) {
 
     // eslint-disable-next-line max-statements
     dev.read(function(err, data) {
-        // eslint-disable-next-line no-console
-        console.error(err);
+        if (err) {
+            // eslint-disable-next-line no-console
+            console.error(err);
+            return;
+        }
         const dv8 = new Uint8Array(data);
         const kind = data[4];
-        const msgSize = data[6];
+        const msgSize = data[8];
         // eslint-disable-next-line no-console
         console.log(
             "Received data", data, " msg kind: ",
-            messages.MessageType[kind]
+            messages.MessageType[kind],
+            " size: ", msgSize
             );
         if (kind == messages.MessageType.MessageType_Failure) {
             try {
                 // eslint-disable-next-line no-console
                 console.log(dv8.slice(9, 9 + msgSize));
-                const failMsg = messages.Failure.
+                const answer = messages.Failure.
                                 decode(dv8.slice(9, 9 + msgSize));
                 // eslint-disable-next-line no-console
                 console.log(
                     "Failure message code",
-                    failMsg.code, "message: ",
-                    failMsg.message
+                    answer.code, "message: ",
+                    answer.message
                     );
             } catch (e) {
                 // eslint-disable-next-line no-console
-                console.error("wire format is invalid");
+                console.error("Wire format is invalid");
+            }
+        }
+
+        if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
+            try {
+                // eslint-disable-next-line no-console
+                console.log(dv8.slice(9, 9 + msgSize));
+                const answer = messages.ResponseSkycoinAddress.
+                                decode(dv8.slice(9, 9 + msgSize));
+                // eslint-disable-next-line no-console
+                console.log("Addresses", answer.addresses);
+            } catch (e) {
+                // eslint-disable-next-line no-console
+                console.error("Wire format is invalid");
             }
         }
     });
     dev.close();
-    return dataBytes;
 };
 
 module.exports = {
     deviceAddressGen,
+    getDevice,
     makeTrezorMessage
 };
