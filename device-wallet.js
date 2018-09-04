@@ -49,6 +49,7 @@ const makeTrezorMessage = function(buffer, msgId) {
 
 module.exports = {
     // Sends Address generation request
+    // eslint-disable-next-line max-statements
     deviceAddressGen(addressN, startIndex) {
         const dev = getDevice();
         if (dev === null) {
@@ -62,10 +63,16 @@ module.exports = {
         };
         const msg = messages.SkycoinAddress.create(msgStructure);
         const buffer = messages.SkycoinAddress.encode(msg).finish();
-        return makeTrezorMessage(
+        const chunks = makeTrezorMessage(
             buffer,
             messages.MessageType.MessageType_SkycoinAddress
-            );
+        );
+        const dataBytes = [];
+        chunks[0].forEach((elt, i) => {
+            dataBytes[i] = elt;
+        });
+        dev.write(dataBytes);
+        return dataBytes;
     },
     makeTrezorMessage
 };
