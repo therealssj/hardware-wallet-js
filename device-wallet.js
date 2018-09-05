@@ -50,7 +50,7 @@ const deviceAddressGen = function(addressN, startIndex) {
     if (dev === null) {
         // eslint-disable-next-line no-console
         console.error("Device not connected");
-        return null;
+        return;
     }
     const msgStructure = {
         addressN,
@@ -76,8 +76,8 @@ const deviceAddressGen = function(addressN, startIndex) {
             return;
         }
         const dv8 = new Uint8Array(data);
-        const kind = data[4];
-        const msgSize = data[8];
+        const kind = new Uint16Array(dv8.slice(4, 5))[0];
+        const msgSize = new Uint32Array(dv8.slice(8, 11))[0];
         // eslint-disable-next-line no-console
         console.log(
             "Received data", data, " msg kind: ",
