@@ -6,5 +6,5 @@ if( deviceWallet.getDevice() === null ) {
 } else {
   // eslint-disable-next-line no-console
   console.log("Skycoin hardware is plugged in");
-  deviceWallet.deviceAddressGen(1, 0);
+  deviceWallet.deviceAddressGen(2, 3);
 }
