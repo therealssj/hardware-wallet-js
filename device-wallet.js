@@ -68,43 +68,26 @@ const deviceAddressGen = function(addressN, startIndex) {
     });
     dev.write(dataBytes);
 
-    // console.log(dev.readSync());
-    // eslint-disable-next-line max-statements
+    // eslint-disable-next-line max-statements, max-lines-per-function
     dev.read(function(err, data) {
         if (err) {
             // eslint-disable-next-line no-console
             console.error(err);
             return;
         }
-        // console.log(new Uint8Array(data));
-        
         const dv8 = new Uint8Array(data);
         const kind = new Uint16Array(dv8.slice(4, 5))[0];
         const msgSize = new Uint32Array(dv8.slice(8, 11))[0];
 
-        // TODO test function for this
-        const dataBuffer = new Uint8Array( 2 + 64 * Math.ceil(msgSize / 64));
-        // dataBuffer.set([10, 35]);
-        dataBuffer.set(dv8.slice(9));//, 2);
+        const dataBuffer = new Uint8Array(2 + (64 * Math.ceil(msgSize / 64)));
+        dataBuffer.set(dv8.slice(9));
         let bytesToGet = msgSize + 9 - 64;
         let i = 0;
         while (bytesToGet > 0) {
-            let currentBuffer = dev.readSync();
-            // console.log(currentBuffer);
-            dataBuffer.set(currentBuffer.slice(1), /*2 +*/ 55 + 63 * i);
-            i++;
+            dataBuffer.set(dev.readSync().slice(1), (63 * i) + 55);
+            i += 1;
             bytesToGet -= 64;
         }
-
-        // const dataBufferArray = [dv8];
-        // let bytesToGet = msgSize + 9 - 64;
-        // let i = 1;
-        // while (bytesToGet > 0) {
-        //     dataBufferArray[i] = new Uint8Array(dev.readSync());
-        //     i++;
-        //     bytesToGet -= 64;
-        // }
-
         // eslint-disable-next-line no-console
         console.log(
             "Received data", dataBuffer, " msg kind: ",
@@ -140,6 +123,7 @@ const deviceAddressGen = function(addressN, startIndex) {
                 // eslint-disable-next-line no-console
                 console.error("Wire format is invalid", e);
             }
+            dev.close();
         }
     });
 };
