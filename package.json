@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/skycoin/hardware-wallet-js#readme",
   "dependencies": {
+    "dgram": "^1.0.1",
     "node-hid": "^0.7.3",
     "protobufjs": "^6.8.8"
   },
