@@ -151,6 +151,11 @@ const emulatorAddressGen = function(addressN, startIndex) {
     const port = 21324;
     // client.bind(port);
     const message = new Buffer(dataBytes);
+    let msg_index = 0;
+    let msgSize = 3600*8;// max_size:36, max_count:100
+    let bytesToGet = 0;
+    let kind = -1;
+    const dataBuffer = new Uint8Array(2 + (64 * Math.ceil(msgSize / 64)));
     client.on('message', function(data, rinfo) {
         if (rinfo) {
             // eslint-disable-next-line no-console
@@ -159,27 +164,39 @@ const emulatorAddressGen = function(addressN, startIndex) {
         // eslint-disable-next-line no-console
         console.log('Received message from emulator', data.toString());
 
-        const dv8 = new Uint8Array(data);
-        const kind = new Uint16Array(dv8.slice(4, 5))[0];
-        const msgSize = new Uint32Array(dv8.slice(8, 11))[0];
-        // eslint-disable-next-line no-console
-        console.log('Msg size', msgSize);
+        if (bytesToGet == 0) {       
+            const dv8 = new Uint8Array(data);
+            kind = new Uint16Array(dv8.slice(4, 5))[0];
+            msgSize = new Uint32Array(dv8.slice(8, 11))[0];
+            // eslint-disable-next-line no-console
+            console.log('Msg size', msgSize);
+            dataBuffer.set(dv8.slice(9));
+            bytesToGet = msgSize + 9 - 64;
+            console.log(
+                "Received data", dataBuffer, " msg kind: ",
+                messages.MessageType[kind],
+                " size: ", msgSize, "buffer lenght: ", dataBuffer.byteLength
+                );
+            return;
+        // const dataBuffer = new Uint8Array(2 + (64 * Math.ceil(msgSize / 64)));
+        }
 
-        const dataBuffer = new Uint8Array(2 + (64 * Math.ceil(msgSize / 64)));
-        dataBuffer.set(dv8.slice(9));
-        let bytesToGet = msgSize + 9 - 64;
-        let i = 0;
-        // while (bytesToGet > 0) {
-        //     dataBuffer.set(dev.readSync().slice(1), (63 * i) + 55);
-        //     i += 1;
-        //     bytesToGet -= 64;
-        // }
-        // eslint-disable-next-line no-console
+        dataBuffer.set(data.slice(1), (63 * msg_index) + 55);
+        msg_index += 1;
+        bytesToGet -= 64;
+
         console.log(
             "Received data", dataBuffer, " msg kind: ",
             messages.MessageType[kind],
             " size: ", msgSize, "buffer lenght: ", dataBuffer.byteLength
             );
+
+        console.log("bytesToGet", bytesToGet, "msg_index", msg_index);
+
+        if (bytesToGet > 0) {
+            return;
+        }
+
         if (kind == messages.MessageType.MessageType_Failure) {
             try {
                 const answer = messages.Failure.
@@ -209,6 +226,8 @@ const emulatorAddressGen = function(addressN, startIndex) {
                 console.error("Wire format is invalid", e);
             }
         }
+
+        client.close();
     });
     // eslint-disable-next-line max-statements, max-lines-per-function
     client.send(message, 0, message.length, port, '127.0.0.1', function(err, bytes) {
