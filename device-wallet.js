@@ -54,20 +54,7 @@ const deviceAddressGen = function(addressN, startIndex) {
         console.error("Device not connected");
         return;
     }
-    const msgStructure = {
-        addressN,
-        startIndex
-    };
-    const msg = messages.SkycoinAddress.create(msgStructure);
-    const buffer = messages.SkycoinAddress.encode(msg).finish();
-    const chunks = makeTrezorMessage(
-        buffer,
-        messages.MessageType.MessageType_SkycoinAddress
-    );
-    const dataBytes = [];
-    chunks[0].forEach((elt, i) => {
-        dataBytes[i] = elt;
-    });
+    const dataBytes = createAddressGenRequest(addressN, startIndex);
     dev.write(dataBytes);
 
     // eslint-disable-next-line max-statements, max-lines-per-function
@@ -130,9 +117,7 @@ const deviceAddressGen = function(addressN, startIndex) {
     });
 };
 
-// Sends Address generation request
-// eslint-disable-next-line max-statements, max-lines-per-function
-const emulatorAddressGen = function(addressN, startIndex) {
+const createAddressGenRequest = function(addressN, startIndex) {
     const msgStructure = {
         addressN,
         startIndex
@@ -147,6 +132,13 @@ const emulatorAddressGen = function(addressN, startIndex) {
     chunks[0].forEach((elt, i) => {
         dataBytes[i] = elt;
     });
+    return dataBytes;
+}
+
+// Sends Address generation request
+// eslint-disable-next-line max-statements, max-lines-per-function
+const emulatorAddressGen = function(addressN, startIndex) {
+    const dataBytes = createAddressGenRequest(addressN, startIndex);
     const client = dgram.createSocket('udp4');
     const port = 21324;
     // client.bind(port);
