@@ -151,6 +151,12 @@ class BufferReceiver {
                     " size: ", this.msgSize, "buffer lenght: ",
                     this.dataBuffer.byteLength
                     );
+
+                if (this.bytesToGet > 0) {
+                    console.log("Remaining bytesToGet", this.bytesToGet);
+                    return;
+                }
+                callback(this.kind, this.dataBuffer, this.msgSize);
                 return;
             }
 
@@ -159,13 +165,14 @@ class BufferReceiver {
             this.bytesToGet -= 64;
 
             console.log(
-                "Received data", this.dataBuffer, " msg this.kind: ",
+                "Received data", this.dataBuffer, " msg kind: ",
                 messages.MessageType[this.kind],
                 " size: ", this.msgSize, "buffer lenght: ",
                 this.dataBuffer.byteLength
                 );
 
             if (this.bytesToGet > 0) {
+                console.log("Remaining bytesToGet", this.bytesToGet);
                 return;
             }
             callback(this.kind, this.dataBuffer, this.msgSize);
@@ -180,6 +187,7 @@ const emulatorAddressGen = function(addressN, startIndex) {
     const client = dgram.createSocket('udp4');
     const port = 21324;
     const bufferReceiver = new BufferReceiver();
+    // eslint-disable-next-line max-lines-per-function
     client.on('message', function(data, rinfo) {
 
         console.log('Received message from emulator', data.toString());
@@ -217,6 +225,16 @@ const emulatorAddressGen = function(addressN, startIndex) {
                     console.error("Wire format is invalid", e);
                 }
             }
+
+            if (kind == messages.MessageType.
+                MessageType_PinMatrixRequest) {
+                try {
+                    messages.PinMatrixRequest.decode(dataBuffer);
+                    console.log("Pin code required");
+                    } catch (e) {
+                        console.error("Wire format is invalid");
+                    }
+                }
 
             client.close();
         }
