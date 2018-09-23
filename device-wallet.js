@@ -16,6 +16,18 @@ const getDevice = function() {
     return null;
 };
 
+const emulatorSend = function(client, message) {
+    client.send(
+        message, 0, message.length, 21324, '127.0.0.1',
+        function(err, bytes) {
+            if (err) {
+                throw err;
+            }
+            console.log("Sending data", bytes);
+        }
+);
+};
+
 // Prepares buffer containing message to device
 // eslint-disable-next-line max-statements
 const makeTrezorMessage = function(buffer, msgId) {
@@ -190,24 +202,27 @@ class BufferReceiver {
         this.bytesToGet = undefined;
         this.kind = undefined;
         this.dataBuffer = undefined;
+        this.parseHeader = function(data) {
+            const dv8 = new Uint8Array(data);
+            this.kind = new Uint16Array(dv8.slice(4, 5))[0];
+            this.msgSize = new Uint32Array(dv8.slice(8, 11))[0];
+            this.dataBuffer = new Uint8Array(64 * Math.ceil(this.msgSize / 64));
+            this.dataBuffer.set(dv8.slice(9));
+            this.bytesToGet = this.msgSize + 9 - 64;
+
+            console.log(
+                "Received header", this.dataBuffer,
+                " msg this.kind: ", messages.MessageType[this.kind],
+                " size: ", this.msgSize,
+                "buffer lenght: ", this.dataBuffer.byteLength,
+                "\nbytes to get before we had this buffer:", this.bytesToGet
+                );
+        };
         // eslint-disable-next-line max-statements
         this.receiveBuffer = function(data, callback) {
 
             if (this.bytesToGet === undefined) {
-                const dv8 = new Uint8Array(data);
-                this.kind = new Uint16Array(dv8.slice(4, 5))[0];
-                this.msgSize = new Uint32Array(dv8.slice(8, 11))[0];
-                this.dataBuffer = new Uint8Array(64 * Math.ceil(this.msgSize / 64));
-                this.dataBuffer.set(dv8.slice(9));
-                this.bytesToGet = this.msgSize + 9 - 64;
-
-                console.log(
-                    "Received data", this.dataBuffer,
-                    " msg this.kind: ", messages.MessageType[this.kind],
-                    " size: ", this.msgSize,
-                    "buffer lenght: ", this.dataBuffer.byteLength,
-                    "\nbytes to get before we had this buffer:", this.bytesToGet
-                    );
+                this.parseHeader(data);
 
                 console.log("Remaining bytesToGet", this.bytesToGet);
                 if (this.bytesToGet > 0) {
@@ -241,11 +256,8 @@ class BufferReceiver {
 const emulatorAddressGen = function(addressN, startIndex, callback) {
     const dataBytes = createAddressGenRequest(addressN, startIndex);
     const client = dgram.createSocket('udp4');
-    const port = 21324;
     const bufferReceiver = new BufferReceiver();
     client.on('message', function(data, rinfo) {
-
-        console.log('Received message from emulator', data.toString());
         if (rinfo) {
             console.log(`server got: 
                 ${data} from ${rinfo.address}:${rinfo.port}`);
@@ -262,21 +274,12 @@ const emulatorAddressGen = function(addressN, startIndex, callback) {
 
     });
 
-    const message = Buffer.from(dataBytes);
-    client.send(
-        message, 0, message.length, port, '127.0.0.1',
-        function(err, bytes) {
-        if (err) {
-            throw err;
-        }
-        console.log("Sending data", bytes);
-    }
-    );
+    emulatorSend(client, Buffer.from(dataBytes));
 };
 
 // eslint-disable-next-line max-lines-per-function
 const emulatorAddressGenPinCode = function(addressN, startIndex) {
-    // eslint-disable-next-line max-statements, max-lines-per-function
+    // eslint-disable-next-line max-statements
     emulatorAddressGen(addressN, startIndex, function(kind, addresses) {
         console.log("Addresses generation kindly returned", messages.MessageType[kind]);
         if (kind == messages.MessageType.
@@ -290,13 +293,10 @@ const emulatorAddressGenPinCode = function(addressN, startIndex) {
                     MessageType_PinMatrixRequest) {
             console.log('Please input your pin code');
             const pinCode = scanf('%s');
-            console.log('Pin code', pinCode);
             const dataBytes = createSendPinCodeRequest(pinCode);
             const client = dgram.createSocket('udp4');
-            const port = 21324;
             const bufferReceiver = new BufferReceiver();
             client.on('message', function(data, rinfo) {
-                console.log('Received message from emulator', data.toString());
                 if (rinfo) {
                     console.log(`server got: 
                         ${data} from ${rinfo.address}:${rinfo.port}`);
@@ -318,16 +318,7 @@ const emulatorAddressGenPinCode = function(addressN, startIndex) {
                 );
             });
 
-            const message = Buffer.from(dataBytes);
-            client.send(
-                message, 0, message.length, port, '127.0.0.1',
-                function(err, bytes) {
-                    if (err) {
-                        throw err;
-                    }
-                    console.log("Sending data", bytes);
-                }
-            );
+            emulatorSend(client, Buffer.from(dataBytes));
         }
     });
 };
