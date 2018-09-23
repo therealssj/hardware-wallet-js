@@ -4,6 +4,11 @@ if( deviceWallet.getDevice() === null ) {
   console.log("Skycoin hardware NOT FOUND, using emulator");
   deviceWallet.emulatorAddressGenPinCode(2, 3);
   deviceWallet.emulatorSkycoinSignMessagePinCode(3, "Hello World!");
+  deviceWallet.emulatorCheckMessageSignature(
+    "2NckPkQRQFa5E7HtqDkZmV1TH4HCzR2N5J6",
+    "Hello World!",
+    "NGV8kPw8FZuYFWYzMa3oHJhHmW4WPTnSUUaEFYBvyS8Te8WxrHDuDdbgVqFkdEg5FzE5QDdwMQcXcWMY4enJhkDE"
+  );
 } else {
   console.log("Skycoin hardware is plugged in");
   deviceWallet.deviceAddressGen(2, 3);

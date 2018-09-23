@@ -17,15 +17,19 @@ const getDevice = function() {
 };
 
 const emulatorSend = function(client, message) {
-    client.send(
-        message, 0, message.length, 21324, '127.0.0.1',
-        function(err, bytes) {
-            if (err) {
-                throw err;
+    console.log("Sending data", message, message.length);
+    const nbChunks = message.length / 64;
+    for (let i = 0; i < nbChunks; i += 1) {
+        client.send(
+            message.slice(64 * i, 64 * (i + 1)), 0, 64, 21324, '127.0.0.1',
+            function(err, bytes) {
+                if (err) {
+                    throw err;
+                }
+                console.log("Sending data", bytes);
             }
-            console.log("Sending data", bytes);
-        }
-    );
+        );
+    }
 };
 
 // Prepares buffer containing message to device
@@ -69,8 +73,11 @@ const createSignMessageRequest = function(addressN, message) {
         messages.MessageType.MessageType_SkycoinSignMessage
     );
     const dataBytes = [];
-    chunks[0].forEach((elt, i) => {
-        dataBytes[i] = elt;
+    chunks.forEach((chunk, j) => {
+        console.log("chunk", chunk);
+        chunk.forEach((elt, i) => {
+            dataBytes[(64 * j) + i] = elt;
+        });
     });
     return dataBytes;
 };
@@ -86,10 +93,37 @@ const createAddressGenRequest = function(addressN, startIndex) {
         buffer,
         messages.MessageType.MessageType_SkycoinAddress
     );
+    console.log("createAddressGenRequest", chunks.length);
     const dataBytes = [];
-    chunks[0].forEach((elt, i) => {
-        dataBytes[i] = elt;
+    chunks.forEach((chunk, j) => {
+        chunk.forEach((elt, i) => {
+            dataBytes[(64 * j) + i] = elt;
+        });
     });
+    return dataBytes;
+};
+
+const createCheckMessageSignatureRequest = function(address, message, signature) {
+    const msgStructure = {
+        address,
+        message,
+        signature
+    };
+    const msg = messages.SkycoinCheckMessageSignature.create(msgStructure);
+    const buffer = messages.SkycoinCheckMessageSignature.encode(msg).finish();
+    console.log("createCheckMessageSignatureRequest", buffer.length);
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_SkycoinCheckMessageSignature
+    );
+    console.log("createCheckMessageSignatureRequest", chunks.length, chunks);
+    const dataBytes = [];
+    chunks.forEach((chunk, j) => {
+        chunk.forEach((elt, i) => {
+            dataBytes[(64 * j) + i] = elt;
+        });
+    });
+    console.log("createCheckMessageSignatureRequest", dataBytes.length);
     return dataBytes;
 };
 
@@ -144,7 +178,6 @@ const decodeSignMessageAnswer = function(kind, dataBuffer, msgSize) {
             console.log("Data slice:", dataBuffer.slice(0, msgSize));
             const answer = messages.ResponseSkycoinSignMessage.
                             decode(dataBuffer.slice(0, msgSize));
-            console.log("Signature", answer.signedMessage);
             signature = answer.signedMessage;
         } catch (e) {
             console.error("Wire format is invalid", e);
@@ -321,7 +354,6 @@ const emulatorSkycoinSignMessage = function(addressN, message, callback) {
             data,
             function(kind, dataBuffer, msgSize) {
                 const signature = decodeSignMessageAnswer(kind, dataBuffer, msgSize);
-                console.log(signature);
                 client.close();
                 callback(kind, signature);
             }
@@ -404,10 +436,44 @@ const emulatorAddressGenPinCode = function(addressN, startIndex) {
     });
 };
 
+const emulatorCheckMessageSignature = function(address, message, signature) {
+    const dataBytes = createCheckMessageSignatureRequest(address, message, signature);
+    const client = dgram.createSocket('udp4');
+    const bufferReceiver = new BufferReceiver();
+    client.on('message', function(data, rinfo) {
+        if (rinfo) {
+            console.log(`server got: 
+                ${data} from ${rinfo.address}:${rinfo.port}`);
+        }
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind, dataBuffer, msgSize) {
+                if (kind == messages.MessageType.
+                    MessageType_Success) {
+                    try {
+                        console.log(dataBuffer.slice(0, msgSize));
+                        const answer = messages.Success.
+                                        decode(dataBuffer.slice(0, msgSize));
+                        console.log("Address emiting that signature:", answer.message);
+                        if (answer.message === address) {
+                            console.log("Signature is correct");
+                        }
+                    } catch (e) {
+                        console.error("Wire format is invalid", e);
+                    }
+                }
+                client.close();
+            }
+        );
+    });
+    emulatorSend(client, Buffer.from(dataBytes));
+};
+
 module.exports = {
     deviceAddressGen,
     emulatorAddressGen,
     emulatorAddressGenPinCode,
+    emulatorCheckMessageSignature,
     emulatorSkycoinSignMessage,
     emulatorSkycoinSignMessagePinCode,
     getDevice,
