@@ -21,7 +21,8 @@
   "dependencies": {
     "dgram": "^1.0.1",
     "node-hid": "^0.7.3",
-    "protobufjs": "^6.8.8"
+    "protobufjs": "^6.8.8",
+    "scanf": "^1.0.2"
   },
   "devDependencies": {
     "eslint": "^5.4.0",
