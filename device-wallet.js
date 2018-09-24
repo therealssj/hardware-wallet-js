@@ -169,15 +169,15 @@ const decodeFailureAndPinCode = function(kind, dataBuffer) {
     }
 };
 
-const decodeSignMessageAnswer = function(kind, dataBuffer, msgSize) {
+const decodeSignMessageAnswer = function(kind, dataBuffer) {
     let signature = "";
     decodeFailureAndPinCode(kind, dataBuffer);
     if (kind == messages.MessageType.
         MessageType_ResponseSkycoinSignMessage) {
         try {
-            console.log("Data slice:", dataBuffer.slice(0, msgSize));
+            console.log("Data slice:", dataBuffer);
             const answer = messages.ResponseSkycoinSignMessage.
-                            decode(dataBuffer.slice(0, msgSize));
+                            decode(dataBuffer);
             signature = answer.signedMessage;
         } catch (e) {
             console.error("Wire format is invalid", e);
@@ -186,16 +186,15 @@ const decodeSignMessageAnswer = function(kind, dataBuffer, msgSize) {
     return signature;
 };
 
-// eslint-disable-next-line max-statements
-const decodeAddressGenAnswer = function(kind, dataBuffer, msgSize) {
+const decodeAddressGenAnswer = function(kind, dataBuffer) {
     let addresses = [];
     decodeFailureAndPinCode(kind, dataBuffer);
     if (kind == messages.MessageType.
         MessageType_ResponseSkycoinAddress) {
         try {
-            console.log(dataBuffer.slice(0, msgSize));
+            console.log(dataBuffer);
             const answer = messages.ResponseSkycoinAddress.
-                            decode(dataBuffer.slice(0, msgSize));
+                            decode(dataBuffer);
             console.log("Addresses", answer.addresses);
             addresses = answer.addresses;
         } catch (e) {
@@ -298,7 +297,7 @@ class BufferReceiver {
                 if (this.bytesToGet > 0) {
                     return;
                 }
-                callback(this.kind, this.dataBuffer, this.msgSize);
+                callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
                 return;
             }
 
@@ -316,7 +315,7 @@ class BufferReceiver {
             if (this.bytesToGet > 0) {
                 return;
             }
-            callback(this.kind, this.dataBuffer, this.msgSize);
+            callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
         };
     }
 }
@@ -352,14 +351,25 @@ const emulatorSkycoinSignMessage = function(addressN, message, callback) {
         }
         bufferReceiver.receiveBuffer(
             data,
-            function(kind, dataBuffer, msgSize) {
-                const signature = decodeSignMessageAnswer(kind, dataBuffer, msgSize);
+            function(kind, dataBuffer) {
+                const signature = decodeSignMessageAnswer(kind, dataBuffer);
                 client.close();
                 callback(kind, signature);
             }
         );
     });
     emulatorSend(client, Buffer.from(dataBytes));
+};
+
+
+const skycoinSignMessagePinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
+    console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
+    closeFunction();
+    const sign = decodeSignMessageAnswer(answerKind, dataBuffer);
+    if (answerKind == messages.MessageType.
+        MessageType_ResponseSkycoinSignMessage) {
+        console.log(sign);
+    }
 };
 
 const emulatorSkycoinSignMessagePinCode = function(addressN, message) {
@@ -369,18 +379,11 @@ const emulatorSkycoinSignMessagePinCode = function(addressN, message) {
                     MessageType_ResponseSkycoinSignMessage) {
             console.log(signature);
         }
-        const pinCodeCallback = function(answerKind, dataBuffer, msgSize) {
-            console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
-            client.close();
-            const sign = decodeSignMessageAnswer(answerKind, dataBuffer, msgSize);
-            if (answerKind == messages.MessageType.
-                MessageType_ResponseSkycoinSignMessage) {
-                console.log(sign);
-            }
-        };
         if (kind == messages.MessageType.
                     MessageType_PinMatrixRequest) {
-            emulatorSendPinCodeRequest(pinCodeCallback);
+            emulatorSendPinCodeRequest((answerKind, dataBuffer) => {
+                skycoinSignMessagePinCodeCallback(answerKind, dataBuffer, client.close);
+            });
         }
     });
 
@@ -398,8 +401,8 @@ const emulatorAddressGen = function(addressN, startIndex, callback) {
         }
         bufferReceiver.receiveBuffer(
             data,
-            function(kind, dataBuffer, msgSize) {
-                const addresses = decodeAddressGenAnswer(kind, dataBuffer, msgSize);
+            function(kind, dataBuffer) {
+                const addresses = decodeAddressGenAnswer(kind, dataBuffer);
                 client.close();
                 callback(kind, addresses);
             }
@@ -408,7 +411,19 @@ const emulatorAddressGen = function(addressN, startIndex, callback) {
     emulatorSend(client, Buffer.from(dataBytes));
 };
 
-// eslint-disable-next-line max-lines-per-function
+
+const addressGenPinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
+        console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
+        closeFunction();
+        const addrs = decodeAddressGenAnswer(answerKind, dataBuffer);
+        if (answerKind == messages.MessageType.
+            MessageType_ResponseSkycoinAddress) {
+            addrs.forEach((addr) => {
+              console.log(addr);
+            });
+        }
+};
+
 const emulatorAddressGenPinCode = function(addressN, startIndex) {
     emulatorAddressGen(addressN, startIndex, function(kind, addresses) {
         console.log("Addresses generation kindly returned", messages.MessageType[kind]);
@@ -418,20 +433,11 @@ const emulatorAddressGenPinCode = function(addressN, startIndex) {
               console.log(addr);
             });
         }
-        const pinCodeCallback = function(answerKind, dataBuffer, msgSize) {
-                console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
-                client.close();
-                const addrs = decodeAddressGenAnswer(answerKind, dataBuffer, msgSize);
-                if (answerKind == messages.MessageType.
-                    MessageType_ResponseSkycoinAddress) {
-                    addrs.forEach((addr) => {
-                      console.log(addr);
-                    });
-                }
-        };
         if (kind == messages.MessageType.
                     MessageType_PinMatrixRequest) {
-            emulatorSendPinCodeRequest(pinCodeCallback);
+            emulatorSendPinCodeRequest((answerKind, dataBuffer) => {
+                addressGenPinCodeCallback(answerKind, dataBuffer, client.close);
+            });
         }
     });
 };
@@ -447,13 +453,13 @@ const emulatorCheckMessageSignature = function(address, message, signature) {
         }
         bufferReceiver.receiveBuffer(
             data,
-            function(kind, dataBuffer, msgSize) {
+            function(kind, dataBuffer) {
                 if (kind == messages.MessageType.
                     MessageType_Success) {
                     try {
-                        console.log(dataBuffer.slice(0, msgSize));
+                        console.log(dataBuffer);
                         const answer = messages.Success.
-                                        decode(dataBuffer.slice(0, msgSize));
+                                        decode(dataBuffer);
                         console.log("Address emiting that signature:", answer.message);
                         if (answer.message === address) {
                             console.log("Signature is correct");
