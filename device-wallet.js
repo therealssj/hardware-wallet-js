@@ -3,6 +3,16 @@ const messages = require('./protob/skycoin');
 const dgram = require('dgram');
 const scanf = require('scanf');
 
+const dataBytesFromChunks = function(chunks) {
+    const dataBytes = [];
+    chunks.forEach((chunk, j) => {
+        chunk.forEach((elt, i) => {
+            dataBytes[(64 * j) + i] = elt;
+        });
+    });
+    return dataBytes;
+};
+
 // Returns a handle to usbhid device
 const getDevice = function() {
     const deviceInfo = HID.devices().find( function(d) {
@@ -72,14 +82,7 @@ const createSignMessageRequest = function(addressN, message) {
         buffer,
         messages.MessageType.MessageType_SkycoinSignMessage
     );
-    const dataBytes = [];
-    chunks.forEach((chunk, j) => {
-        console.log("chunk", chunk);
-        chunk.forEach((elt, i) => {
-            dataBytes[(64 * j) + i] = elt;
-        });
-    });
-    return dataBytes;
+    return dataBytesFromChunks(chunks);
 };
 
 const createAddressGenRequest = function(addressN, startIndex) {
@@ -93,13 +96,7 @@ const createAddressGenRequest = function(addressN, startIndex) {
         buffer,
         messages.MessageType.MessageType_SkycoinAddress
     );
-    const dataBytes = [];
-    chunks.forEach((chunk, j) => {
-        chunk.forEach((elt, i) => {
-            dataBytes[(64 * j) + i] = elt;
-        });
-    });
-    return dataBytes;
+    return dataBytesFromChunks(chunks);
 };
 
 const createCheckMessageSignatureRequest = function(address, message, signature) {
@@ -114,13 +111,7 @@ const createCheckMessageSignatureRequest = function(address, message, signature)
         buffer,
         messages.MessageType.MessageType_SkycoinCheckMessageSignature
     );
-    const dataBytes = [];
-    chunks.forEach((chunk, j) => {
-        chunk.forEach((elt, i) => {
-            dataBytes[(64 * j) + i] = elt;
-        });
-    });
-    return dataBytes;
+    return dataBytesFromChunks(chunks);
 };
 
 const createSendPinCodeRequest = function(pin) {
@@ -133,11 +124,7 @@ const createSendPinCodeRequest = function(pin) {
         buffer,
         messages.MessageType.MessageType_PinMatrixAck
     );
-    const dataBytes = [];
-    chunks[0].forEach((elt, i) => {
-        dataBytes[i] = elt;
-    });
-    return dataBytes;
+    return dataBytesFromChunks(chunks);
 };
 
 const decodeFailureAndPinCode = function(kind, dataBuffer) {
