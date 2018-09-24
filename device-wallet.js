@@ -93,7 +93,6 @@ const createAddressGenRequest = function(addressN, startIndex) {
         buffer,
         messages.MessageType.MessageType_SkycoinAddress
     );
-    console.log("createAddressGenRequest", chunks.length);
     const dataBytes = [];
     chunks.forEach((chunk, j) => {
         chunk.forEach((elt, i) => {
@@ -111,19 +110,16 @@ const createCheckMessageSignatureRequest = function(address, message, signature)
     };
     const msg = messages.SkycoinCheckMessageSignature.create(msgStructure);
     const buffer = messages.SkycoinCheckMessageSignature.encode(msg).finish();
-    console.log("createCheckMessageSignatureRequest", buffer.length);
     const chunks = makeTrezorMessage(
         buffer,
         messages.MessageType.MessageType_SkycoinCheckMessageSignature
     );
-    console.log("createCheckMessageSignatureRequest", chunks.length, chunks);
     const dataBytes = [];
     chunks.forEach((chunk, j) => {
         chunk.forEach((elt, i) => {
             dataBytes[(64 * j) + i] = elt;
         });
     });
-    console.log("createCheckMessageSignatureRequest", dataBytes.length);
     return dataBytes;
 };
 
