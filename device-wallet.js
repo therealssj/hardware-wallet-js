@@ -71,6 +71,19 @@ const makeTrezorMessage = function(buffer, msgId) {
     return chunks;
 };
 
+const createSetMnemonicRequest = function(mnemonic) {
+    const msgStructure = {
+        mnemonic
+    };
+    const msg = messages.SetMnemonic.create(msgStructure);
+    const buffer = messages.SetMnemonic.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_SetMnemonic
+    );
+    return dataBytesFromChunks(chunks);
+};
+
 const createSignMessageRequest = function(addressN, message) {
     const msgStructure = {
         addressN,
@@ -344,7 +357,6 @@ const emulatorSkycoinSignMessage = function(addressN, message, callback) {
     emulatorSend(client, Buffer.from(dataBytes));
 };
 
-
 const skycoinSignMessagePinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
     console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
     closeFunction();
@@ -458,11 +470,33 @@ const emulatorCheckMessageSignature = function(address, message, signature) {
     emulatorSend(client, Buffer.from(dataBytes));
 };
 
+const emulatorSetMnemonic = function(mnemonic) {
+    const dataBytes = createSetMnemonicRequest(mnemonic);
+    const client = dgram.createSocket('udp4');
+    const bufferReceiver = new BufferReceiver();
+    client.on('message', function(data, rinfo) {
+        if (rinfo) {
+            console.log(`server got: 
+                ${data} from ${rinfo.address}:${rinfo.port}`);
+        }
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind, dataBuffer) {
+                console.log("SetMnemonic: ", kind, dataBuffer);
+                client.close();
+            }
+        );
+    });
+    emulatorSend(client, Buffer.from(dataBytes));
+};
+
+
 module.exports = {
     deviceAddressGen,
     emulatorAddressGen,
     emulatorAddressGenPinCode,
     emulatorCheckMessageSignature,
+    emulatorSetMnemonic,
     emulatorSkycoinSignMessage,
     emulatorSkycoinSignMessagePinCode,
     getDevice,
