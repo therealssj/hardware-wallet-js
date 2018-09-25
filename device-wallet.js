@@ -246,19 +246,18 @@ const emulatorSend = function(client, message) {
 
 const emulatorButtonRequestCallback = function(kind, callback) {
     const dBytes = createButtonAckRequest();
-    console.log("buttonRequestCallback!", dBytes);
     const cl = dgram.createSocket('udp4');
     cl.on('message', function(data, rinfo) {
         if (rinfo) {
             console.log(`server got: 
             ${data} from ${rinfo.address}:${rinfo.port}`);
         }
-        console.log("User hit a button!");
-        if (callback) {
-            callback(data);
-            return;
-        }
+        console.log("User hit a button, calling: ", callback);
         cl.close();
+        if (callback !== null && callback !== undefined) {
+            // eslint-disable-next-line callback-return
+            callback(data);
+        }
     });
     emulatorSend(cl, Buffer.from(dBytes));
 };
@@ -590,12 +589,32 @@ const emulatorChangePin = function() {
             console.log(`server got: 
                 ${data} from ${rinfo.address}:${rinfo.port}`);
         }
+        const pinCodeMatrixCallback = function(receivedData) {
+            const dv8 = new Uint8Array(receivedData);
+            const kind = new Uint16Array(dv8.slice(4, 5))[0];
+            console.log("pinCodeMatrixCallback kind:", kind);
+            if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
+                console.log('Please input your pin code');
+                const pinCode = scanf('%s');
+                dBytes = createSendPinCodeRequest(pinCode);
+                const cl = dgram.createSocket('udp4');
+                cl.on('message', function(dta, info) {
+                    if (info) {
+                        console.log(`server got: 
+                            ${dta} from ${info.address}:${info.port}`);
+                    }
+                    cl.close();
+                    pinCodeMatrixCallback(dta);
+                });
+                emulatorSend(cl, Buffer.from(dBytes));
+            }
+        };
         bufferReceiver.receiveBuffer(
             data,
             function(kind) {
                 client.close();
                 if (decodeButtonRequest(kind)) {
-                    emulatorButtonRequestCallback();
+                    emulatorButtonRequestCallback(kind, pinCodeMatrixCallback);
                 }
             }
         );
