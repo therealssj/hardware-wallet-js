@@ -10,6 +10,7 @@ if( deviceWallet.getDevice() === null ) {
     "NGV8kPw8FZuYFWYzMa3oHJhHmW4WPTnSUUaEFYBvyS8Te8WxrHDuDdbgVqFkdEg5FzE5QDdwMQcXcWMY4enJhkDE"
   );
   deviceWallet.emulatorSetMnemonic("cloud flower upset remain green metal below cup stem infant art thank");
+  deviceWallet.emulatorWipeDevice();
 } else {
   console.log("Skycoin hardware is plugged in");
   deviceWallet.deviceAddressGen(2, 3);

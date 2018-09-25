@@ -42,6 +42,22 @@ const emulatorSend = function(client, message) {
     }
 };
 
+
+const emulatorButtonRequestCallback = function(kind) {
+    const dBytes = createButtonAckRequest();
+    console.log("buttonRequestCallback!", dBytes);
+    const cl = dgram.createSocket('udp4');
+    cl.on('message', function(data, rinfo) {
+        if (rinfo) {
+            console.log(`server got: 
+            ${data} from ${rinfo.address}:${rinfo.port}`);
+        }
+        console.log("User hit a button!");
+        cl.close();
+    });
+    emulatorSend(cl, Buffer.from(dBytes));
+};
+
 // Prepares buffer containing message to device
 // eslint-disable-next-line max-statements
 const makeTrezorMessage = function(buffer, msgId) {
@@ -92,6 +108,17 @@ const createSetMnemonicRequest = function(mnemonic) {
     const chunks = makeTrezorMessage(
         buffer,
         messages.MessageType.MessageType_SetMnemonic
+    );
+    return dataBytesFromChunks(chunks);
+};
+
+const createWipeDeviceRequest = function() {
+    const msgStructure = {};
+    const msg = messages.WipeDevice.create(msgStructure);
+    const buffer = messages.WipeDevice.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_WipeDevice
     );
     return dataBytesFromChunks(chunks);
 };
@@ -495,21 +522,6 @@ const emulatorSetMnemonic = function(mnemonic) {
     const dataBytes = createSetMnemonicRequest(mnemonic);
     const client = dgram.createSocket('udp4');
     const bufferReceiver = new BufferReceiver();
-    const buttonRequestCallback = function(kind) {
-        const dBytes = createButtonAckRequest();
-        console.log("buttonRequestCallback!", dBytes);
-        const cl = dgram.createSocket('udp4');
-        cl.on('message', function(data, rinfo) {
-            if (rinfo) {
-                console.log(`server got: 
-                ${data} from ${rinfo.address}:${rinfo.port}`);
-            }
-            console.log("User hit a button!");
-            console.log("emulatorSetMnemonic message id!", messages.MessageType[kind]);
-            cl.close();
-        });
-        emulatorSend(cl, Buffer.from(dBytes));
-    };
     client.on('message', function(data, rinfo) {
         if (rinfo) {
             console.log(`server got: 
@@ -520,7 +532,7 @@ const emulatorSetMnemonic = function(mnemonic) {
             function(kind) {
                 client.close();
                 if (decodeButtonRequest(kind)) {
-                    buttonRequestCallback();
+                    emulatorButtonRequestCallback();
                 }
             }
         );
@@ -528,6 +540,27 @@ const emulatorSetMnemonic = function(mnemonic) {
     emulatorSend(client, Buffer.from(dataBytes));
 };
 
+const emulatorWipeDevice = function() {
+    const dataBytes = createWipeDeviceRequest();
+    const client = dgram.createSocket('udp4');
+    const bufferReceiver = new BufferReceiver();
+    client.on('message', function(data, rinfo) {
+        if (rinfo) {
+            console.log(`server got: 
+                ${data} from ${rinfo.address}:${rinfo.port}`);
+        }
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind) {
+                client.close();
+                if (decodeButtonRequest(kind)) {
+                    emulatorButtonRequestCallback();
+                }
+            }
+        );
+    });
+    emulatorSend(client, Buffer.from(dataBytes));
+};
 
 module.exports = {
     deviceAddressGen,
@@ -537,6 +570,7 @@ module.exports = {
     emulatorSetMnemonic,
     emulatorSkycoinSignMessage,
     emulatorSkycoinSignMessagePinCode,
+    emulatorWipeDevice,
     getDevice,
     makeTrezorMessage
 };
