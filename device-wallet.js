@@ -42,7 +42,6 @@ const emulatorSend = function(client, message) {
     }
 };
 
-
 const emulatorButtonRequestCallback = function(kind) {
     const dBytes = createButtonAckRequest();
     console.log("buttonRequestCallback!", dBytes);
@@ -96,6 +95,19 @@ const createButtonAckRequest = function() {
         messages.MessageType.MessageType_ButtonAck
     );
     console.log("createButtonAckRequest", chunks);
+    return dataBytesFromChunks(chunks);
+};
+
+const createChangePinRequest = function(mnemonic) {
+    const msgStructure = {
+        mnemonic
+    };
+    const msg = messages.ChangePin.create(msgStructure);
+    const buffer = messages.ChangePin.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_ChangePin
+    );
     return dataBytesFromChunks(chunks);
 };
 
@@ -562,10 +574,33 @@ const emulatorWipeDevice = function() {
     emulatorSend(client, Buffer.from(dataBytes));
 };
 
+const emulatorChangePin = function() {
+    const dataBytes = createChangePinRequest();
+    const client = dgram.createSocket('udp4');
+    const bufferReceiver = new BufferReceiver();
+    client.on('message', function(data, rinfo) {
+        if (rinfo) {
+            console.log(`server got: 
+                ${data} from ${rinfo.address}:${rinfo.port}`);
+        }
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind) {
+                client.close();
+                if (decodeButtonRequest(kind)) {
+                    emulatorButtonRequestCallback();
+                }
+            }
+        );
+    });
+    emulatorSend(client, Buffer.from(dataBytes));
+};
+
 module.exports = {
     deviceAddressGen,
     emulatorAddressGen,
     emulatorAddressGenPinCode,
+    emulatorChangePin,
     emulatorCheckMessageSignature,
     emulatorSetMnemonic,
     emulatorSkycoinSignMessage,
