@@ -60,15 +60,27 @@ const makeTrezorMessage = function(buffer, msgId) {
     let lengthToWrite = u8Array.byteLength;
     const chunks = [];
     let j = 0;
-    while (lengthToWrite > 0) {
+    do {
         const u64pack = new Uint8Array(64);
         u64pack[0] = 63;
         u64pack.set(trezorMsg8.slice(63 * j, 63 * (j + 1)), 1);
         lengthToWrite -= 63;
         chunks[j] = u64pack;
         j += 1;
-    }
+    } while (lengthToWrite > 0);
     return chunks;
+};
+
+const createButtonAckRequest = function() {
+    const msgStructure = {};
+    const msg = messages.ButtonAck.create(msgStructure);
+    const buffer = messages.ButtonAck.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_ButtonAck
+    );
+    console.log("createButtonAckRequest", chunks);
+    return dataBytesFromChunks(chunks);
 };
 
 const createSetMnemonicRequest = function(mnemonic) {
@@ -138,6 +150,15 @@ const createSendPinCodeRequest = function(pin) {
         messages.MessageType.MessageType_PinMatrixAck
     );
     return dataBytesFromChunks(chunks);
+};
+
+const decodeButtonRequest = function(kind) {
+    if (kind != messages.MessageType.MessageType_ButtonRequest) {
+        console.error("Wrong message id!", messages.MessageType[kind]);
+        return false;
+    }
+    console.log("ButtonRequest!");
+    return true;
 };
 
 const decodeFailureAndPinCode = function(kind, dataBuffer) {
@@ -474,6 +495,21 @@ const emulatorSetMnemonic = function(mnemonic) {
     const dataBytes = createSetMnemonicRequest(mnemonic);
     const client = dgram.createSocket('udp4');
     const bufferReceiver = new BufferReceiver();
+    const buttonRequestCallback = function(kind) {
+        const dBytes = createButtonAckRequest();
+        console.log("buttonRequestCallback!", dBytes);
+        const cl = dgram.createSocket('udp4');
+        cl.on('message', function(data, rinfo) {
+            if (rinfo) {
+                console.log(`server got: 
+                ${data} from ${rinfo.address}:${rinfo.port}`);
+            }
+            console.log("User hit a button!");
+            console.log("emulatorSetMnemonic message id!", messages.MessageType[kind]);
+            cl.close();
+        });
+        emulatorSend(cl, Buffer.from(dBytes));
+    };
     client.on('message', function(data, rinfo) {
         if (rinfo) {
             console.log(`server got: 
@@ -481,9 +517,11 @@ const emulatorSetMnemonic = function(mnemonic) {
         }
         bufferReceiver.receiveBuffer(
             data,
-            function(kind, dataBuffer) {
-                console.log("SetMnemonic: ", kind, dataBuffer);
+            function(kind) {
                 client.close();
+                if (decodeButtonRequest(kind)) {
+                    buttonRequestCallback();
+                }
             }
         );
     });
