@@ -26,37 +26,6 @@ const getDevice = function() {
     return null;
 };
 
-const emulatorSend = function(client, message) {
-    console.log("Sending data", message, message.length);
-    const nbChunks = message.length / 64;
-    for (let i = 0; i < nbChunks; i += 1) {
-        client.send(
-            message.slice(64 * i, 64 * (i + 1)), 0, 64, 21324, '127.0.0.1',
-            function(err, bytes) {
-                if (err) {
-                    throw err;
-                }
-                console.log("Sending data", bytes);
-            }
-        );
-    }
-};
-
-const emulatorButtonRequestCallback = function(kind) {
-    const dBytes = createButtonAckRequest();
-    console.log("buttonRequestCallback!", dBytes);
-    const cl = dgram.createSocket('udp4');
-    cl.on('message', function(data, rinfo) {
-        if (rinfo) {
-            console.log(`server got: 
-            ${data} from ${rinfo.address}:${rinfo.port}`);
-        }
-        console.log("User hit a button!");
-        cl.close();
-    });
-    emulatorSend(cl, Buffer.from(dBytes));
-};
-
 // Prepares buffer containing message to device
 // eslint-disable-next-line max-statements
 const makeTrezorMessage = function(buffer, msgId) {
@@ -94,7 +63,6 @@ const createButtonAckRequest = function() {
         buffer,
         messages.MessageType.MessageType_ButtonAck
     );
-    console.log("createButtonAckRequest", chunks);
     return dataBytesFromChunks(chunks);
 };
 
@@ -260,6 +228,40 @@ const decodeAddressGenAnswer = function(kind, dataBuffer) {
     return addresses;
 };
 
+const emulatorSend = function(client, message) {
+    console.log("Sending data", message, message.length);
+    const nbChunks = message.length / 64;
+    for (let i = 0; i < nbChunks; i += 1) {
+        client.send(
+            message.slice(64 * i, 64 * (i + 1)), 0, 64, 21324, '127.0.0.1',
+            function(err, bytes) {
+                if (err) {
+                    throw err;
+                }
+                console.log("Sending data", bytes);
+            }
+        );
+    }
+};
+
+const emulatorButtonRequestCallback = function(kind, callback) {
+    const dBytes = createButtonAckRequest();
+    console.log("buttonRequestCallback!", dBytes);
+    const cl = dgram.createSocket('udp4');
+    cl.on('message', function(data, rinfo) {
+        if (rinfo) {
+            console.log(`server got: 
+            ${data} from ${rinfo.address}:${rinfo.port}`);
+        }
+        console.log("User hit a button!");
+        if (callback) {
+            callback(data);
+            return;
+        }
+        cl.close();
+    });
+    emulatorSend(cl, Buffer.from(dBytes));
+};
 
 // Sends Address generation request
 // eslint-disable-next-line max-statements, max-lines-per-function
@@ -287,6 +289,7 @@ const deviceAddressGen = function(addressN, startIndex) {
         let bytesToGet = msgSize + 9 - 64;
         let i = 0;
         while (bytesToGet > 0) {
+            // eslint-disable-next-line no-sync
             dataBuffer.set(dev.readSync().slice(1), (63 * i) + 55);
             i += 1;
             bytesToGet -= 64;
@@ -321,58 +324,62 @@ const deviceAddressGen = function(addressN, startIndex) {
 };
 
 class BufferReceiver {
-    // eslint-disable-next-line max-lines-per-function
     constructor() {
         this.msgIndex = 0;
         this.msgSize = undefined;
         this.bytesToGet = undefined;
         this.kind = undefined;
         this.dataBuffer = undefined;
-        this.parseHeader = function(data) {
-            const dv8 = new Uint8Array(data);
-            this.kind = new Uint16Array(dv8.slice(4, 5))[0];
-            this.msgSize = new Uint32Array(dv8.slice(8, 11))[0];
-            this.dataBuffer = new Uint8Array(64 * Math.ceil(this.msgSize / 64));
-            this.dataBuffer.set(dv8.slice(9));
-            this.bytesToGet = this.msgSize + 9 - 64;
+    }
 
-            console.log(
-                "Received header", this.dataBuffer,
-                " msg this.kind: ", messages.MessageType[this.kind],
-                " size: ", this.msgSize,
-                "buffer lenght: ", this.dataBuffer.byteLength,
-                "\nRemaining bytesToGet:", this.bytesToGet
-                );
-        };
-        // eslint-disable-next-line max-statements
-        this.receiveBuffer = function(data, callback) {
+    parseHeader(data) {
+        const dv8 = new Uint8Array(data);
+        this.kind = new Uint16Array(dv8.slice(4, 5))[0];
+        this.msgSize = new Uint32Array(dv8.slice(8, 11))[0];
+        this.dataBuffer = new Uint8Array(64 * Math.ceil(this.msgSize / 64));
+        this.dataBuffer.set(dv8.slice(9));
+        this.bytesToGet = this.msgSize + 9 - 64;
 
-            if (this.bytesToGet === undefined) {
-                this.parseHeader(data);
+        console.log(
+            "Received header", this.dataBuffer,
+            " msg this.kind: ", messages.MessageType[this.kind],
+            " size: ", this.msgSize,
+            "buffer lenght: ", this.dataBuffer.byteLength,
+            "\nRemaining bytesToGet:", this.bytesToGet
+            );
+    }
 
-                if (this.bytesToGet > 0) {
-                    return;
-                }
-                callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
-                return;
-            }
+    // eslint-disable-next-line max-statements
+    receiveBuffer(data, callback) {
 
-            this.dataBuffer.set(data.slice(1), (63 * this.msgIndex) + 55);
-            this.msgIndex += 1;
-            this.bytesToGet -= 64;
-
-            console.log(
-                "Received data", this.dataBuffer, " msg kind: ",
-                messages.MessageType[this.kind],
-                " size: ", this.msgSize, "buffer lenght: ",
-                this.dataBuffer.byteLength
-                );
+        if (this.bytesToGet === undefined) {
+            this.parseHeader(data);
 
             if (this.bytesToGet > 0) {
                 return;
             }
             callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
-        };
+            return;
+        }
+
+        this.dataBuffer.set(data.slice(1), (63 * this.msgIndex) + 55);
+        this.msgIndex += 1;
+        this.bytesToGet -= 64;
+
+        console.log(
+            "Received data", this.dataBuffer, " msg kind: ",
+            messages.MessageType[this.kind],
+            " size: ", this.msgSize, "buffer lenght: ",
+            this.dataBuffer.byteLength
+            );
+
+        if (this.bytesToGet > 0) {
+            return;
+        }
+        if (callback) {
+            // eslint-disable-next-line callback-return
+            callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
+        }
     }
 }
 
