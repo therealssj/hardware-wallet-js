@@ -21,5 +21,6 @@ if( deviceWallet.getDevice() === null ) {
     "Hello World!",
     "NGV8kPw8FZuYFWYzMa3oHJhHmW4WPTnSUUaEFYBvyS8Te8WxrHDuDdbgVqFkdEg5FzE5QDdwMQcXcWMY4enJhkDE"
   );
+  deviceWallet.deviceSetMnemonic("cloud flower upset remain green metal below cup stem infant art thank");
   deviceWallet.deviceWipeDevice();
 }

@@ -560,6 +560,36 @@ const deviceWipeDevice = function() {
     dev.write(dataBytes);
 };
 
+const deviceSetMnemonic = function(mnemonic) {
+    const dataBytes = createSetMnemonicRequest(mnemonic);
+    const dev = getDevice();
+    if (dev === null) {
+        console.error("Device not connected");
+        return;
+    }
+    const bufferReceiver = new BufferReceiver();
+    const devReadCallback = function(err, data) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind) {
+                dev.close();
+                if (decodeButtonRequest(kind)) {
+                    deviceButtonRequestCallback();
+                }
+            }
+        );
+        if (bufferReceiver.bytesToGet > 0) {
+            dev.read(devReadCallback);
+        }
+    };
+    dev.read(devReadCallback);
+    dev.write(dataBytes);
+};
+
 const emulatorSendPinCodeRequest = function(pinCodeCallback) {
     console.log('Please input your pin code');
     const pinCode = scanf('%s');
@@ -781,6 +811,7 @@ module.exports = {
     deviceAddressGen,
     deviceAddressGenPinCode,
     deviceCheckMessageSignature,
+    deviceSetMnemonic,
     deviceSkycoinSignMessagePinCode,
     deviceWipeDevice,
     emulatorAddressGen,
