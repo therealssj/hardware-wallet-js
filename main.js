@@ -23,4 +23,5 @@ if( deviceWallet.getDevice() === null ) {
   );
   deviceWallet.deviceSetMnemonic("cloud flower upset remain green metal below cup stem infant art thank");
   deviceWallet.deviceWipeDevice();
+  deviceWallet.deviceChangePin();
 }

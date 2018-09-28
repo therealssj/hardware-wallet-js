@@ -590,6 +590,60 @@ const deviceSetMnemonic = function(mnemonic) {
     dev.write(dataBytes);
 };
 
+const deviceChangePin = function() {
+    const dataBytes = createChangePinRequest();
+    const dev = getDevice();
+    if (dev === null) {
+        console.error("Device not connected");
+        return;
+    }
+    const bufferReceiver = new BufferReceiver();
+    const devReadCallback = function(err, data) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        const pinCodeMatrixCallback = function(receivedData) {
+            const dv8 = new Uint8Array(receivedData);
+            const kind = new Uint16Array(dv8.slice(4, 5))[0];
+            console.log("pinCodeMatrixCallback kind:", kind);
+            if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
+                console.log('Please input your pin code');
+                const pinCode = scanf('%s');
+                dBytes = createSendPinCodeRequest(pinCode);
+                const device = getDevice();
+                if (device === null) {
+                    console.error("Device not connected");
+                    return;
+                }
+                device.read(function(deverr, dta) {
+                    if (deverr) {
+                        console.error(deverr);
+                        return;
+                    }
+                    device.close();
+                    pinCodeMatrixCallback(dta);
+                });
+                device.write(dBytes);
+            }
+        };
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind) {
+                dev.close();
+                if (decodeButtonRequest(kind)) {
+                    deviceButtonRequestCallback(kind, pinCodeMatrixCallback);
+                }
+            }
+        );
+        if (bufferReceiver.bytesToGet > 0) {
+            dev.read(devReadCallback);
+        }
+    };
+    dev.read(devReadCallback);
+    dev.write(dataBytes);
+};
+
 const emulatorSendPinCodeRequest = function(pinCodeCallback) {
     console.log('Please input your pin code');
     const pinCode = scanf('%s');
@@ -810,6 +864,7 @@ const emulatorChangePin = function() {
 module.exports = {
     deviceAddressGen,
     deviceAddressGenPinCode,
+    deviceChangePin,
     deviceCheckMessageSignature,
     deviceSetMnemonic,
     deviceSkycoinSignMessagePinCode,
