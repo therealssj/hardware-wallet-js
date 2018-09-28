@@ -590,6 +590,7 @@ const deviceSetMnemonic = function(mnemonic) {
     dev.write(dataBytes);
 };
 
+// eslint-disable-next-line max-statements, max-lines-per-function
 const deviceChangePin = function() {
     const dataBytes = createChangePinRequest();
     const dev = getDevice();
@@ -603,6 +604,7 @@ const deviceChangePin = function() {
             console.error(err);
             return;
         }
+        // eslint-disable-next-line max-statements
         const pinCodeMatrixCallback = function(receivedData) {
             const dv8 = new Uint8Array(receivedData);
             const kind = new Uint16Array(dv8.slice(4, 5))[0];
