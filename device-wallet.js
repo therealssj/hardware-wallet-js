@@ -322,6 +322,28 @@ const emulatorButtonRequestCallback = function(kind, callback) {
     emulatorSend(cl, Buffer.from(dBytes));
 };
 
+const deviceButtonRequestCallback = function(kind, callback) {
+    const dataBytes = createButtonAckRequest();
+    const dev = getDevice();
+    if (dev === null) {
+        console.error("Device not connected");
+        return;
+    }
+    dev.read(function(err, data) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        console.log("User hit a button, calling: ", callback);
+        dev.close();
+        if (callback !== null && callback !== undefined) {
+            // eslint-disable-next-line callback-return
+            callback(data);
+        }
+    });
+    dev.write(dataBytes);
+};
+
 const addressGenPinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
         console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
         if (closeFunction) {
@@ -498,6 +520,36 @@ const deviceCheckMessageSignature = function(address, message, signature) {
                     }
                 }
                 dev.close();
+            }
+        );
+        if (bufferReceiver.bytesToGet > 0) {
+            dev.read(devReadCallback);
+        }
+    };
+    dev.read(devReadCallback);
+    dev.write(dataBytes);
+};
+
+const deviceWipeDevice = function() {
+    const dataBytes = createWipeDeviceRequest();
+    const dev = getDevice();
+    if (dev === null) {
+        console.error("Device not connected");
+        return;
+    }
+    const bufferReceiver = new BufferReceiver();
+    const devReadCallback = function(err, data) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind) {
+                dev.close();
+                if (decodeButtonRequest(kind)) {
+                    deviceButtonRequestCallback();
+                }
             }
         );
         if (bufferReceiver.bytesToGet > 0) {
@@ -730,6 +782,7 @@ module.exports = {
     deviceAddressGenPinCode,
     deviceCheckMessageSignature,
     deviceSkycoinSignMessagePinCode,
+    deviceWipeDevice,
     emulatorAddressGen,
     emulatorAddressGenPinCode,
     emulatorChangePin,
