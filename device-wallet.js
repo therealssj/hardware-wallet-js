@@ -428,8 +428,9 @@ const deviceSkycoinSignMessage = function(addressN, message, callback) {
     const dev = getDevice();
     if (dev === null) {
         console.error("Device not connected");
-        return null;
+        return;
     }
+    const bufferReceiver = new BufferReceiver();
     const devReadCallback = function(err, data) {
         if (err) {
             console.error(err);
@@ -447,14 +448,12 @@ const deviceSkycoinSignMessage = function(addressN, message, callback) {
             dev.read(devReadCallback);
         }
     };
-    const bufferReceiver = new BufferReceiver();
     dev.read(devReadCallback);
     dev.write(dataBytes);
-    return dev;
 };
 
 const deviceSkycoinSignMessagePinCode = function(addressN, message) {
-    const dev = deviceSkycoinSignMessage(addressN, message, function(kind, signature) {
+    deviceSkycoinSignMessage(addressN, message, function(kind, signature) {
         console.log("Signature generation kindly returned", messages.MessageType[kind]);
         if (kind == messages.MessageType.
                     MessageType_ResponseSkycoinSignMessage) {
@@ -466,6 +465,47 @@ const deviceSkycoinSignMessagePinCode = function(addressN, message) {
         }
     });
 
+};
+
+const deviceCheckMessageSignature = function(address, message, signature) {
+    const dataBytes = createCheckMessageSignatureRequest(address, message, signature);
+    const dev = getDevice();
+    if (dev === null) {
+        console.error("Device not connected");
+        return;
+    }
+    const bufferReceiver = new BufferReceiver();
+    const devReadCallback = function(err, data) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind, dataBuffer) {
+                if (kind == messages.MessageType.
+                    MessageType_Success) {
+                    try {
+                        console.log(dataBuffer);
+                        const answer = messages.Success.
+                                        decode(dataBuffer);
+                        console.log("Address emiting that signature:", answer.message);
+                        if (answer.message === address) {
+                            console.log("Signature is correct");
+                        }
+                    } catch (e) {
+                        console.error("Wire format is invalid", e);
+                    }
+                }
+                dev.close();
+            }
+        );
+        if (bufferReceiver.bytesToGet > 0) {
+            dev.read(devReadCallback);
+        }
+    };
+    dev.read(devReadCallback);
+    dev.write(dataBytes);
 };
 
 const emulatorSendPinCodeRequest = function(pinCodeCallback) {
@@ -688,6 +728,7 @@ const emulatorChangePin = function() {
 module.exports = {
     deviceAddressGen,
     deviceAddressGenPinCode,
+    deviceCheckMessageSignature,
     deviceSkycoinSignMessagePinCode,
     emulatorAddressGen,
     emulatorAddressGenPinCode,
