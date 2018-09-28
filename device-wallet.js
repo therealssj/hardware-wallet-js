@@ -336,6 +336,18 @@ const addressGenPinCodeCallback = function(answerKind, dataBuffer, closeFunction
         }
 };
 
+const skycoinSignMessagePinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
+    console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
+    if (closeFunction) {
+        closeFunction();
+    }
+    const sign = decodeSignMessageAnswer(answerKind, dataBuffer);
+    if (answerKind == messages.MessageType.
+        MessageType_ResponseSkycoinSignMessage) {
+        console.log(sign);
+    }
+};
+
 // Sends Address generation request
 const deviceAddressGen = function(addressN, startIndex, callback) {
     const dataBytes = createAddressGenRequest(addressN, startIndex);
@@ -406,13 +418,55 @@ const deviceAddressGenPinCode = function(addressN, startIndex) {
         }
         if (kind == messages.MessageType.
                     MessageType_PinMatrixRequest) {
-            deviceSendPinCodeRequest((answerKind, dataBuffer) => {
-                addressGenPinCodeCallback(answerKind, dataBuffer);
-            });
+            deviceSendPinCodeRequest(addressGenPinCodeCallback);
         }
     });
 };
 
+const deviceSkycoinSignMessage = function(addressN, message, callback) {
+    const dataBytes = createSignMessageRequest(addressN, message);
+    const dev = getDevice();
+    if (dev === null) {
+        console.error("Device not connected");
+        return null;
+    }
+    const devReadCallback = function(err, data) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind, dataBuffer) {
+                const signature = decodeSignMessageAnswer(kind, dataBuffer);
+                dev.close();
+                callback(kind, signature);
+            }
+        );
+        if (bufferReceiver.bytesToGet > 0) {
+            dev.read(devReadCallback);
+        }
+    };
+    const bufferReceiver = new BufferReceiver();
+    dev.read(devReadCallback);
+    dev.write(dataBytes);
+    return dev;
+};
+
+const deviceSkycoinSignMessagePinCode = function(addressN, message) {
+    const dev = deviceSkycoinSignMessage(addressN, message, function(kind, signature) {
+        console.log("Signature generation kindly returned", messages.MessageType[kind]);
+        if (kind == messages.MessageType.
+                    MessageType_ResponseSkycoinSignMessage) {
+            console.log(signature);
+        }
+        if (kind == messages.MessageType.
+                    MessageType_PinMatrixRequest) {
+            deviceSendPinCodeRequest(skycoinSignMessagePinCodeCallback);
+        }
+    });
+
+};
 
 const emulatorSendPinCodeRequest = function(pinCodeCallback) {
     console.log('Please input your pin code');
@@ -453,16 +507,6 @@ const emulatorSkycoinSignMessage = function(addressN, message, callback) {
         );
     });
     emulatorSend(client, Buffer.from(dataBytes));
-};
-
-const skycoinSignMessagePinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
-    console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
-    closeFunction();
-    const sign = decodeSignMessageAnswer(answerKind, dataBuffer);
-    if (answerKind == messages.MessageType.
-        MessageType_ResponseSkycoinSignMessage) {
-        console.log(sign);
-    }
 };
 
 const emulatorSkycoinSignMessagePinCode = function(addressN, message) {
@@ -644,6 +688,7 @@ const emulatorChangePin = function() {
 module.exports = {
     deviceAddressGen,
     deviceAddressGenPinCode,
+    deviceSkycoinSignMessagePinCode,
     emulatorAddressGen,
     emulatorAddressGenPinCode,
     emulatorChangePin,

@@ -15,4 +15,5 @@ if( deviceWallet.getDevice() === null ) {
 } else {
   console.log("Skycoin hardware is plugged in");
   deviceWallet.deviceAddressGenPinCode(2, 3);
+  deviceWallet.deviceSkycoinSignMessagePinCode(3, "Hello World!");
 }
