@@ -14,5 +14,5 @@ if( deviceWallet.getDevice() === null ) {
   deviceWallet.emulatorChangePin();
 } else {
   console.log("Skycoin hardware is plugged in");
-  deviceWallet.deviceAddressGen(2, 3);
+  deviceWallet.deviceAddressGenPinCode(2, 3);
 }

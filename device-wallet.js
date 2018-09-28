@@ -262,65 +262,87 @@ const emulatorButtonRequestCallback = function(kind, callback) {
     emulatorSend(cl, Buffer.from(dBytes));
 };
 
+const addressGenPinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
+        console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
+        closeFunction();
+        const addrs = decodeAddressGenAnswer(answerKind, dataBuffer);
+        if (answerKind == messages.MessageType.
+            MessageType_ResponseSkycoinAddress) {
+            addrs.forEach((addr) => {
+              console.log(addr);
+            });
+        }
+};
+
 // Sends Address generation request
-// eslint-disable-next-line max-statements, max-lines-per-function
-const deviceAddressGen = function(addressN, startIndex) {
+const deviceAddressGen = function(addressN, startIndex, callback) {
+    const dataBytes = createAddressGenRequest(addressN, startIndex);
     const dev = getDevice();
     if (dev === null) {
         console.error("Device not connected");
         return;
     }
-    const dataBytes = createAddressGenRequest(addressN, startIndex);
-    dev.write(dataBytes);
-
-    // eslint-disable-next-line max-statements, max-lines-per-function
+    const bufferReceiver = new BufferReceiver();
     dev.read(function(err, data) {
         if (err) {
             console.error(err);
             return;
         }
-        const dv8 = new Uint8Array(data);
-        const kind = new Uint16Array(dv8.slice(4, 5))[0];
-        const msgSize = new Uint32Array(dv8.slice(8, 11))[0];
-
-        const dataBuffer = new Uint8Array(2 + (64 * Math.ceil(msgSize / 64)));
-        dataBuffer.set(dv8.slice(9));
-        let bytesToGet = msgSize + 9 - 64;
-        let i = 0;
-        while (bytesToGet > 0) {
-            // eslint-disable-next-line no-sync
-            dataBuffer.set(dev.readSync().slice(1), (63 * i) + 55);
-            i += 1;
-            bytesToGet -= 64;
-        }
-        if (kind == messages.MessageType.MessageType_Failure) {
-            try {
-                const answer = messages.Failure.
-                                decode(dataBufferArray);
-                console.log(
-                    "Failure message code",
-                    answer.code, "message: ",
-                    answer.message
-                    );
-            } catch (e) {
-                console.error("Wire format is invalid");
+        bufferReceiver.receiveBuffer(
+            data,
+            function(kind, dataBuffer) {
+                const addresses = decodeAddressGenAnswer(kind, dataBuffer);
+                dev.close();
+                callback(kind, addresses);
             }
-            dev.close();
+        );
+    });
+    dev.write(dataBytes);
+};
+
+
+const deviceSendPinCodeRequest = function(pinCodeCallback) {
+    console.log('Please input your pin code');
+    const pinCode = scanf('%s');
+    const dataBytes = createSendPinCodeRequest(pinCode);
+    const dev = getDevice();
+    if (dev === null) {
+        console.error("Device not connected");
+        return;
+    }
+    const bufferReceiver = new BufferReceiver();
+    dev.read(function(err, data) {
+        if (err) {
+            console.error(err);
+            return;
         }
 
-        if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
-            try {
-                console.log(dataBuffer.slice(0, msgSize));
-                const answer = messages.ResponseSkycoinAddress.
-                                decode(dataBuffer.slice(0, msgSize));
-                console.log("Addresses", answer.addresses);
-            } catch (e) {
-                console.error("Wire format is invalid", e);
-            }
-            dev.close();
+        bufferReceiver.receiveBuffer(
+            data,
+            pinCodeCallback
+        );
+    });
+    dev.write(dataBytes);
+};
+
+const deviceAddressGenPinCode = function(addressN, startIndex) {
+    deviceAddressGen(addressN, startIndex, function(kind, addresses) {
+        console.log("Addresses generation kindly returned", messages.MessageType[kind]);
+        if (kind == messages.MessageType.
+                    MessageType_ResponseSkycoinAddress) {
+            addresses.forEach((addr) => {
+              console.log(addr);
+            });
+        }
+        if (kind == messages.MessageType.
+                    MessageType_PinMatrixRequest) {
+            deviceSendPinCodeRequest((answerKind, dataBuffer) => {
+                addressGenPinCodeCallback(answerKind, dataBuffer, client.close);
+            });
         }
     });
 };
+
 
 class BufferReceiver {
     constructor() {
@@ -472,19 +494,6 @@ const emulatorAddressGen = function(addressN, startIndex, callback) {
     emulatorSend(client, Buffer.from(dataBytes));
 };
 
-
-const addressGenPinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
-        console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
-        closeFunction();
-        const addrs = decodeAddressGenAnswer(answerKind, dataBuffer);
-        if (answerKind == messages.MessageType.
-            MessageType_ResponseSkycoinAddress) {
-            addrs.forEach((addr) => {
-              console.log(addr);
-            });
-        }
-};
-
 const emulatorAddressGenPinCode = function(addressN, startIndex) {
     emulatorAddressGen(addressN, startIndex, function(kind, addresses) {
         console.log("Addresses generation kindly returned", messages.MessageType[kind]);
@@ -624,6 +633,7 @@ const emulatorChangePin = function() {
 
 module.exports = {
     deviceAddressGen,
+    deviceAddressGenPinCode,
     emulatorAddressGen,
     emulatorAddressGenPinCode,
     emulatorChangePin,
