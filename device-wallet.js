@@ -55,6 +55,66 @@ const makeTrezorMessage = function(buffer, msgId) {
     return chunks;
 };
 
+class BufferReceiver {
+    constructor() {
+        this.msgIndex = 0;
+        this.msgSize = undefined;
+        this.bytesToGet = undefined;
+        this.kind = undefined;
+        this.dataBuffer = undefined;
+    }
+
+    parseHeader(data) {
+        const dv8 = new Uint8Array(data);
+        this.kind = new Uint16Array(dv8.slice(4, 5))[0];
+        this.msgSize = new Uint32Array(dv8.slice(8, 11))[0];
+        this.dataBuffer = new Uint8Array(64 * Math.ceil(this.msgSize / 64));
+        this.dataBuffer.set(dv8.slice(9));
+        this.bytesToGet = this.msgSize + 9 - 64;
+
+        console.log(
+            "Received header", this.dataBuffer,
+            " msg this.kind: ", messages.MessageType[this.kind],
+            " size: ", this.msgSize,
+            "buffer lenght: ", this.dataBuffer.byteLength,
+            "\nRemaining bytesToGet:", this.bytesToGet
+            );
+    }
+
+    // eslint-disable-next-line max-statements
+    receiveBuffer(data, callback) {
+
+        if (this.bytesToGet === undefined) {
+            this.parseHeader(data);
+
+            if (this.bytesToGet > 0) {
+                return;
+            }
+            callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
+            return;
+        }
+
+        this.dataBuffer.set(data.slice(1), (63 * this.msgIndex) + 55);
+        this.msgIndex += 1;
+        this.bytesToGet -= 64;
+
+        console.log(
+            "Received data", this.dataBuffer, " msg kind: ",
+            messages.MessageType[this.kind],
+            " size: ", this.msgSize, "buffer lenght: ",
+            this.dataBuffer.byteLength
+            );
+
+        if (this.bytesToGet > 0) {
+            return;
+        }
+        if (callback) {
+            // eslint-disable-next-line callback-return
+            callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
+        }
+    }
+}
+
 const createButtonAckRequest = function() {
     const msgStructure = {};
     const msg = messages.ButtonAck.create(msgStructure);
@@ -264,7 +324,9 @@ const emulatorButtonRequestCallback = function(kind, callback) {
 
 const addressGenPinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
         console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
-        closeFunction();
+        if (closeFunction) {
+            closeFunction();
+        }
         const addrs = decodeAddressGenAnswer(answerKind, dataBuffer);
         if (answerKind == messages.MessageType.
             MessageType_ResponseSkycoinAddress) {
@@ -283,7 +345,7 @@ const deviceAddressGen = function(addressN, startIndex, callback) {
         return;
     }
     const bufferReceiver = new BufferReceiver();
-    dev.read(function(err, data) {
+    const devReadCallback = function(err, data) {
         if (err) {
             console.error(err);
             return;
@@ -296,11 +358,15 @@ const deviceAddressGen = function(addressN, startIndex, callback) {
                 callback(kind, addresses);
             }
         );
-    });
+        if (bufferReceiver.bytesToGet > 0) {
+            dev.read(devReadCallback);
+        }
+    };
+    dev.read(devReadCallback);
     dev.write(dataBytes);
 };
 
-
+// eslint-disable-next-line max-statements
 const deviceSendPinCodeRequest = function(pinCodeCallback) {
     console.log('Please input your pin code');
     const pinCode = scanf('%s');
@@ -311,7 +377,7 @@ const deviceSendPinCodeRequest = function(pinCodeCallback) {
         return;
     }
     const bufferReceiver = new BufferReceiver();
-    dev.read(function(err, data) {
+    const devReadCallback = function(err, data) {
         if (err) {
             console.error(err);
             return;
@@ -321,7 +387,11 @@ const deviceSendPinCodeRequest = function(pinCodeCallback) {
             data,
             pinCodeCallback
         );
-    });
+        if (bufferReceiver.bytesToGet > 0) {
+            dev.read(devReadCallback);
+        }
+    };
+    dev.read(devReadCallback);
     dev.write(dataBytes);
 };
 
@@ -337,72 +407,12 @@ const deviceAddressGenPinCode = function(addressN, startIndex) {
         if (kind == messages.MessageType.
                     MessageType_PinMatrixRequest) {
             deviceSendPinCodeRequest((answerKind, dataBuffer) => {
-                addressGenPinCodeCallback(answerKind, dataBuffer, client.close);
+                addressGenPinCodeCallback(answerKind, dataBuffer);
             });
         }
     });
 };
 
-
-class BufferReceiver {
-    constructor() {
-        this.msgIndex = 0;
-        this.msgSize = undefined;
-        this.bytesToGet = undefined;
-        this.kind = undefined;
-        this.dataBuffer = undefined;
-    }
-
-    parseHeader(data) {
-        const dv8 = new Uint8Array(data);
-        this.kind = new Uint16Array(dv8.slice(4, 5))[0];
-        this.msgSize = new Uint32Array(dv8.slice(8, 11))[0];
-        this.dataBuffer = new Uint8Array(64 * Math.ceil(this.msgSize / 64));
-        this.dataBuffer.set(dv8.slice(9));
-        this.bytesToGet = this.msgSize + 9 - 64;
-
-        console.log(
-            "Received header", this.dataBuffer,
-            " msg this.kind: ", messages.MessageType[this.kind],
-            " size: ", this.msgSize,
-            "buffer lenght: ", this.dataBuffer.byteLength,
-            "\nRemaining bytesToGet:", this.bytesToGet
-            );
-    }
-
-    // eslint-disable-next-line max-statements
-    receiveBuffer(data, callback) {
-
-        if (this.bytesToGet === undefined) {
-            this.parseHeader(data);
-
-            if (this.bytesToGet > 0) {
-                return;
-            }
-            callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
-            return;
-        }
-
-        this.dataBuffer.set(data.slice(1), (63 * this.msgIndex) + 55);
-        this.msgIndex += 1;
-        this.bytesToGet -= 64;
-
-        console.log(
-            "Received data", this.dataBuffer, " msg kind: ",
-            messages.MessageType[this.kind],
-            " size: ", this.msgSize, "buffer lenght: ",
-            this.dataBuffer.byteLength
-            );
-
-        if (this.bytesToGet > 0) {
-            return;
-        }
-        if (callback) {
-            // eslint-disable-next-line callback-return
-            callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
-        }
-    }
-}
 
 const emulatorSendPinCodeRequest = function(pinCodeCallback) {
     console.log('Please input your pin code');
