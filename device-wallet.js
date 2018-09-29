@@ -286,26 +286,21 @@ const decodeButtonRequest = function(kind) {
 const decodeFailureAndPinCode = function(kind, dataBuffer) {
     if (kind == messages.MessageType.MessageType_Failure) {
         try {
-            const answer = messages.Failure.
-                            decode(dataBuffer);
+            const answer = messages.Failure.decode(dataBuffer);
             console.log(
                 "Failure message code",
                 answer.code, "message: ",
                 answer.message
                 );
+            return answer.message;
         } catch (e) {
             console.error("Wire format is invalid");
         }
     }
-    if (kind == messages.MessageType.
-        MessageType_PinMatrixRequest) {
-        try {
-            messages.PinMatrixRequest.decode(dataBuffer);
-            console.log("Pin code required");
-        } catch (e) {
-            console.error("Wire format is invalid");
-        }
+    if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
+        return "Pin code required";
     }
+    return "decodeFailureAndPinCode failed";
 };
 
 const decodeSignMessageAnswer = function(kind, dataBuffer) {
@@ -327,9 +322,7 @@ const decodeSignMessageAnswer = function(kind, dataBuffer) {
 
 const decodeAddressGenAnswer = function(kind, dataBuffer) {
     let addresses = [];
-    decodeFailureAndPinCode(kind, dataBuffer);
-    if (kind == messages.MessageType.
-        MessageType_ResponseSkycoinAddress) {
+    if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
         try {
             console.log(dataBuffer);
             const answer = messages.ResponseSkycoinAddress.
@@ -339,6 +332,8 @@ const decodeAddressGenAnswer = function(kind, dataBuffer) {
         } catch (e) {
             console.error("Wire format is invalid", e);
         }
+    } else {
+        return decodeFailureAndPinCode(kind, dataBuffer);
     }
     return addresses;
 };
@@ -360,20 +355,6 @@ const devButtonRequestCallback = function(kind, callback) {
     }
 };
 
-const addressGenPinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
-    console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
-    if (closeFunction) {
-        closeFunction();
-    }
-    const addrs = decodeAddressGenAnswer(answerKind, dataBuffer);
-    if (answerKind == messages.MessageType.
-        MessageType_ResponseSkycoinAddress) {
-        addrs.forEach((addr) => {
-          console.log(addr);
-        });
-    }
-};
-
 const skycoinSignMessagePinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
     console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
     if (closeFunction) {
@@ -390,9 +371,8 @@ const devAddressGen = function(addressN, startIndex, callback) {
     const dataBytes = createAddressGenRequest(addressN, startIndex);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, dataBuffer) {
-        const addresses = decodeAddressGenAnswer(kind, dataBuffer);
         deviceHandle.close();
-        callback(kind, addresses);
+        callback(kind, dataBuffer);
     };
     deviceHandle.read(devReadCallback);
     deviceHandle.write(dataBytes);
@@ -411,20 +391,27 @@ const devSendPinCodeRequest = function(pinCodeCallback) {
 };
 
 const devAddressGenPinCode = function(addressN, startIndex) {
-    devAddressGen(addressN, startIndex, function(kind, addresses) {
-        console.log("Addresses generation kindly returned", messages.MessageType[kind]);
-        if (kind == messages.MessageType.
-                    MessageType_ResponseSkycoinAddress) {
-            addresses.forEach((addr) => {
-              console.log(addr);
-            });
-        }
-        if (kind == messages.MessageType.
-                    MessageType_PinMatrixRequest) {
-            devSendPinCodeRequest((answerKind, dataBuffer) => {
-                addressGenPinCodeCallback(answerKind, dataBuffer);
-            });
-        }
+    return new Promise((resolve, reject) => {
+        devAddressGen(addressN, startIndex, function(kind, dataBuffer) {
+            console.log("Addresses generation kindly returned", messages.MessageType[kind]);
+            if (kind == messages.MessageType.Failure) {
+                reject(decodeFailureAndPinCode(kind, dataBuffer));
+            }
+            if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
+                resolve(decodeAddressGenAnswer(kind, dataBuffer));
+            }
+            if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
+                devSendPinCodeRequest((answerKind, answerBuffer) => {
+                    console.log("Pin code callback got answerKind", answerKind, messages.MessageType.Failure);
+                    if (answerKind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
+                        resolve(decodeAddressGenAnswer(answerKind, answerBuffer));
+                    }
+                    if (answerKind == messages.MessageType.MessageType_Failure) {
+                        reject(decodeFailureAndPinCode(answerKind, answerBuffer));
+                    }
+                });
+            }
+        });
     });
 };
 

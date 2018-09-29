@@ -8,8 +8,15 @@ if( deviceWallet.getDevice() === null ) {
   deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
 }
 
-deviceWallet.devAddressGenPinCode(2, 3);
-deviceWallet.devSkycoinSignMessagePinCode(3, "Hello World!");
+const addrPromise = deviceWallet.devAddressGenPinCode(2, 3);
+addrPromise.then((addresses) => {
+    console.log("Promise resolved", addresses);
+    deviceWallet.devSkycoinSignMessagePinCode(3, "Hello World!");
+  },
+  (msg) => {
+    console.log("Promise rejected", msg);
+  }
+);
 deviceWallet.devCheckMessageSignature(
   "2NckPkQRQFa5E7HtqDkZmV1TH4HCzR2N5J6",
   "Hello World!",
