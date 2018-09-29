@@ -283,6 +283,23 @@ const decodeButtonRequest = function(kind) {
     return true;
 };
 
+const decodeSuccess = function(kind, dataBuffer) {
+    if (kind == messages.MessageType.MessageType_Success) {
+        try {
+            const answer = messages.Success.decode(dataBuffer);
+            console.log(
+                "Success message code",
+                answer.code, "message: ",
+                answer.message
+                );
+            return answer.message;
+        } catch (e) {
+            console.error("Wire format is invalid");
+        }
+    }
+    return "decodeSuccess failed";
+};
+
 const decodeFailureAndPinCode = function(kind, dataBuffer) {
     if (kind == messages.MessageType.MessageType_Failure) {
         try {
@@ -380,7 +397,7 @@ const devAddressGenPinCode = function(addressN, startIndex) {
     return new Promise((resolve, reject) => {
         devAddressGen(addressN, startIndex, function(kind, dataBuffer) {
             console.log("Addresses generation kindly returned", messages.MessageType[kind]);
-            if (kind == messages.MessageType.Failure) {
+            if (kind == messages.MessageType.MessageType_Failure) {
                 reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
             }
             if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
@@ -388,7 +405,7 @@ const devAddressGenPinCode = function(addressN, startIndex) {
             }
             if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
                 devSendPinCodeRequest((answerKind, answerBuffer) => {
-                    console.log("Pin code callback got answerKind", answerKind, messages.MessageType.Failure);
+                    console.log("Pin code callback got answerKind", answerKind);
                     if (answerKind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
                         resolve(decodeAddressGenAnswer(answerKind, answerBuffer));
                     }
@@ -416,7 +433,7 @@ const devSkycoinSignMessagePinCode = function(addressN, message) {
     return new Promise((resolve, reject) => {
         devSkycoinSignMessage(addressN, message, function(kind, dataBuffer) {
             console.log("Signature generation kindly returned", messages.MessageType[kind]);
-            if (kind == messages.MessageType.Failure) {
+            if (kind == messages.MessageType.MessageType_Failure) {
                 reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
             }
             if (kind == messages.MessageType.MessageType_ResponseSkycoinSignMessage) {
@@ -424,7 +441,7 @@ const devSkycoinSignMessagePinCode = function(addressN, message) {
             }
             if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
                 devSendPinCodeRequest((answerKind, answerBuffer) => {
-                    console.log("Pin code callback got answerKind", answerKind, messages.MessageType.Failure);
+                    console.log("Pin code callback got answerKind", answerKind);
                     if (answerKind == messages.MessageType.MessageType_ResponseSkycoinSignMessage) {
                         resolve(decodeSignMessageAnswer(answerKind, answerBuffer));
                     }
@@ -496,20 +513,28 @@ const devSetMnemonic = function(mnemonic) {
 };
 
 const devChangePin = function() {
-    const dataBytes = createChangePinRequest();
-    const deviceHandle = new DeviceHandler(deviceType);
-    const pinCodeMatrixCallback = function(datakind) {
-        console.log("pinCodeMatrixCallback kind:", datakind, messages.MessageType[datakind]);
-        if (datakind == messages.MessageType.MessageType_PinMatrixRequest) {
-            devSendPinCodeRequest(pinCodeMatrixCallback);
-        }
-    };
-    const devReadCallback = function(kind) {
-        deviceHandle.close();
-        devButtonRequestCallback(kind, pinCodeMatrixCallback);
-    };
-    deviceHandle.read(devReadCallback);
-    deviceHandle.write(dataBytes);
+    return new Promise((resolve, reject) => {
+        const dataBytes = createChangePinRequest();
+        const deviceHandle = new DeviceHandler(deviceType);
+        const pinCodeMatrixCallback = function(datakind, dataBuffer) {
+            console.log("pinCodeMatrixCallback kind:", datakind, messages.MessageType[datakind]);
+            if (datakind == messages.MessageType.MessageType_PinMatrixRequest) {
+                devSendPinCodeRequest(pinCodeMatrixCallback);
+            }
+            if (datakind == messages.MessageType.MessageType_Failure) {
+                reject(new Error(decodeFailureAndPinCode(datakind, dataBuffer)));
+            }
+            if (datakind == messages.MessageType.MessageType_Success) {
+                resolve(decodeSuccess(datakind, dataBuffer));
+            }
+        };
+        const devReadCallback = function(kind) {
+            deviceHandle.close();
+            devButtonRequestCallback(kind, pinCodeMatrixCallback);
+        };
+        deviceHandle.read(devReadCallback);
+        deviceHandle.write(dataBytes);
+    });
 };
 
 module.exports = {

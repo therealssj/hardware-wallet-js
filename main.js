@@ -36,10 +36,16 @@ addrPromise.then(
               setMnemonicPromise.then(
                 (mnemonicMsg) => {
                   console.log(mnemonicMsg);
-                  deviceWallet.devChangePin();
+                  const changePinPromise = deviceWallet.devChangePin();
+                  changePinPromise.then(
+                  () => {
+                    console.log("Finally change pin success");
+                  },
+                  rejectPromise
+                  );
                 },
                 rejectPromise
-              );
+                );
             },
             rejectPromise
             );
