@@ -411,52 +411,12 @@ const devButtonRequestCallback = function(kind, callback) {
             deviceHandle.close();
             if (callback !== null && callback !== undefined) {
                 // eslint-disable-next-line callback-return
-                callback(data);
+                callback(datakind, data);
             }
         };
         deviceHandle.read(devReadCallback);
         deviceHandle.write(dataBytes);
     }
-};
-
-const emulatorButtonRequestCallback = function(kind, callback) {
-    const dBytes = createButtonAckRequest();
-    const cl = dgram.createSocket('udp4');
-    cl.on('message', function(data, rinfo) {
-        if (rinfo) {
-            console.log(`server got: 
-            ${data} from ${rinfo.address}:${rinfo.port}`);
-        }
-        console.log("User hit a button, calling: ", callback);
-        cl.close();
-        if (callback !== null && callback !== undefined) {
-            // eslint-disable-next-line callback-return
-            callback(data);
-        }
-    });
-    emulatorSend(cl, Buffer.from(dBytes));
-};
-
-const deviceButtonRequestCallback = function(kind, callback) {
-    const dataBytes = createButtonAckRequest();
-    const dev = getDevice();
-    if (dev === null) {
-        console.error("Device not connected");
-        return;
-    }
-    dev.read(function(err, data) {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        console.log("User hit a button, calling: ", callback);
-        dev.close();
-        if (callback !== null && callback !== undefined) {
-            // eslint-disable-next-line callback-return
-            callback(data);
-        }
-    });
-    dev.write(dataBytes);
 };
 
 const addressGenPinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
@@ -599,114 +559,33 @@ const devSetMnemonic = function(mnemonic) {
     deviceHandle.write(dataBytes);
 };
 
-// eslint-disable-next-line max-statements, max-lines-per-function
-const deviceChangePin = function() {
+const devChangePin = function() {
     const dataBytes = createChangePinRequest();
-    const dev = getDevice();
-    if (dev === null) {
-        console.error("Device not connected");
-        return;
-    }
-    const bufferReceiver = new BufferReceiver();
-    const devReadCallback = function(err, data) {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        // eslint-disable-next-line max-statements
-        const pinCodeMatrixCallback = function(receivedData) {
-            const dv8 = new Uint8Array(receivedData);
-            const kind = new Uint16Array(dv8.slice(4, 5))[0];
-            console.log("pinCodeMatrixCallback kind:", kind);
-            if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
-                console.log('Please input your pin code');
-                const pinCode = scanf('%s');
-                dBytes = createSendPinCodeRequest(pinCode);
-                const device = getDevice();
-                if (device === null) {
-                    console.error("Device not connected");
-                    return;
-                }
-                device.read(function(deverr, dta) {
-                    if (deverr) {
-                        console.error(deverr);
-                        return;
-                    }
-                    device.close();
-                    pinCodeMatrixCallback(dta);
-                });
-                device.write(dBytes);
-            }
-        };
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind) {
-                dev.close();
-                if (decodeButtonRequest(kind)) {
-                    deviceButtonRequestCallback(kind, pinCodeMatrixCallback);
-                }
-            }
-        );
-        if (bufferReceiver.bytesToGet > 0) {
-            dev.read(devReadCallback);
+    const deviceHandle = new DeviceHandler(deviceType);
+    const pinCodeMatrixCallback = function(datakind, receivedData) {
+        console.log("pinCodeMatrixCallback kind:", datakind, messages.MessageType[datakind]);
+        console.log("pinCodeMatrixCallback data:", receivedData);
+        if (datakind == messages.MessageType.MessageType_PinMatrixRequest) {
+            devSendPinCodeRequest(pinCodeMatrixCallback);
         }
     };
-    dev.read(devReadCallback);
-    dev.write(dataBytes);
-};
-
-const emulatorChangePin = function() {
-    const dataBytes = createChangePinRequest();
-    const client = dgram.createSocket('udp4');
-    const bufferReceiver = new BufferReceiver();
-    client.on('message', function(data, rinfo) {
-        if (rinfo) {
-            console.log(`server got: 
-                ${data} from ${rinfo.address}:${rinfo.port}`);
-        }
-        const pinCodeMatrixCallback = function(receivedData) {
-            const dv8 = new Uint8Array(receivedData);
-            const kind = new Uint16Array(dv8.slice(4, 5))[0];
-            console.log("pinCodeMatrixCallback kind:", kind);
-            if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
-                console.log('Please input your pin code');
-                const pinCode = scanf('%s');
-                dBytes = createSendPinCodeRequest(pinCode);
-                const cl = dgram.createSocket('udp4');
-                cl.on('message', function(dta, info) {
-                    if (info) {
-                        console.log(`server got: 
-                            ${dta} from ${info.address}:${info.port}`);
-                    }
-                    cl.close();
-                    pinCodeMatrixCallback(dta);
-                });
-                emulatorSend(cl, Buffer.from(dBytes));
-            }
-        };
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind) {
-                client.close();
-                if (decodeButtonRequest(kind)) {
-                    emulatorButtonRequestCallback(kind, pinCodeMatrixCallback);
-                }
-            }
-        );
-    });
-    emulatorSend(client, Buffer.from(dataBytes));
+    const devReadCallback = function(kind) {
+        deviceHandle.close();
+        devButtonRequestCallback(kind, pinCodeMatrixCallback);
+    };
+    deviceHandle.read(devReadCallback);
+    deviceHandle.write(dataBytes);
 };
 
 module.exports = {
     DeviceTypeEnum,
     devAddressGen,
     devAddressGenPinCode,
+    devChangePin,
     devCheckMessageSignature,
     devSetMnemonic,
     devSkycoinSignMessagePinCode,
     devWipeDevice,
-    deviceChangePin,
-    emulatorChangePin,
     getDevice,
     makeTrezorMessage,
     setDeviceType
