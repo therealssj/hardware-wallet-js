@@ -536,45 +536,28 @@ const devSkycoinSignMessagePinCode = function(addressN, message) {
     });
 };
 
-const deviceCheckMessageSignature = function(address, message, signature) {
+const devCheckMessageSignature = function(address, message, signature) {
     const dataBytes = createCheckMessageSignatureRequest(address, message, signature);
-    const dev = getDevice();
-    if (dev === null) {
-        console.error("Device not connected");
-        return;
-    }
-    const bufferReceiver = new BufferReceiver();
-    const devReadCallback = function(err, data) {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind, dataBuffer) {
-                if (kind == messages.MessageType.
-                    MessageType_Success) {
-                    try {
-                        console.log(dataBuffer);
-                        const answer = messages.Success.
-                                        decode(dataBuffer);
-                        console.log("Address emiting that signature:", answer.message);
-                        if (answer.message === address) {
-                            console.log("Signature is correct");
-                        }
-                    } catch (e) {
-                        console.error("Wire format is invalid", e);
-                    }
+    const deviceHandle = new DeviceHandler(deviceType);
+    const devReadCallback = function(kind, dataBuffer) {
+        if (kind == messages.MessageType.
+            MessageType_Success) {
+            try {
+                console.log(dataBuffer);
+                const answer = messages.Success.
+                                decode(dataBuffer);
+                console.log("Address emiting that signature:", answer.message);
+                if (answer.message === address) {
+                    console.log("Signature is correct");
                 }
-                dev.close();
+            } catch (e) {
+                console.error("Wire format is invalid", e);
             }
-        );
-        if (bufferReceiver.bytesToGet > 0) {
-            dev.read(devReadCallback);
         }
+        deviceHandle.close();
     };
-    dev.read(devReadCallback);
-    dev.write(dataBytes);
+    deviceHandle.read(devReadCallback);
+    deviceHandle.write(dataBytes);
 };
 
 const deviceWipeDevice = function() {
@@ -693,39 +676,6 @@ const deviceChangePin = function() {
     dev.write(dataBytes);
 };
 
-const emulatorCheckMessageSignature = function(address, message, signature) {
-    const dataBytes = createCheckMessageSignatureRequest(address, message, signature);
-    const client = dgram.createSocket('udp4');
-    const bufferReceiver = new BufferReceiver();
-    client.on('message', function(data, rinfo) {
-        if (rinfo) {
-            console.log(`server got: 
-                ${data} from ${rinfo.address}:${rinfo.port}`);
-        }
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind, dataBuffer) {
-                if (kind == messages.MessageType.
-                    MessageType_Success) {
-                    try {
-                        console.log(dataBuffer);
-                        const answer = messages.Success.
-                                        decode(dataBuffer);
-                        console.log("Address emiting that signature:", answer.message);
-                        if (answer.message === address) {
-                            console.log("Signature is correct");
-                        }
-                    } catch (e) {
-                        console.error("Wire format is invalid", e);
-                    }
-                }
-                client.close();
-            }
-        );
-    });
-    emulatorSend(client, Buffer.from(dataBytes));
-};
-
 const emulatorSetMnemonic = function(mnemonic) {
     const dataBytes = createSetMnemonicRequest(mnemonic);
     const client = dgram.createSocket('udp4');
@@ -816,13 +766,12 @@ module.exports = {
     DeviceTypeEnum,
     devAddressGen,
     devAddressGenPinCode,
+    devCheckMessageSignature,
     devSkycoinSignMessagePinCode,
     deviceChangePin,
-    deviceCheckMessageSignature,
     deviceSetMnemonic,
     deviceWipeDevice,
     emulatorChangePin,
-    emulatorCheckMessageSignature,
     emulatorSetMnemonic,
     emulatorWipeDevice,
     getDevice,
