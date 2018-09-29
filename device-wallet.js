@@ -1,5 +1,6 @@
 const HID = require('node-hid');
 const messages = require('./protob/skycoin');
+const bufReceiver = require('./buffer-receiver');
 const dgram = require('dgram');
 const scanf = require('scanf');
 
@@ -77,66 +78,6 @@ const emulatorSend = function(client, message) {
     }
 };
 
-class BufferReceiver {
-    constructor() {
-        this.msgIndex = 0;
-        this.msgSize = undefined;
-        this.bytesToGet = undefined;
-        this.kind = undefined;
-        this.dataBuffer = undefined;
-    }
-
-    parseHeader(data) {
-        const dv8 = new Uint8Array(data);
-        this.kind = new Uint16Array(dv8.slice(4, 5))[0];
-        this.msgSize = new Uint32Array(dv8.slice(8, 11))[0];
-        this.dataBuffer = new Uint8Array(64 * Math.ceil(this.msgSize / 64));
-        this.dataBuffer.set(dv8.slice(9));
-        this.bytesToGet = this.msgSize + 9 - 64;
-
-        console.log(
-            "Received header", this.dataBuffer,
-            " msg this.kind: ", messages.MessageType[this.kind],
-            " size: ", this.msgSize,
-            "buffer lenght: ", this.dataBuffer.byteLength,
-            "\nRemaining bytesToGet:", this.bytesToGet
-            );
-    }
-
-    // eslint-disable-next-line max-statements
-    receiveBuffer(data, callback) {
-
-        if (this.bytesToGet === undefined) {
-            this.parseHeader(data);
-
-            if (this.bytesToGet > 0) {
-                return;
-            }
-            callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
-            return;
-        }
-
-        this.dataBuffer.set(data.slice(1), (63 * this.msgIndex) + 55);
-        this.msgIndex += 1;
-        this.bytesToGet -= 64;
-
-        console.log(
-            "Received data", this.dataBuffer, " msg kind: ",
-            messages.MessageType[this.kind],
-            " size: ", this.msgSize, "buffer lenght: ",
-            this.dataBuffer.byteLength
-            );
-
-        if (this.bytesToGet > 0) {
-            return;
-        }
-        if (callback) {
-            // eslint-disable-next-line callback-return
-            callback(this.kind, this.dataBuffer.slice(0, this.msgSize));
-        }
-    }
-}
-
 DeviceTypeEnum = {
     'EMULATOR': 1,
     'USB': 2
@@ -169,7 +110,7 @@ class DeviceHandler {
     }
 
     read(devReadCallback) {
-        const bufferReceiver = new BufferReceiver();
+        const bufferReceiver = new bufReceiver.BufferReceiver();
         switch (this.deviceType) {
         case DeviceTypeEnum.USB:
             {
