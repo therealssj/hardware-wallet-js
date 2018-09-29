@@ -2,7 +2,8 @@ const deviceWallet = require('./device-wallet');
 
 if( deviceWallet.getDevice() === null ) {
   console.log("Skycoin hardware NOT FOUND, using emulator");
-  deviceWallet.emulatorAddressGenPinCode(2, 3);
+  deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
+  deviceWallet.devAddressGenPinCode(2, 3);
   deviceWallet.emulatorSkycoinSignMessagePinCode(3, "Hello World!");
   deviceWallet.emulatorCheckMessageSignature(
     "2NckPkQRQFa5E7HtqDkZmV1TH4HCzR2N5J6",
@@ -14,7 +15,8 @@ if( deviceWallet.getDevice() === null ) {
   deviceWallet.emulatorChangePin();
 } else {
   console.log("Skycoin hardware is plugged in");
-  deviceWallet.deviceAddressGenPinCode(2, 3);
+  deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
+  deviceWallet.devAddressGenPinCode(2, 3);
   deviceWallet.deviceSkycoinSignMessagePinCode(3, "Hello World!");
   deviceWallet.deviceCheckMessageSignature(
     "2NckPkQRQFa5E7HtqDkZmV1TH4HCzR2N5J6",
