@@ -18,7 +18,7 @@ class BufferReceiver {
         this.bytesToGet = this.msgSize + 9 - 64;
 
         console.log(
-            "Received header", this.dataBuffer,
+            "Received header",
             " msg this.kind: ", messages.MessageType[this.kind],
             " size: ", this.msgSize,
             "buffer lenght: ", this.dataBuffer.byteLength,
@@ -44,7 +44,7 @@ class BufferReceiver {
         this.bytesToGet -= 64;
 
         console.log(
-            "Received data", this.dataBuffer, " msg kind: ",
+            "Received data", " msg kind: ",
             messages.MessageType[this.kind],
             " size: ", this.msgSize, "buffer lenght: ",
             this.dataBuffer.byteLength
