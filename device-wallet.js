@@ -381,7 +381,7 @@ const devAddressGenPinCode = function(addressN, startIndex) {
         devAddressGen(addressN, startIndex, function(kind, dataBuffer) {
             console.log("Addresses generation kindly returned", messages.MessageType[kind]);
             if (kind == messages.MessageType.Failure) {
-                reject(decodeFailureAndPinCode(kind, dataBuffer));
+                reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
             }
             if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
                 resolve(decodeAddressGenAnswer(kind, dataBuffer));
@@ -393,7 +393,7 @@ const devAddressGenPinCode = function(addressN, startIndex) {
                         resolve(decodeAddressGenAnswer(answerKind, answerBuffer));
                     }
                     if (answerKind == messages.MessageType.MessageType_Failure) {
-                        reject(decodeFailureAndPinCode(answerKind, answerBuffer));
+                        reject(new Error(decodeFailureAndPinCode(answerKind, answerBuffer)));
                     }
                 });
             }
@@ -417,7 +417,7 @@ const devSkycoinSignMessagePinCode = function(addressN, message) {
         devSkycoinSignMessage(addressN, message, function(kind, dataBuffer) {
             console.log("Signature generation kindly returned", messages.MessageType[kind]);
             if (kind == messages.MessageType.Failure) {
-                reject(decodeFailureAndPinCode(kind, dataBuffer));
+                reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
             }
             if (kind == messages.MessageType.MessageType_ResponseSkycoinSignMessage) {
                 resolve(decodeSignMessageAnswer(kind, dataBuffer));
@@ -429,7 +429,7 @@ const devSkycoinSignMessagePinCode = function(addressN, message) {
                         resolve(decodeSignMessageAnswer(answerKind, answerBuffer));
                     }
                     if (answerKind == messages.MessageType.MessageType_Failure) {
-                        reject(decodeFailureAndPinCode(answerKind, answerBuffer));
+                        reject(new Error(decodeFailureAndPinCode(answerKind, answerBuffer)));
                     }
                 });
             }
@@ -438,26 +438,31 @@ const devSkycoinSignMessagePinCode = function(addressN, message) {
 };
 
 const devCheckMessageSignature = function(address, message, signature) {
-    const dataBytes = createCheckMessageSignatureRequest(address, message, signature);
-    const deviceHandle = new DeviceHandler(deviceType);
-    const devReadCallback = function(kind, dataBuffer) {
-        if (kind == messages.MessageType.
-            MessageType_Success) {
-            try {
-                const answer = messages.Success.
-                                decode(dataBuffer);
-                console.log("Address emiting that signature:", answer.message);
-                if (answer.message === address) {
-                    console.log("Signature is correct");
+    return new Promise((resolve, reject) => {
+        const dataBytes = createCheckMessageSignatureRequest(address, message, signature);
+        const deviceHandle = new DeviceHandler(deviceType);
+        const devReadCallback = function(kind, dataBuffer) {
+            if (kind == messages.MessageType.MessageType_Success) {
+                try {
+                    const answer = messages.Success.
+                                    decode(dataBuffer);
+                    console.log("Address emiting that signature:", answer.message);
+                    if (answer.message === address) {
+                        resolve("Signature is correct");
+                    } else {
+                        reject(new Error("Wrong signature"));
+                    }
+                } catch (e) {
+                    reject(new Error("Wire format is invalid", e));
                 }
-            } catch (e) {
-                console.error("Wire format is invalid", e);
+            } else {
+                reject(new Error("Wrong answer kind", kind));
             }
-        }
-        deviceHandle.close();
-    };
-    deviceHandle.read(devReadCallback);
-    deviceHandle.write(dataBytes);
+            deviceHandle.close();
+        };
+        deviceHandle.read(devReadCallback);
+        deviceHandle.write(dataBytes);
+    });
 };
 
 const devWipeDevice = function() {
@@ -485,7 +490,7 @@ const devSetMnemonic = function(mnemonic) {
 const devChangePin = function() {
     const dataBytes = createChangePinRequest();
     const deviceHandle = new DeviceHandler(deviceType);
-    const pinCodeMatrixCallback = function(datakind, receivedData) {
+    const pinCodeMatrixCallback = function(datakind) {
         console.log("pinCodeMatrixCallback kind:", datakind, messages.MessageType[datakind]);
         if (datakind == messages.MessageType.MessageType_PinMatrixRequest) {
             devSendPinCodeRequest(pinCodeMatrixCallback);
