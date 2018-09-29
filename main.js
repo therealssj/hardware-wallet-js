@@ -27,7 +27,14 @@ addrPromise.then(
       checkSignPromise.then(
         (check) => {
           console.log(check);
-          deviceWallet.devWipeDevice();
+          const wipePromise = deviceWallet.devWipeDevice();
+          wipePromise.then(
+            (msg) => {
+              console.log(msg);
+              deviceWallet.devSetMnemonic("cloud flower upset remain green metal below cup stem infant art thank");
+            },
+            rejectPromise
+            );
         },
         rejectPromise
         );
@@ -37,5 +44,4 @@ addrPromise.then(
   },
   rejectPromise
 );
-deviceWallet.devSetMnemonic("cloud flower upset remain green metal below cup stem infant art thank");
 deviceWallet.devChangePin();

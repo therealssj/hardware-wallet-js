@@ -466,14 +466,18 @@ const devCheckMessageSignature = function(address, message, signature) {
 };
 
 const devWipeDevice = function() {
-    const dataBytes = createWipeDeviceRequest();
-    const deviceHandle = new DeviceHandler(deviceType);
-    const devReadCallback = function(kind) {
-        deviceHandle.close();
-        devButtonRequestCallback(kind);
-    };
-    deviceHandle.read(devReadCallback);
-    deviceHandle.write(dataBytes);
+    return new Promise((resolve) => {
+            const dataBytes = createWipeDeviceRequest();
+            const deviceHandle = new DeviceHandler(deviceType);
+            const devReadCallback = function(kind) {
+                deviceHandle.close();
+                devButtonRequestCallback(kind, () => {
+                    resolve("Wipe Device operation finished or refused");
+                });
+            };
+            deviceHandle.read(devReadCallback);
+            deviceHandle.write(dataBytes);
+    });
 };
 
 const devSetMnemonic = function(mnemonic) {
