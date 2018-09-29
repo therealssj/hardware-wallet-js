@@ -402,6 +402,23 @@ const decodeAddressGenAnswer = function(kind, dataBuffer) {
     return addresses;
 };
 
+const devButtonRequestCallback = function(kind, callback) {
+    if (decodeButtonRequest(kind)) {
+        const dataBytes = createButtonAckRequest();
+        const deviceHandle = new DeviceHandler(deviceType);
+        const devReadCallback = function(datakind, data) {
+            console.log("User hit a button, calling: ", callback);
+            deviceHandle.close();
+            if (callback !== null && callback !== undefined) {
+                // eslint-disable-next-line callback-return
+                callback(data);
+            }
+        };
+        deviceHandle.read(devReadCallback);
+        deviceHandle.write(dataBytes);
+    }
+};
+
 const emulatorButtonRequestCallback = function(kind, callback) {
     const dBytes = createButtonAckRequest();
     const cl = dgram.createSocket('udp4');
@@ -590,34 +607,15 @@ const deviceWipeDevice = function() {
     dev.write(dataBytes);
 };
 
-const deviceSetMnemonic = function(mnemonic) {
+const devSetMnemonic = function(mnemonic) {
     const dataBytes = createSetMnemonicRequest(mnemonic);
-    const dev = getDevice();
-    if (dev === null) {
-        console.error("Device not connected");
-        return;
-    }
-    const bufferReceiver = new BufferReceiver();
-    const devReadCallback = function(err, data) {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind) {
-                dev.close();
-                if (decodeButtonRequest(kind)) {
-                    deviceButtonRequestCallback();
-                }
-            }
-        );
-        if (bufferReceiver.bytesToGet > 0) {
-            dev.read(devReadCallback);
-        }
+    const deviceHandle = new DeviceHandler(deviceType);
+    const devReadCallback = function(kind) {
+        deviceHandle.close();
+        devButtonRequestCallback(kind);
     };
-    dev.read(devReadCallback);
-    dev.write(dataBytes);
+    deviceHandle.read(devReadCallback);
+    deviceHandle.write(dataBytes);
 };
 
 // eslint-disable-next-line max-statements, max-lines-per-function
@@ -674,28 +672,6 @@ const deviceChangePin = function() {
     };
     dev.read(devReadCallback);
     dev.write(dataBytes);
-};
-
-const emulatorSetMnemonic = function(mnemonic) {
-    const dataBytes = createSetMnemonicRequest(mnemonic);
-    const client = dgram.createSocket('udp4');
-    const bufferReceiver = new BufferReceiver();
-    client.on('message', function(data, rinfo) {
-        if (rinfo) {
-            console.log(`server got: 
-                ${data} from ${rinfo.address}:${rinfo.port}`);
-        }
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind) {
-                client.close();
-                if (decodeButtonRequest(kind)) {
-                    emulatorButtonRequestCallback();
-                }
-            }
-        );
-    });
-    emulatorSend(client, Buffer.from(dataBytes));
 };
 
 const emulatorWipeDevice = function() {
@@ -767,12 +743,11 @@ module.exports = {
     devAddressGen,
     devAddressGenPinCode,
     devCheckMessageSignature,
+    devSetMnemonic,
     devSkycoinSignMessagePinCode,
     deviceChangePin,
-    deviceSetMnemonic,
     deviceWipeDevice,
     emulatorChangePin,
-    emulatorSetMnemonic,
     emulatorWipeDevice,
     getDevice,
     makeTrezorMessage,
