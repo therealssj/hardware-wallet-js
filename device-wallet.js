@@ -309,7 +309,6 @@ const decodeSignMessageAnswer = function(kind, dataBuffer) {
     if (kind == messages.MessageType.
         MessageType_ResponseSkycoinSignMessage) {
         try {
-            console.log("Data slice:", dataBuffer);
             const answer = messages.ResponseSkycoinSignMessage.
                             decode(dataBuffer);
             signature = answer.signedMessage;
@@ -324,7 +323,6 @@ const decodeAddressGenAnswer = function(kind, dataBuffer) {
     let addresses = [];
     if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
         try {
-            console.log(dataBuffer);
             const answer = messages.ResponseSkycoinAddress.
                             decode(dataBuffer);
             console.log("Addresses", answer.addresses);
@@ -352,18 +350,6 @@ const devButtonRequestCallback = function(kind, callback) {
         };
         deviceHandle.read(devReadCallback);
         deviceHandle.write(dataBytes);
-    }
-};
-
-const skycoinSignMessagePinCodeCallback = function(answerKind, dataBuffer, closeFunction) {
-    console.log("After pinCode sending, got answer of kind:", messages.MessageType[answerKind]);
-    if (closeFunction) {
-        closeFunction();
-    }
-    const sign = decodeSignMessageAnswer(answerKind, dataBuffer);
-    if (answerKind == messages.MessageType.
-        MessageType_ResponseSkycoinSignMessage) {
-        console.log(sign);
     }
 };
 
@@ -419,25 +405,35 @@ const devSkycoinSignMessage = function(addressN, message, callback) {
     const dataBytes = createSignMessageRequest(addressN, message);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, dataBuffer) {
-        const signature = decodeSignMessageAnswer(kind, dataBuffer);
         deviceHandle.close();
-        callback(kind, signature);
+        callback(kind, dataBuffer);
     };
     deviceHandle.read(devReadCallback);
     deviceHandle.write(dataBytes);
 };
 
 const devSkycoinSignMessagePinCode = function(addressN, message) {
-    devSkycoinSignMessage(addressN, message, function(kind, signature) {
-        console.log("Signature generation kindly returned", messages.MessageType[kind]);
-        if (kind == messages.MessageType.
-                    MessageType_ResponseSkycoinSignMessage) {
-            console.log(signature);
-        }
-        if (kind == messages.MessageType.
-                    MessageType_PinMatrixRequest) {
-            devSendPinCodeRequest(skycoinSignMessagePinCodeCallback);
-        }
+    return new Promise((resolve, reject) => {
+        devSkycoinSignMessage(addressN, message, function(kind, dataBuffer) {
+            console.log("Signature generation kindly returned", messages.MessageType[kind]);
+            if (kind == messages.MessageType.Failure) {
+                reject(decodeFailureAndPinCode(kind, dataBuffer));
+            }
+            if (kind == messages.MessageType.MessageType_ResponseSkycoinSignMessage) {
+                resolve(decodeSignMessageAnswer(kind, dataBuffer));
+            }
+            if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
+                devSendPinCodeRequest((answerKind, answerBuffer) => {
+                    console.log("Pin code callback got answerKind", answerKind, messages.MessageType.Failure);
+                    if (answerKind == messages.MessageType.MessageType_ResponseSkycoinSignMessage) {
+                        resolve(decodeSignMessageAnswer(answerKind, answerBuffer));
+                    }
+                    if (answerKind == messages.MessageType.MessageType_Failure) {
+                        reject(decodeFailureAndPinCode(answerKind, answerBuffer));
+                    }
+                });
+            }
+        });
     });
 };
 
@@ -448,7 +444,6 @@ const devCheckMessageSignature = function(address, message, signature) {
         if (kind == messages.MessageType.
             MessageType_Success) {
             try {
-                console.log(dataBuffer);
                 const answer = messages.Success.
                                 decode(dataBuffer);
                 console.log("Address emiting that signature:", answer.message);
@@ -492,7 +487,6 @@ const devChangePin = function() {
     const deviceHandle = new DeviceHandler(deviceType);
     const pinCodeMatrixCallback = function(datakind, receivedData) {
         console.log("pinCodeMatrixCallback kind:", datakind, messages.MessageType[datakind]);
-        console.log("pinCodeMatrixCallback data:", receivedData);
         if (datakind == messages.MessageType.MessageType_PinMatrixRequest) {
             devSendPinCodeRequest(pinCodeMatrixCallback);
         }
