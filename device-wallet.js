@@ -481,14 +481,18 @@ const devWipeDevice = function() {
 };
 
 const devSetMnemonic = function(mnemonic) {
-    const dataBytes = createSetMnemonicRequest(mnemonic);
-    const deviceHandle = new DeviceHandler(deviceType);
-    const devReadCallback = function(kind) {
-        deviceHandle.close();
-        devButtonRequestCallback(kind);
-    };
-    deviceHandle.read(devReadCallback);
-    deviceHandle.write(dataBytes);
+    return new Promise((resolve) => {
+        const dataBytes = createSetMnemonicRequest(mnemonic);
+        const deviceHandle = new DeviceHandler(deviceType);
+        const devReadCallback = function(kind) {
+            deviceHandle.close();
+            devButtonRequestCallback(kind, () => {
+                resolve("Set Mnemonic operation finished or refused");
+            });
+        };
+        deviceHandle.read(devReadCallback);
+        deviceHandle.write(dataBytes);
+    });
 };
 
 const devChangePin = function() {
