@@ -7,7 +7,7 @@ let deviceType = 0;
 
 const setDeviceType = function(devType) {
     deviceType = devType;
-}
+};
 
 const dataBytesFromChunks = function(chunks) {
     const dataBytes = [];
@@ -143,8 +143,8 @@ DeviceTypeEnum = {
 };
 
 class DeviceHandler {
-    constructor(deviceType) {
-        this.deviceType = deviceType;
+    constructor(devType) {
+        this.deviceType = devType;
         this.devHandle = this.getDeviceHandler();
     }
 
@@ -510,37 +510,20 @@ const devAddressGenPinCode = function(addressN, startIndex) {
     });
 };
 
-const deviceSkycoinSignMessage = function(addressN, message, callback) {
+const devSkycoinSignMessage = function(addressN, message, callback) {
     const dataBytes = createSignMessageRequest(addressN, message);
-    const dev = getDevice();
-    if (dev === null) {
-        console.error("Device not connected");
-        return;
-    }
-    const bufferReceiver = new BufferReceiver();
-    const devReadCallback = function(err, data) {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind, dataBuffer) {
-                const signature = decodeSignMessageAnswer(kind, dataBuffer);
-                dev.close();
-                callback(kind, signature);
-            }
-        );
-        if (bufferReceiver.bytesToGet > 0) {
-            dev.read(devReadCallback);
-        }
+    const deviceHandle = new DeviceHandler(deviceType);
+    const devReadCallback = function(kind, dataBuffer) {
+        const signature = decodeSignMessageAnswer(kind, dataBuffer);
+        deviceHandle.close();
+        callback(kind, signature);
     };
-    dev.read(devReadCallback);
-    dev.write(dataBytes);
+    deviceHandle.read(devReadCallback);
+    deviceHandle.write(dataBytes);
 };
 
-const deviceSkycoinSignMessagePinCode = function(addressN, message) {
-    deviceSkycoinSignMessage(addressN, message, function(kind, signature) {
+const devSkycoinSignMessagePinCode = function(addressN, message) {
+    devSkycoinSignMessage(addressN, message, function(kind, signature) {
         console.log("Signature generation kindly returned", messages.MessageType[kind]);
         if (kind == messages.MessageType.
                     MessageType_ResponseSkycoinSignMessage) {
@@ -548,10 +531,9 @@ const deviceSkycoinSignMessagePinCode = function(addressN, message) {
         }
         if (kind == messages.MessageType.
                     MessageType_PinMatrixRequest) {
-            deviceSendPinCodeRequest(skycoinSignMessagePinCodeCallback);
+            devSendPinCodeRequest(skycoinSignMessagePinCodeCallback);
         }
     });
-
 };
 
 const deviceCheckMessageSignature = function(address, message, signature) {
@@ -711,64 +693,6 @@ const deviceChangePin = function() {
     dev.write(dataBytes);
 };
 
-const emulatorSendPinCodeRequest = function(pinCodeCallback) {
-    console.log('Please input your pin code');
-    const pinCode = scanf('%s');
-    const dataBytes = createSendPinCodeRequest(pinCode);
-    const client = dgram.createSocket('udp4');
-    const bufferReceiver = new BufferReceiver();
-    client.on('message', function(data, rinfo) {
-        if (rinfo) {
-            console.log(`server got: 
-                ${data} from ${rinfo.address}:${rinfo.port}`);
-        }
-
-        bufferReceiver.receiveBuffer(
-            data,
-            pinCodeCallback
-        );
-    });
-    emulatorSend(client, Buffer.from(dataBytes));
-};
-
-const emulatorSkycoinSignMessage = function(addressN, message, callback) {
-    const dataBytes = createSignMessageRequest(addressN, message);
-    const client = dgram.createSocket('udp4');
-    const bufferReceiver = new BufferReceiver();
-    client.on('message', function(data, rinfo) {
-        if (rinfo) {
-            console.log(`server got: 
-                ${data} from ${rinfo.address}:${rinfo.port}`);
-        }
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind, dataBuffer) {
-                const signature = decodeSignMessageAnswer(kind, dataBuffer);
-                client.close();
-                callback(kind, signature);
-            }
-        );
-    });
-    emulatorSend(client, Buffer.from(dataBytes));
-};
-
-const emulatorSkycoinSignMessagePinCode = function(addressN, message) {
-    emulatorSkycoinSignMessage(addressN, message, function(kind, signature) {
-        console.log("Signature generation kindly returned", messages.MessageType[kind]);
-        if (kind == messages.MessageType.
-                    MessageType_ResponseSkycoinSignMessage) {
-            console.log(signature);
-        }
-        if (kind == messages.MessageType.
-                    MessageType_PinMatrixRequest) {
-            emulatorSendPinCodeRequest((answerKind, dataBuffer) => {
-                skycoinSignMessagePinCodeCallback(answerKind, dataBuffer, client.close);
-            });
-        }
-    });
-
-};
-
 const emulatorCheckMessageSignature = function(address, message, signature) {
     const dataBytes = createCheckMessageSignatureRequest(address, message, signature);
     const client = dgram.createSocket('udp4');
@@ -889,19 +813,17 @@ const emulatorChangePin = function() {
 };
 
 module.exports = {
+    DeviceTypeEnum,
     devAddressGen,
     devAddressGenPinCode,
+    devSkycoinSignMessagePinCode,
     deviceChangePin,
     deviceCheckMessageSignature,
     deviceSetMnemonic,
-    deviceSkycoinSignMessagePinCode,
-    DeviceTypeEnum,
     deviceWipeDevice,
     emulatorChangePin,
     emulatorCheckMessageSignature,
     emulatorSetMnemonic,
-    emulatorSkycoinSignMessage,
-    emulatorSkycoinSignMessagePinCode,
     emulatorWipeDevice,
     getDevice,
     makeTrezorMessage,
