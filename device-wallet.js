@@ -577,34 +577,15 @@ const devCheckMessageSignature = function(address, message, signature) {
     deviceHandle.write(dataBytes);
 };
 
-const deviceWipeDevice = function() {
+const devWipeDevice = function() {
     const dataBytes = createWipeDeviceRequest();
-    const dev = getDevice();
-    if (dev === null) {
-        console.error("Device not connected");
-        return;
-    }
-    const bufferReceiver = new BufferReceiver();
-    const devReadCallback = function(err, data) {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind) {
-                dev.close();
-                if (decodeButtonRequest(kind)) {
-                    deviceButtonRequestCallback();
-                }
-            }
-        );
-        if (bufferReceiver.bytesToGet > 0) {
-            dev.read(devReadCallback);
-        }
+    const deviceHandle = new DeviceHandler(deviceType);
+    const devReadCallback = function(kind) {
+        deviceHandle.close();
+        devButtonRequestCallback(kind);
     };
-    dev.read(devReadCallback);
-    dev.write(dataBytes);
+    deviceHandle.read(devReadCallback);
+    deviceHandle.write(dataBytes);
 };
 
 const devSetMnemonic = function(mnemonic) {
@@ -674,28 +655,6 @@ const deviceChangePin = function() {
     dev.write(dataBytes);
 };
 
-const emulatorWipeDevice = function() {
-    const dataBytes = createWipeDeviceRequest();
-    const client = dgram.createSocket('udp4');
-    const bufferReceiver = new BufferReceiver();
-    client.on('message', function(data, rinfo) {
-        if (rinfo) {
-            console.log(`server got: 
-                ${data} from ${rinfo.address}:${rinfo.port}`);
-        }
-        bufferReceiver.receiveBuffer(
-            data,
-            function(kind) {
-                client.close();
-                if (decodeButtonRequest(kind)) {
-                    emulatorButtonRequestCallback();
-                }
-            }
-        );
-    });
-    emulatorSend(client, Buffer.from(dataBytes));
-};
-
 const emulatorChangePin = function() {
     const dataBytes = createChangePinRequest();
     const client = dgram.createSocket('udp4');
@@ -745,10 +704,9 @@ module.exports = {
     devCheckMessageSignature,
     devSetMnemonic,
     devSkycoinSignMessagePinCode,
+    devWipeDevice,
     deviceChangePin,
-    deviceWipeDevice,
     emulatorChangePin,
-    emulatorWipeDevice,
     getDevice,
     makeTrezorMessage,
     setDeviceType

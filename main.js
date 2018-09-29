@@ -3,12 +3,10 @@ const deviceWallet = require('./device-wallet');
 if( deviceWallet.getDevice() === null ) {
   console.log("Skycoin hardware NOT FOUND, using emulator");
   deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
-  deviceWallet.emulatorWipeDevice();
   deviceWallet.emulatorChangePin();
 } else {
   console.log("Skycoin hardware is plugged in");
   deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
-  deviceWallet.deviceWipeDevice();
   deviceWallet.deviceChangePin();
 }
 
@@ -20,3 +18,4 @@ deviceWallet.devCheckMessageSignature(
   "NGV8kPw8FZuYFWYzMa3oHJhHmW4WPTnSUUaEFYBvyS8Te8WxrHDuDdbgVqFkdEg5FzE5QDdwMQcXcWMY4enJhkDE"
 );
 deviceWallet.devSetMnemonic("cloud flower upset remain green metal below cup stem infant art thank");
+deviceWallet.devWipeDevice();
