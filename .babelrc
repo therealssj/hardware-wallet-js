@@ -1,0 +1,19 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "node": 8
+        },
+        "forceAllTransforms": true
+      }
+    ],
+    "flow",
+    "es2015",
+    "stage-0"
+  ],
+  "plugins": [
+  "transform-class-properties"
+  ],
+}
