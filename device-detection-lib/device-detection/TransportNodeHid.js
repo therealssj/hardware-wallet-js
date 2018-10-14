@@ -231,3 +231,4 @@ TransportNodeHid.listen = function (observer) {
 };
 
 exports.default = TransportNodeHid;
+module.exports = exports.default;

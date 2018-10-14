@@ -129,3 +129,5 @@ exports.default = function (delay, listenDevicesPollingSkip, debug) {
     events: events
   };
 };
+
+module.exports = exports.default;

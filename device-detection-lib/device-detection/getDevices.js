@@ -21,3 +21,4 @@ function getDevices() {
 }
 
 console.log(getDevices());
+module.exports = exports.default;
