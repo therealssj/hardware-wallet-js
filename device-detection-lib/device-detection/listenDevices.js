@@ -4,6 +4,14 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _set = require("babel-runtime/core-js/set");
+
+var _set2 = _interopRequireDefault(_set);
+
+var _toConsumableArray2 = require("babel-runtime/helpers/toConsumableArray");
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
 var _events = require("events");
 
 var _events2 = _interopRequireDefault(_events);
@@ -22,8 +30,6 @@ var _getDevices2 = _interopRequireDefault(_getDevices);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 exports.default = function (delay, listenDevicesPollingSkip, debug) {
   var events = new _events2.default();
   events.setMaxListeners(0);
@@ -35,7 +41,7 @@ exports.default = function (delay, listenDevicesPollingSkip, debug) {
   };
 
   var getFlatDevices = function getFlatDevices() {
-    return [].concat(_toConsumableArray(new Set((0, _getDevices2.default)().map(function (d) {
+    return [].concat((0, _toConsumableArray3.default)(new _set2.default((0, _getDevices2.default)().map(function (d) {
       return flatDevice(d);
     }))));
   };
