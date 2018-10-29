@@ -13,7 +13,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var filterInterface = function filterInterface(device) {
   return ["win32", "darwin"].includes(process.platform) ? // $FlowFixMe bug in HID flow def
-  device.usagePage === 0xffa0 : device.interface === 0;
+  device.usagePage === 65280 : device.interface === 0;
 };
 function getDevices() {
   // $FlowFixMe bug in HID flow def

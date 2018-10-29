@@ -4,7 +4,7 @@ import HID from "node-hid";
 const filterInterface = device => 
   ["win32", "darwin"].includes(process.platform)
     ? // $FlowFixMe bug in HID flow def
-      device.usagePage === 0xffa0
+      device.usagePage === 65280
     : device.interface === 0;
 
 export default function getDevices(): Array<*> {

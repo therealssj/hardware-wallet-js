@@ -3,6 +3,7 @@ const messages = require('./protob/skycoin');
 const bufReceiver = require('./buffer-receiver');
 const dgram = require('dgram');
 const scanf = require('scanf');
+const os = require('os');
 
 let deviceType = 0;
 
@@ -146,6 +147,9 @@ class DeviceHandler {
     write(dataBytes) {
         switch (this.deviceType) {
         case DeviceTypeEnum.USB:
+            if (os.platform() == 'win32') {
+                dataBytes.unshift(0x00);
+            }
             this.devHandle.write(dataBytes);
             break;
         case DeviceTypeEnum.EMULATOR:
