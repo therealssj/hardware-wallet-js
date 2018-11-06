@@ -513,8 +513,12 @@ const devWipeDevice = function() {
             const deviceHandle = new DeviceHandler(deviceType);
             const devReadCallback = function(kind) {
                 deviceHandle.close();
-                devButtonRequestCallback(kind, () => {
-                    resolve("Wipe Device operation finished or refused");
+                devButtonRequestCallback(kind, (datakind) => {
+                    if (datakind == messages.MessageType.MessageType_Success) {
+                        resolve("Wipe Device operation completed");
+                    } else {
+                        resolve("Wipe Device operation failed or refused");
+                    }
                 });
             };
             deviceHandle.read(devReadCallback);
@@ -528,8 +532,12 @@ const devSetMnemonic = function(mnemonic) {
         const deviceHandle = new DeviceHandler(deviceType);
         const devReadCallback = function(kind) {
             deviceHandle.close();
-            devButtonRequestCallback(kind, () => {
-                resolve("Set Mnemonic operation finished or refused");
+            devButtonRequestCallback(kind, (datakind) => {
+                if (datakind == messages.MessageType.MessageType_Success) {
+                    resolve("Set Mnemonic operation completed");
+                } else {
+                    resolve("Set Mnemonic operation failed or refused");
+                }
             });
         };
         deviceHandle.read(devReadCallback);
@@ -543,8 +551,12 @@ const devGenerateMnemonic = function() {
         const deviceHandle = new DeviceHandler(deviceType);
         const devReadCallback = function(kind) {
             deviceHandle.close();
-            devButtonRequestCallback(kind, () => {
-                resolve("Set Mnemonic operation finished or refused");
+            devButtonRequestCallback(kind, (datakind) => {
+                if (datakind == messages.MessageType.MessageType_Success) {
+                    resolve("Generate Mnemonic operation completed");
+                } else {
+                    resolve("Generate Mnemonic operation failed or refused");
+                }
             });
         };
         deviceHandle.read(devReadCallback);
