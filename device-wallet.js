@@ -221,6 +221,17 @@ const createSetMnemonicRequest = function(mnemonic) {
     return dataBytesFromChunks(chunks);
 };
 
+const createGenerateMnemonicRequest = function() {
+    const msgStructure = {};
+    const msg = messages.GenerateMnemonic.create(msgStructure);
+    const buffer = messages.GenerateMnemonic.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_GenerateMnemonic
+    );
+    return dataBytesFromChunks(chunks);
+};
+
 const createWipeDeviceRequest = function() {
     const msgStructure = {};
     const msg = messages.WipeDevice.create(msgStructure);
@@ -526,6 +537,21 @@ const devSetMnemonic = function(mnemonic) {
     });
 };
 
+const devGenerateMnemonic = function() {
+    return new Promise((resolve) => {
+        const dataBytes = createGenerateMnemonicRequest();
+        const deviceHandle = new DeviceHandler(deviceType);
+        const devReadCallback = function(kind) {
+            deviceHandle.close();
+            devButtonRequestCallback(kind, () => {
+                resolve("Set Mnemonic operation finished or refused");
+            });
+        };
+        deviceHandle.read(devReadCallback);
+        deviceHandle.write(dataBytes);
+    });
+};
+
 const devChangePin = function() {
     return new Promise((resolve, reject) => {
         const dataBytes = createChangePinRequest();
@@ -557,6 +583,7 @@ module.exports = {
     devAddressGenPinCode,
     devChangePin,
     devCheckMessageSignature,
+    devGenerateMnemonic,
     devSetMnemonic,
     devSkycoinSignMessagePinCode,
     devWipeDevice,
