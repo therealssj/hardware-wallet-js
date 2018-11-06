@@ -1,11 +1,12 @@
 const deviceWallet = require('./device-wallet');
-const deviceDetectionEvent = require('./device-detection-lib/device-detection/DeviceEventObserver');
+const DeviceDetectionEvent = require('./device-detection-lib/device-detection/DeviceEventObserver');
 const transportNodeHid = require('./device-detection-lib/device-detection/TransportNodeHid');
 
 console.log(deviceDetectionEvent);
-const observer = new deviceDetectionEvent();
+const observer = new DeviceDetectionEvent();
 transportNodeHid.listen(observer);
 
+// eslint-disable-next-line max-lines-per-function
 const sandbox = function() {
   if( deviceWallet.getDevice() === null ) {
     console.log("Skycoin hardware NOT FOUND, using emulator");
@@ -65,4 +66,5 @@ const sandbox = function() {
     },
     rejectPromise
   );
-}
+};
+sandbox();
