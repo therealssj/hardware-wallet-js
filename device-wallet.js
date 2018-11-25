@@ -418,10 +418,13 @@ const devAddressGen = function(addressN, startIndex, callback) {
 };
 
 const devSendPinCodeRequest = function(pinCodeCallback, pinCodeReader) {
-    const pinCode = (pinCodeReader !== null && pinCodeReader !== undefined) ? pinCodeReader() : function() {
+    const pinCode = (function() {
+        if (pinCodeReader !== null && pinCodeReader !== undefined) {
+            return pinCodeReader();
+        }
         console.log("Please input your pin code: ");
         return scanf('%s');
-    }();
+    }());
     const dataBytes = createSendPinCodeRequest(pinCode);
     const deviceHandle = new DeviceHandler(deviceType);
     deviceHandle.read((answerKind, dataBuffer) => {
@@ -442,7 +445,8 @@ const devAddressGenPinCode = function(addressN, startIndex, pinCodeReader) {
                 resolve(decodeAddressGenAnswer(kind, dataBuffer));
             }
             if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
-                devSendPinCodeRequest((answerKind, answerBuffer) => {
+                devSendPinCodeRequest(
+                    (answerKind, answerBuffer) => {
                     console.log("Pin code callback got answerKind", answerKind);
                     if (answerKind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
                         resolve(decodeAddressGenAnswer(answerKind, answerBuffer));
@@ -451,7 +455,8 @@ const devAddressGenPinCode = function(addressN, startIndex, pinCodeReader) {
                         reject(new Error(decodeFailureAndPinCode(answerKind, answerBuffer)));
                     }
                 },
-                pinCodeReader);
+                pinCodeReader
+                );
             }
         });
     });
@@ -479,7 +484,8 @@ const devSkycoinSignMessagePinCode = function(addressN, message, pinCodeReader) 
                 resolve(decodeSignMessageAnswer(kind, dataBuffer));
             }
             if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
-                devSendPinCodeRequest((answerKind, answerBuffer) => {
+                devSendPinCodeRequest(
+                    (answerKind, answerBuffer) => {
                     console.log("Pin code callback got answerKind", answerKind);
                     if (answerKind == messages.MessageType.MessageType_ResponseSkycoinSignMessage) {
                         resolve(decodeSignMessageAnswer(answerKind, answerBuffer));
@@ -488,7 +494,8 @@ const devSkycoinSignMessagePinCode = function(addressN, message, pinCodeReader) 
                         reject(new Error(decodeFailureAndPinCode(answerKind, answerBuffer)));
                     }
                 },
-                pinCodeReader);
+                pinCodeReader
+                );
             }
         });
     });
