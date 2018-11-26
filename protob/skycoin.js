@@ -48,6 +48,7 @@ var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
  * @property {number} MessageType_ResponseSkycoinAddress=117 MessageType_ResponseSkycoinAddress value
  * @property {number} MessageType_ResponseSkycoinSignMessage=118 MessageType_ResponseSkycoinSignMessage value
  * @property {number} MessageType_GenerateMnemonic=119 MessageType_GenerateMnemonic value
+ * @property {number} MessageType_GetVersion=120 MessageType_GetVersion value
  */
 $root.MessageType = (function() {
     var valuesById = {}, values = Object.create(valuesById);
@@ -86,6 +87,7 @@ $root.MessageType = (function() {
     values[valuesById[117] = "MessageType_ResponseSkycoinAddress"] = 117;
     values[valuesById[118] = "MessageType_ResponseSkycoinSignMessage"] = 118;
     values[valuesById[119] = "MessageType_GenerateMnemonic"] = 119;
+    values[valuesById[120] = "MessageType_GetVersion"] = 120;
     return values;
 })();
 
@@ -5529,6 +5531,167 @@ $root.GetEntropy = (function() {
     };
 
     return GetEntropy;
+})();
+
+$root.GetVersion = (function() {
+
+    /**
+     * Properties of a GetVersion.
+     * @exports IGetVersion
+     * @interface IGetVersion
+     */
+
+    /**
+     * Constructs a new GetVersion.
+     * @exports GetVersion
+     * @classdesc Request: Request firmware version
+     * @next Success
+     * @implements IGetVersion
+     * @constructor
+     * @param {IGetVersion=} [properties] Properties to set
+     */
+    function GetVersion(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Creates a new GetVersion instance using the specified properties.
+     * @function create
+     * @memberof GetVersion
+     * @static
+     * @param {IGetVersion=} [properties] Properties to set
+     * @returns {GetVersion} GetVersion instance
+     */
+    GetVersion.create = function create(properties) {
+        return new GetVersion(properties);
+    };
+
+    /**
+     * Encodes the specified GetVersion message. Does not implicitly {@link GetVersion.verify|verify} messages.
+     * @function encode
+     * @memberof GetVersion
+     * @static
+     * @param {IGetVersion} message GetVersion message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetVersion.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetVersion message, length delimited. Does not implicitly {@link GetVersion.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetVersion
+     * @static
+     * @param {IGetVersion} message GetVersion message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetVersion.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetVersion message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetVersion
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetVersion} GetVersion
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetVersion.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetVersion();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetVersion message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetVersion
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetVersion} GetVersion
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetVersion.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetVersion message.
+     * @function verify
+     * @memberof GetVersion
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetVersion.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        return null;
+    };
+
+    /**
+     * Creates a GetVersion message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetVersion
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetVersion} GetVersion
+     */
+    GetVersion.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetVersion)
+            return object;
+        return new $root.GetVersion();
+    };
+
+    /**
+     * Creates a plain object from a GetVersion message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetVersion
+     * @static
+     * @param {GetVersion} message GetVersion
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetVersion.toObject = function toObject() {
+        return {};
+    };
+
+    /**
+     * Converts this GetVersion to JSON.
+     * @function toJSON
+     * @memberof GetVersion
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetVersion.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetVersion;
 })();
 
 $root.Entropy = (function() {

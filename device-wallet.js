@@ -249,6 +249,17 @@ const createGenerateMnemonicRequest = function() {
     return dataBytesFromChunks(chunks);
 };
 
+const createGetVersionRequest = function() {
+    const msgStructure = {};
+    const msg = messages.GetVersion.create(msgStructure);
+    const buffer = messages.GetVersion.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_GetVersion
+    );
+    return dataBytesFromChunks(chunks);
+};
+
 const createWipeDeviceRequest = function() {
     const msgStructure = {};
     const msg = messages.WipeDevice.create(msgStructure);
@@ -481,6 +492,24 @@ const devUpdateFirmware = function(data, hash) {
         };
         deviceHandle.read(devReadCallback);
         deviceHandle.write(dataBytes);
+    });
+};
+
+const devGetVersionDevice = function() {
+    return new Promise((resolve) => {
+            const dataBytes = createGetVersionRequest();
+            const deviceHandle = new DeviceHandler(deviceType);
+            const devReadCallback = function(kind, data) {
+                deviceHandle.close();
+                const version = decodeSuccess(kind, data); 
+                if (version != "") {
+                    resolve(version);
+                } else {
+                    reject(new Error("Could not get version from the device"));
+                }
+            };
+            deviceHandle.read(devReadCallback);
+            deviceHandle.write(dataBytes);
     });
 };
 
@@ -720,6 +749,7 @@ module.exports = {
     devChangePin,
     devCheckMessageSignature,
     devGenerateMnemonic,
+    devGetVersionDevice,
     devSetMnemonic,
     devSkycoinSignMessagePinCode,
     devUpdateFirmware,

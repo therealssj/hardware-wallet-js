@@ -53,7 +53,7 @@ if (testPinChange) {
     );
 }
 
-const testFirmwareUpdate = true;
+const testFirmwareUpdate = false;
 
 if (testFirmwareUpdate) {
     fs.readFile('fw.bin', function(err, data) {
@@ -62,4 +62,16 @@ if (testFirmwareUpdate) {
         console.log(data.length);
         deviceWallet.devUpdateFirmware(data, []);
   });
+}
+
+const testGetVersion = true;
+
+if (testGetVersion) {
+    const promise = deviceWallet.devGetVersionDevice();
+    promise.then(
+        (version) => {
+            console.log("Version is: ", version);
+        },
+        rejectPromise
+    );
 }
