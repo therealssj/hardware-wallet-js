@@ -4,4 +4,4 @@
 
 Generate messages.js library:
 
-    ./node_modules/.bin/pbjs -t static-module -w commonjs -o protob/skycoin.js protob/messages.proto protob/types.proto
+    npm run make-protobuf-files
