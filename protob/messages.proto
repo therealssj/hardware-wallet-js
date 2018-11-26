@@ -417,3 +417,14 @@ message FirmwareRequest {
     optional uint32 offset = 1; // offset of requested firmware chunk
     optional uint32 length = 2; // length of requested firmware chunk
 }
+
+
+/**
+ * Request: Ask device to upload its firmware
+ * @start
+ * @next FirmwareUpload
+ */
+ message FirmwareUpload {
+    optional bytes payload = 1; // offset of requested firmware chunk
+    optional bytes hash = 2; // length of requested firmware chunk
+}

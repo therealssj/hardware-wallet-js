@@ -1,5 +1,6 @@
 const deviceWallet = require('./device-wallet');
 const scanf = require('scanf');
+const fs = require('fs');
 
 if( deviceWallet.getDevice() === null ) {
     console.log("Skycoin hardware NOT FOUND, using emulator");
@@ -16,7 +17,7 @@ const pinCodeReader = function() {
 };
 
 const testSign = false;
-const testPinChange = true;
+const testPinChange = false;
 
 if (testSign) {
     const signPromise = deviceWallet.devSkycoinSignMessagePinCode(3, "Hello World!", null);
@@ -50,4 +51,15 @@ if (testPinChange) {
         },
         rejectPromise
     );
+}
+
+const testFirmwareUpdate = true;
+
+if (testFirmwareUpdate) {
+    fs.readFile('fw.bin', function(err, data) {
+        console.log(err);
+        console.log(data);
+        console.log(data.length);
+        deviceWallet.devUpdateFirmware(data, []);
+  });
 }
