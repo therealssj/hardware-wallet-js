@@ -501,11 +501,11 @@ const devGetVersionDevice = function() {
             const deviceHandle = new DeviceHandler(deviceType);
             const devReadCallback = function(kind, data) {
                 deviceHandle.close();
-                const version = decodeSuccess(kind, data); 
-                if (version != "") {
-                    resolve(version);
-                } else {
+                const version = decodeSuccess(kind, data);
+                if (version == "") {
                     reject(new Error("Could not get version from the device"));
+                } else {
+                    resolve(version);
                 }
             };
             deviceHandle.read(devReadCallback);
