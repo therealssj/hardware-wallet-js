@@ -212,6 +212,17 @@ const createButtonAckRequest = function() {
     return dataBytesFromChunks(chunks);
 };
 
+const createCancelRequest = function() {
+    const msgStructure = {};
+    const msg = messages.Cancel.create(msgStructure);
+    const buffer = messages.Cancel.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_Cancel
+    );
+    return dataBytesFromChunks(chunks);
+};
+
 const createChangePinRequest = function(mnemonic) {
     const msgStructure = {
         mnemonic
@@ -542,6 +553,9 @@ const devSendPinCodeRequest = function(pinCodeCallback, pinCodeReader) {
             },
             () => {
                 console.log("Pin code promise rejected");
+                const dataBytes = createCancelRequest();
+                const deviceHandle = new DeviceHandler(deviceType);
+                deviceHandle.write(dataBytes);
             }
             );
     } else {
