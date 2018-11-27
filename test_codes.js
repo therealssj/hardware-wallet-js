@@ -12,11 +12,18 @@ const rejectPromise = function(msg) {
 };
 
 const pinCodeReader = function() {
-    console.log("Got inside pinCodeReader");
-    return scanf('%s');
+    return new Promise((resolve, reject) => {
+        console.log("Got inside pinCodeReader");
+        const pinCode = scanf('%s');
+        if (pinCode.length != 4) {
+            reject(new Error("Bad bad pin code"));
+            return;
+        }
+        resolve(pinCode);
+    });
 };
 
-const testSign = false;
+const testSign = true;
 const testPinChange = false;
 
 if (testSign) {
@@ -56,7 +63,7 @@ if (testPinChange) {
 const testFirmwareUpdate = false;
 
 if (testFirmwareUpdate) {
-    fs.readFile('fw.bin', function(err, data) {
+    fs.readFile('fw_magic.bin', function(err, data) {
         console.log(err);
         console.log(data);
         console.log(data.length);

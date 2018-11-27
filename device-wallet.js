@@ -525,20 +525,29 @@ const devAddressGen = function(addressN, startIndex, callback) {
 };
 
 const devSendPinCodeRequest = function(pinCodeCallback, pinCodeReader) {
-    const pinCode = (function() {
-        if (pinCodeReader !== null && pinCodeReader !== undefined) {
-            return pinCodeReader();
-        }
+    const sendPinCodeRequest = function(pinCode) {
+        const dataBytes = createSendPinCodeRequest(pinCode);
+        const deviceHandle = new DeviceHandler(deviceType);
+        deviceHandle.read((answerKind, dataBuffer) => {
+            pinCodeCallback(answerKind, dataBuffer);
+            deviceHandle.close();
+        });
+        deviceHandle.write(dataBytes);
+    };
+    if (pinCodeReader !== null && pinCodeReader !== undefined) {
+        const pinCodePromise = pinCodeReader();
+        pinCodePromise.then(
+            (pinCode) => {
+                sendPinCodeRequest(pinCode);
+            },
+            () => {
+                console.log("Pin code promise rejected");
+            }
+            );
+    } else {
         console.log("Please input your pin code: ");
-        return scanf('%s');
-    }());
-    const dataBytes = createSendPinCodeRequest(pinCode);
-    const deviceHandle = new DeviceHandler(deviceType);
-    deviceHandle.read((answerKind, dataBuffer) => {
-        pinCodeCallback(answerKind, dataBuffer);
-        deviceHandle.close();
-    });
-    deviceHandle.write(dataBytes);
+        sendPinCodeRequest(scanf('%s'));
+    }
 };
 
 const devAddressGenPinCode = function(addressN, startIndex, pinCodeReader) {
