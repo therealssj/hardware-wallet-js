@@ -484,20 +484,25 @@ const decodeAddressGenAnswer = function(kind, dataBuffer) {
     return addresses;
 };
 
-const devButtonRequestCallback = function(kind, callback) {
+const devButtonRequestCallback = function(kind, data, callback) {
     if (decodeButtonRequest(kind)) {
         const dataBytes = createButtonAckRequest();
         const deviceHandle = new DeviceHandler(deviceType);
-        const devReadCallback = function(datakind, data) {
+        const devReadCallback = function(datakind, dta) {
             console.log("User hit a button, calling: ", callback);
             deviceHandle.close();
             if (callback !== null && callback !== undefined) {
                 // eslint-disable-next-line callback-return
-                callback(datakind, data);
+                callback(datakind, dta);
             }
         };
         deviceHandle.read(devReadCallback);
         deviceHandle.write(dataBytes);
+        return;
+    }
+    if (callback !== null && callback !== undefined) {
+        // eslint-disable-next-line callback-return
+        callback(kind, data);
     }
 };
 
@@ -505,9 +510,9 @@ const devUpdateFirmware = function(data, hash) {
     return new Promise((resolve, reject) => {
         const dataBytes = createInitializeRequest();
         const deviceHandle = new DeviceHandler(deviceType);
-        const uploadFirmwareCallback = function(kind) {
+        const uploadFirmwareCallback = function(kind, d) {
             deviceHandle.close();
-            devButtonRequestCallback(kind, (datakind) => {
+            devButtonRequestCallback(kind, d, (datakind) => {
                 if (datakind == messages.MessageType.MessageType_Success) {
                     resolve("Update firmware operation completed");
                 } else {
@@ -692,9 +697,9 @@ const devWipeDevice = function() {
     return new Promise((resolve) => {
             const dataBytes = createWipeDeviceRequest();
             const deviceHandle = new DeviceHandler(deviceType);
-            const devReadCallback = function(kind) {
+            const devReadCallback = function(kind, d) {
                 deviceHandle.close();
-                devButtonRequestCallback(kind, (datakind) => {
+                devButtonRequestCallback(kind, d, (datakind) => {
                     if (datakind == messages.MessageType.MessageType_Success) {
                         resolve("Wipe Device operation completed");
                     } else {
@@ -730,9 +735,9 @@ const devBackupDevice = function() {
     });
 };
 
-const wordAckLoop = function(kind, data, wordReader) {
+const wordAckLoop = function(kind, wordReader, callback) {
     const deviceHandle = new DeviceHandler(deviceType);
-    const wordAckCallback = function(k) {
+    const wordAckCallback = function(k, d) {
         if (k == messages.MessageType.MessageType_WordRequest) {
             console.log("Going into WordAck loop");
             deviceHandle.reopen();
@@ -741,7 +746,7 @@ const wordAckLoop = function(kind, data, wordReader) {
                 (word) => {
                     const dataBytes = createWordAckRequest(word);
                     deviceHandle.read((knd, dta) => {
-                            wordAckCallback(knd, dta, wordReader);
+                            wordAckCallback(knd, dta);
                         });
                     deviceHandle.write(dataBytes);
                 },
@@ -750,39 +755,49 @@ const wordAckLoop = function(kind, data, wordReader) {
             return;
         }
         deviceHandle.close();
-        devButtonRequestCallback(k, decodeFailureAndPinCode);
+        callback(k, d);
     };
-    wordAckCallback(kind, data);
+    wordAckCallback(kind);
 };
 
 const devRecoveryDevice = function(wordReader) {
-    const dataBytes = createRecoveryDeviceRequest();
-    const deviceHandle = new DeviceHandler(deviceType);
-    const buttonAckLoop = function(kind, data) {
-        if (kind != messages.MessageType.MessageType_ButtonRequest) {
-            if (kind == messages.MessageType.MessageType_WordRequest) {
-                deviceHandle.close();
-                console.log("Button Loop operation completed");
-                wordAckLoop(kind, data, wordReader);
-                return;
+    return new Promise((resolve, reject) => {
+        const dataBytes = createRecoveryDeviceRequest();
+        const deviceHandle = new DeviceHandler(deviceType);
+        const buttonAckLoop = function(kind) {
+            if (kind != messages.MessageType.MessageType_ButtonRequest) {
+                if (kind == messages.MessageType.MessageType_WordRequest) {
+                    deviceHandle.close();
+                    console.log("Button Loop operation completed");
+                    wordAckLoop(kind, wordReader, (k, d) => {
+                        devButtonRequestCallback(k, d, (kd, dta) => {
+                            if (kd == messages.MessageType.MessageType_Success) {
+                                resolve(decodeSuccess(kd, dta));
+                                return;
+                            }
+                            reject(new Error(decodeFailureAndPinCode(kd, dta)));
+                        });
+                    });
+                    return;
+                }
+                reject(new Error("Expected WordAck after Button confirmation"));
             }
-            console.log("Button Loop continue");
-        }
-        const buttonAckBytes = createButtonAckRequest();
+            const buttonAckBytes = createButtonAckRequest();
+            deviceHandle.read(buttonAckLoop);
+            deviceHandle.write(buttonAckBytes);
+        };
         deviceHandle.read(buttonAckLoop);
-        deviceHandle.write(buttonAckBytes);
-    };
-    deviceHandle.read(buttonAckLoop);
-    deviceHandle.write(dataBytes);
+        deviceHandle.write(dataBytes);
+    });
 };
 
 const devSetMnemonic = function(mnemonic) {
     return new Promise((resolve) => {
         const dataBytes = createSetMnemonicRequest(mnemonic);
         const deviceHandle = new DeviceHandler(deviceType);
-        const devReadCallback = function(kind) {
+        const devReadCallback = function(kind, d) {
             deviceHandle.close();
-            devButtonRequestCallback(kind, (datakind) => {
+            devButtonRequestCallback(kind, d, (datakind) => {
                 if (datakind == messages.MessageType.MessageType_Success) {
                     resolve("Set Mnemonic operation completed");
                 } else {
@@ -799,9 +814,9 @@ const devGenerateMnemonic = function() {
     return new Promise((resolve) => {
         const dataBytes = createGenerateMnemonicRequest();
         const deviceHandle = new DeviceHandler(deviceType);
-        const devReadCallback = function(kind) {
+        const devReadCallback = function(kind, d) {
             deviceHandle.close();
-            devButtonRequestCallback(kind, (datakind) => {
+            devButtonRequestCallback(kind, d, (datakind) => {
                 if (datakind == messages.MessageType.MessageType_Success) {
                     resolve("Generate Mnemonic operation completed");
                 } else {
@@ -830,9 +845,9 @@ const devChangePin = function(pinCodeReader) {
                 resolve(decodeSuccess(datakind, dataBuffer));
             }
         };
-        const devReadCallback = function(kind) {
+        const devReadCallback = function(kind, d) {
             deviceHandle.close();
-            devButtonRequestCallback(kind, pinCodeMatrixCallback);
+            devButtonRequestCallback(kind, d, pinCodeMatrixCallback);
         };
         deviceHandle.read(devReadCallback);
         deviceHandle.write(dataBytes);

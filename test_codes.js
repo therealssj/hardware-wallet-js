@@ -95,5 +95,6 @@ const wordReader = function() {
 };
 
 if (testRecovery) {
-    deviceWallet.devRecoveryDevice(wordReader);
+    const promise = deviceWallet.devRecoveryDevice(wordReader);
+    promise.then(console.log, rejectPromise);
 }
