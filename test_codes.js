@@ -4,9 +4,10 @@ const fs = require('fs');
 
 if( deviceWallet.getDevice() === null ) {
     console.log("Skycoin hardware NOT FOUND, using emulator");
-    exit(0);
+    deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
+} else {
+    deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
 }
-deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
 const rejectPromise = function(msg) {
   console.log("Promise rejected", msg);
 };
@@ -23,7 +24,7 @@ const pinCodeReader = function() {
     });
 };
 
-const testSign = true;
+const testSign = false;
 const testPinChange = false;
 
 if (testSign) {
@@ -71,7 +72,7 @@ if (testFirmwareUpdate) {
   });
 }
 
-const testGetVersion = true;
+const testGetVersion = false;
 
 if (testGetVersion) {
     const promise = deviceWallet.devGetVersionDevice();
@@ -81,4 +82,18 @@ if (testGetVersion) {
         },
         rejectPromise
     );
+}
+
+const testRecovery = true;
+
+const wordReader = function() {
+    return new Promise((resolve) => {
+        console.log("Input word: ");
+        const word = scanf('%s');
+        resolve(word);
+    });
+};
+
+if (testRecovery) {
+    deviceWallet.devRecoveryDevice(wordReader);
 }

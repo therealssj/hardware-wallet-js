@@ -91,6 +91,7 @@ class DeviceHandler {
     }
 
     getDeviceHandler() {
+        console.log("Device Open");
         switch (this.deviceType) {
         case DeviceTypeEnum.USB:
         {
@@ -177,6 +178,7 @@ class DeviceHandler {
     }
 
     close() {
+        console.log("Device Close");
         switch (this.deviceType) {
         case DeviceTypeEnum.USB:
             this.devHandle.close();
@@ -236,6 +238,19 @@ const createChangePinRequest = function(mnemonic) {
     return dataBytesFromChunks(chunks);
 };
 
+const createWordAckRequest = function(word) {
+    const msgStructure = {
+        word
+    };
+    const msg = messages.WordAck.create(msgStructure);
+    const buffer = messages.WordAck.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_WordAck
+    );
+    return dataBytesFromChunks(chunks);
+};
+
 const createSetMnemonicRequest = function(mnemonic) {
     const msgStructure = {
         mnemonic
@@ -278,6 +293,20 @@ const createWipeDeviceRequest = function() {
     const chunks = makeTrezorMessage(
         buffer,
         messages.MessageType.MessageType_WipeDevice
+    );
+    return dataBytesFromChunks(chunks);
+};
+
+const createRecoveryDeviceRequest = function() {
+    const msgStructure = {
+        'dryRun': true,
+        'wordCount': 12
+    };
+    const msg = messages.RecoveryDevice.create(msgStructure);
+    const buffer = messages.RecoveryDevice.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_RecoveryDevice
     );
     return dataBytesFromChunks(chunks);
 };
@@ -701,6 +730,52 @@ const devBackupDevice = function() {
     });
 };
 
+const wordAckLoop = function(kind, data, wordReader) {
+    const deviceHandle = new DeviceHandler(deviceType);
+    const wordAckCallback = function(k) {
+        if (k == messages.MessageType.MessageType_WordRequest) {
+            console.log("Going into WordAck loop");
+            deviceHandle.reopen();
+            const wordPromise = wordReader();
+            wordPromise.then(
+                (word) => {
+                    const dataBytes = createWordAckRequest(word);
+                    deviceHandle.read((knd, dta) => {
+                            wordAckCallback(knd, dta, wordReader);
+                        });
+                    deviceHandle.write(dataBytes);
+                },
+                deviceHandle.close
+                );
+            return;
+        }
+        deviceHandle.close();
+        devButtonRequestCallback(k, decodeFailureAndPinCode);
+    };
+    wordAckCallback(kind, data);
+};
+
+const devRecoveryDevice = function(wordReader) {
+    const dataBytes = createRecoveryDeviceRequest();
+    const deviceHandle = new DeviceHandler(deviceType);
+    const buttonAckLoop = function(kind, data) {
+        if (kind != messages.MessageType.MessageType_ButtonRequest) {
+            if (kind == messages.MessageType.MessageType_WordRequest) {
+                deviceHandle.close();
+                console.log("Button Loop operation completed");
+                wordAckLoop(kind, data, wordReader);
+                return;
+            }
+            console.log("Button Loop continue");
+        }
+        const buttonAckBytes = createButtonAckRequest();
+        deviceHandle.read(buttonAckLoop);
+        deviceHandle.write(buttonAckBytes);
+    };
+    deviceHandle.read(buttonAckLoop);
+    deviceHandle.write(dataBytes);
+};
+
 const devSetMnemonic = function(mnemonic) {
     return new Promise((resolve) => {
         const dataBytes = createSetMnemonicRequest(mnemonic);
@@ -773,6 +848,7 @@ module.exports = {
     devCheckMessageSignature,
     devGenerateMnemonic,
     devGetVersionDevice,
+    devRecoveryDevice,
     devSetMnemonic,
     devSkycoinSignMessagePinCode,
     devUpdateFirmware,
