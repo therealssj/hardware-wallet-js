@@ -84,7 +84,7 @@ if (testGetVersion) {
     );
 }
 
-const testRecovery = true;
+const testRecovery = false;
 
 const wordReader = function() {
     return new Promise((resolve) => {
@@ -96,5 +96,12 @@ const wordReader = function() {
 
 if (testRecovery) {
     const promise = deviceWallet.devRecoveryDevice(wordReader);
+    promise.then(console.log, rejectPromise);
+}
+
+const testFeatures = true;
+
+if (testFeatures) {
+    const promise = deviceWallet.devGetFeatures();
     promise.then(console.log, rejectPromise);
 }

@@ -203,6 +203,17 @@ const createInitializeRequest = function() {
     return dataBytesFromChunks(chunks);
 };
 
+const createGetFeaturesRequest = function() {
+    const msgStructure = {};
+    const msg = messages.GetFeatures.create(msgStructure);
+    const buffer = messages.GetFeatures.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_GetFeatures
+    );
+    return dataBytesFromChunks(chunks);
+};
+
 const createButtonAckRequest = function() {
     const msgStructure = {};
     const msg = messages.ButtonAck.create(msgStructure);
@@ -403,6 +414,46 @@ const createSendPinCodeRequest = function(pin) {
         messages.MessageType.MessageType_PinMatrixAck
     );
     return dataBytesFromChunks(chunks);
+};
+
+const decodeFeaturesRequest = function(kind, dataBuffer) {
+    if (kind != messages.MessageType.MessageType_Features) {
+        console.error("Calling decodeFeaturesRequest with wrong message type!", messages.MessageType[kind]);
+        return null;
+    }
+    try {
+        const answer = messages.Features.decode(dataBuffer);
+        console.log(
+            "Features message:",
+            "vendor:", answer.vendor,
+            "majorVersion:", answer.majorVersion,
+            "minorVersion:", answer.minorVersion,
+            "patchVersion:", answer.patchVersion,
+            "bootloaderMode:", answer.bootloaderMode,
+            "deviceId:", answer.deviceId,
+            "pinProtection:", answer.pinProtection,
+            "passphraseProtection:", answer.passphraseProtection,
+            "language:", answer.language,
+            "label:", answer.label,
+            "initialized:", answer.initialized,
+            "bootloaderHash:", answer.bootloaderHash,
+            "pinCached:", answer.pinCached,
+            "passphraseCached:", answer.passphraseCached,
+            "firmwarePresent:", answer.firmwarePresent,
+            "needsBackup:", answer.needsBackup,
+            "model:", answer.model,
+            "fwMajor:", answer.fwMajor,
+            "fwMinor:", answer.fwMinor,
+            "fwPatch:", answer.fwPatch,
+            "fwVendor:", answer.fwVendor,
+            "fwVendorKeys:", answer.fwVendorKeys,
+            "unfinishedBackup:", answer.unfinishedBackup
+            );
+        return answer;
+    } catch (e) {
+        console.error("Wire format is invalid");
+        return null;
+    }
 };
 
 const decodeButtonRequest = function(kind) {
@@ -854,6 +905,17 @@ const devChangePin = function(pinCodeReader) {
     });
 };
 
+const devGetFeatures = function() {
+    return new Promise((resolve) => {
+        const dataBytes = createGetFeaturesRequest();
+        const deviceHandle = new DeviceHandler(deviceType);
+        deviceHandle.read((kind, data) => {
+            resolve(decodeFeaturesRequest(kind, data));
+        });
+        deviceHandle.write(dataBytes);
+    });
+};
+
 module.exports = {
     DeviceTypeEnum,
     devAddressGen,
@@ -862,6 +924,7 @@ module.exports = {
     devChangePin,
     devCheckMessageSignature,
     devGenerateMnemonic,
+    devGetFeatures,
     devGetVersionDevice,
     devRecoveryDevice,
     devSetMnemonic,
