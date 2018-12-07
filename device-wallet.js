@@ -24,7 +24,7 @@ const dataBytesFromChunks = function(chunks) {
 // Returns a handle to usbhid device
 const getDevice = function() {
     const deviceInfo = HID.devices().find( function(d) {
-        const isTeensy = d.manufacturer == "SatoshiLabs";
+        const isTeensy = d.manufacturer == "SkycoinFoundation";
         return isTeensy;
     });
     if( deviceInfo ) {
