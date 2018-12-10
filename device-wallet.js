@@ -310,7 +310,8 @@ const createWipeDeviceRequest = function() {
 
 const createRecoveryDeviceRequest = function() {
     const msgStructure = {
-        'dryRun': true,
+        'dryRun': false,
+        'enforceWordList': true,
         'wordCount': 12
     };
     const msg = messages.RecoveryDevice.create(msgStructure);
@@ -830,6 +831,7 @@ const wordAckLoop = function(kind, wordReader, callback) {
     wordAckCallback(kind);
 };
 
+// eslint-disable-next-line max-statements
 const devRecoveryDevice = function(wordReader) {
     return new Promise((resolve, reject) => {
         const dataBytes = createRecoveryDeviceRequest();
@@ -850,8 +852,11 @@ const devRecoveryDevice = function(wordReader) {
                     });
                     return;
                 }
+                deviceHandle.close();
                 reject(new Error("Expected WordAck after Button confirmation"));
+                return;
             }
+            deviceHandle.reopen();
             const buttonAckBytes = createButtonAckRequest();
             deviceHandle.read(buttonAckLoop);
             deviceHandle.write(buttonAckBytes);

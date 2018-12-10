@@ -84,7 +84,7 @@ if (testGetVersion) {
     );
 }
 
-const testRecovery = false;
+const testRecovery = true;
 
 const wordReader = function() {
     return new Promise((resolve) => {
@@ -106,7 +106,7 @@ if (testFeatures) {
     promise.then(console.log, rejectPromise);
 }
 
-const testCancel = true;
+const testCancel = false;
 if (testCancel) {
     const promise = deviceWallet.devCancelRequest();
     promise.then(console.log, rejectPromise);
