@@ -831,11 +831,11 @@ const wordAckLoop = function(kind, wordReader, callback) {
     wordAckCallback(kind);
 };
 
-// eslint-disable-next-line max-statements
 const devRecoveryDevice = function(wordReader) {
     return new Promise((resolve, reject) => {
         const dataBytes = createRecoveryDeviceRequest();
         const deviceHandle = new DeviceHandler(deviceType);
+        // eslint-disable-next-line max-statements
         const buttonAckLoop = function(kind) {
             if (kind != messages.MessageType.MessageType_ButtonRequest) {
                 if (kind == messages.MessageType.MessageType_WordRequest) {
