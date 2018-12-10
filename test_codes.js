@@ -99,9 +99,15 @@ if (testRecovery) {
     promise.then(console.log, rejectPromise);
 }
 
-const testFeatures = true;
+const testFeatures = false;
 
 if (testFeatures) {
     const promise = deviceWallet.devGetFeatures();
+    promise.then(console.log, rejectPromise);
+}
+
+const testCancel = true;
+if (testCancel) {
+    const promise = deviceWallet.devCancelRequest();
     promise.then(console.log, rejectPromise);
 }

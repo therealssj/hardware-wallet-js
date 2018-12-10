@@ -591,6 +591,27 @@ const devUpdateFirmware = function(data, hash) {
     });
 };
 
+const devCancelRequest = function() {
+    return new Promise((resolve, reject) => {
+        const dataBytes = createCancelRequest();
+        const deviceHandle = new DeviceHandler(deviceType);
+        const devReadCallback = function(kind, data) {
+            deviceHandle.close();
+            if (kind == messages.MessageType.MessageType_Success) {
+                resolve(decodeSuccess(kind, data));
+                return;
+            }
+            if (kind == messages.MessageType.MessageType_Failure) {
+                resolve(decodeFailureAndPinCode(kind, data));
+                return;
+            }
+            reject(new Error(`Could not recognize message of kind ${kind}`));
+        };
+        deviceHandle.read(devReadCallback);
+        deviceHandle.write(dataBytes);
+    });
+};
+
 const devGetVersionDevice = function() {
     return new Promise((resolve) => {
             const dataBytes = createGetVersionRequest();
@@ -625,8 +646,8 @@ const devSendPinCodeRequest = function(pinCodeCallback, pinCodeReader) {
         const dataBytes = createSendPinCodeRequest(pinCode);
         const deviceHandle = new DeviceHandler(deviceType);
         deviceHandle.read((answerKind, dataBuffer) => {
-            pinCodeCallback(answerKind, dataBuffer);
             deviceHandle.close();
+            pinCodeCallback(answerKind, dataBuffer);
         });
         deviceHandle.write(dataBytes);
     };
@@ -638,9 +659,7 @@ const devSendPinCodeRequest = function(pinCodeCallback, pinCodeReader) {
             },
             () => {
                 console.log("Pin code promise rejected");
-                const dataBytes = createCancelRequest();
-                const deviceHandle = new DeviceHandler(deviceType);
-                deviceHandle.write(dataBytes);
+                devCancelRequest();
             }
             );
     } else {
@@ -921,6 +940,7 @@ module.exports = {
     devAddressGen,
     devAddressGenPinCode,
     devBackupDevice,
+    devCancelRequest,
     devChangePin,
     devCheckMessageSignature,
     devGenerateMnemonic,
