@@ -112,8 +112,21 @@ if (testCancel) {
     promise.then(console.log, rejectPromise);
 }
 
-const testBackup = true;
+const testBackup = false;
 if (testBackup) {
     const promise = deviceWallet.devBackupDevice(pinCodeReader);
+    promise.then(console.log, rejectPromise);
+}
+
+const testMnemonic = true;
+if (testMnemonic) {
+    const mnemonic = "cloud flower upset remain green metal below cup stem infant art thank";
+    const promise = deviceWallet.devSetMnemonic(mnemonic);
+    promise.then(console.log, rejectPromise);
+}
+
+const testGenerateMnemonic = false;
+if (testGenerateMnemonic) {
+    const promise = deviceWallet.devGenerateMnemonic();
     promise.then(console.log, rejectPromise);
 }
