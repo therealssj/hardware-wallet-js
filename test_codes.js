@@ -84,7 +84,7 @@ if (testGetVersion) {
     );
 }
 
-const testRecovery = true;
+const testRecovery = false;
 
 const wordReader = function() {
     return new Promise((resolve) => {
@@ -109,5 +109,11 @@ if (testFeatures) {
 const testCancel = false;
 if (testCancel) {
     const promise = deviceWallet.devCancelRequest();
+    promise.then(console.log, rejectPromise);
+}
+
+const testBackup = true;
+if (testBackup) {
+    const promise = deviceWallet.devBackupDevice(pinCodeReader);
     promise.then(console.log, rejectPromise);
 }

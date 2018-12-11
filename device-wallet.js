@@ -783,13 +783,12 @@ const devWipeDevice = function() {
     });
 };
 
-const devBackupDevice = function() {
-    return new Promise((resolve) => {
+const devBackupDevice = function(pinCodeReader) {
+    return new Promise((resolve, reject) => {
             const dataBytes = createBackupDeviceRequest();
             const deviceHandle = new DeviceHandler(deviceType);
             const buttonAckLoop = function(kind) {
                 if (kind != messages.MessageType.MessageType_ButtonRequest) {
-                    deviceHandle.close();
                     if (kind == messages.MessageType.MessageType_Success) {
                         resolve("Backup Device operation completed");
                     } else {
@@ -797,11 +796,35 @@ const devBackupDevice = function() {
                     }
                     return;
                 }
+                buttonDevHandle = new DeviceHandler(deviceType);
                 const buttonAckBytes = createButtonAckRequest();
-                deviceHandle.read(buttonAckLoop);
-                deviceHandle.write(buttonAckBytes);
+                buttonDevHandle.read((k) => {
+                    buttonDevHandle.close();
+                    buttonAckLoop(k);
+                });
+                buttonDevHandle.write(buttonAckBytes);
             };
-            deviceHandle.read(buttonAckLoop);
+            const backupReader = function(kind) {
+                deviceHandle.close();
+                if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
+                    devSendPinCodeRequest(
+                        (answerKind, answerBuffer) => {
+                        console.log("Pin code callback got answerKind", answerKind);
+                        if (answerKind == messages.MessageType.MessageType_ButtonRequest) {
+                            buttonAckLoop(answerKind);
+                            return;
+                        }
+                        if (answerKind == messages.MessageType.MessageType_Failure) {
+                            reject(new Error(decodeFailureAndPinCode(answerKind, answerBuffer)));
+                        }
+                    },
+                    pinCodeReader
+                    );
+                } else {
+                    buttonAckLoop(kind);
+                }
+            };
+            deviceHandle.read(backupReader);
             deviceHandle.write(dataBytes);
     });
 };
