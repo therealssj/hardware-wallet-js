@@ -774,28 +774,30 @@ const devSkycoinSignMessage = function(addressN, message, pinCodeReader, passphr
     });
 };
 
-const devCheckMessageSignature = function(address, message, signature) {
+// eslint-disable-next-line max-params
+const devCheckMessageSignature = function(address, message, signature, passphraseReader) {
     return new Promise((resolve, reject) => {
         const dataBytes = createCheckMessageSignatureRequest(address, message, signature);
         const deviceHandle = new DeviceHandler(deviceType);
         const devReadCallback = function(kind, dataBuffer) {
+            deviceHandle.close();
             if (kind == messages.MessageType.MessageType_Success) {
                 try {
                     const answer = messages.Success.
                                     decode(dataBuffer);
-                    console.log("Address emiting that signature:", answer.message);
                     if (answer.message === address) {
-                        resolve("Signature is correct");
+                        resolve(`Address emiting that signature: ${answer.message}`);
                     } else {
                         reject(new Error("Wrong signature"));
                     }
                 } catch (e) {
                     reject(new Error("Wire format is invalid", e));
                 }
+            } else if (kind == messages.MessageType.MessageType_PassphraseRequest) {
+                devSendPassphraseAck(devReadCallback, passphraseReader);
             } else {
                 reject(new Error("Wrong answer kind", kind));
             }
-            deviceHandle.close();
         };
         deviceHandle.read(devReadCallback);
         deviceHandle.write(dataBytes);
