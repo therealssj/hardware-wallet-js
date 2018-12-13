@@ -32,14 +32,14 @@ const pinCodeReader = function() {
     });
 };
 
-const testSign = false;
+const testSign = true;
 
 if (testSign) {
     const signPromise = deviceWallet.devSkycoinSignMessage(3, "Hello World!", null);
     signPromise.then(
         (signature) => {
             console.log("Signature promise resolved", signature);
-            const signPromise2 = deviceWallet.devSkycoinSignMessage(3, "Hello World!", pinCodeReader);
+            const signPromise2 = deviceWallet.devSkycoinSignMessage(3, "Hello World!", pinCodeReader, wordReader);
             signPromise2.then(
                 (signature2) => {
                     console.log("Signature promise resolved", signature2);
@@ -51,7 +51,7 @@ if (testSign) {
     );
 }
 
-const testAddressGen = true;
+const testAddressGen = false;
 
 if (testAddressGen) {
     const promise = deviceWallet.devAddressGen(2, 3, pinCodeReader, wordReader);

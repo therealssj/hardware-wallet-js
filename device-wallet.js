@@ -747,31 +747,30 @@ const devSendSkycoinSignMessage = function(addressN, message, callback) {
     deviceHandle.write(dataBytes);
 };
 
-const devSkycoinSignMessage = function(addressN, message, pinCodeReader) {
+// eslint-disable-next-line max-params
+const devSkycoinSignMessage = function(addressN, message, pinCodeReader, passphraseReader) {
     return new Promise((resolve, reject) => {
-        devSendSkycoinSignMessage(addressN, message, function(kind, dataBuffer) {
-            console.log("Signature generation kindly returned", messages.MessageType[kind]);
-            if (kind == messages.MessageType.MessageType_Failure) {
+        const skycoinSignHander = function(kind, dataBuffer) {
+            console.log("Signature generation received message kind:", messages.MessageType[kind]);
+            switch (kind) {
+            case messages.MessageType.MessageType_Failure:
                 reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
-            }
-            if (kind == messages.MessageType.MessageType_ResponseSkycoinSignMessage) {
+                break;
+            case messages.MessageType.MessageType_ResponseSkycoinSignMessage:
                 resolve(decodeSignMessageAnswer(kind, dataBuffer));
+                break;
+            case messages.MessageType.MessageType_PassphraseRequest:
+                devSendPassphraseAck(skycoinSignHander, passphraseReader);
+                break;
+            case messages.MessageType.MessageType_PinMatrixRequest:
+                devSendPinCodeRequest(skycoinSignHander, pinCodeReader);
+                break;
+             default:
+                reject(new Error(`Unexpected answer from the device: ${kind}`));
+                break;
             }
-            if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
-                devSendPinCodeRequest(
-                    (answerKind, answerBuffer) => {
-                    console.log("Pin code callback got answerKind", answerKind);
-                    if (answerKind == messages.MessageType.MessageType_ResponseSkycoinSignMessage) {
-                        resolve(decodeSignMessageAnswer(answerKind, answerBuffer));
-                    }
-                    if (answerKind == messages.MessageType.MessageType_Failure) {
-                        reject(new Error(decodeFailureAndPinCode(answerKind, answerBuffer)));
-                    }
-                },
-                pinCodeReader
-                );
-            }
-        });
+        };
+        devSendSkycoinSignMessage(addressN, message, skycoinSignHander);
     });
 };
 
