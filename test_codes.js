@@ -12,6 +12,14 @@ const rejectPromise = function(msg) {
   console.log("Promise rejected", msg);
 };
 
+const wordReader = function() {
+    return new Promise((resolve) => {
+        console.log("Inside wordReader callback, please input word: ");
+        const word = scanf('%s');
+        resolve(word);
+    });
+};
+
 const pinCodeReader = function() {
     return new Promise((resolve, reject) => {
         console.log("Got inside pinCodeReader");
@@ -25,7 +33,6 @@ const pinCodeReader = function() {
 };
 
 const testSign = false;
-const testPinChange = false;
 
 if (testSign) {
     const signPromise = deviceWallet.devSkycoinSignMessagePinCode(3, "Hello World!", null);
@@ -44,6 +51,14 @@ if (testSign) {
     );
 }
 
+const testAddressGen = true;
+
+if (testAddressGen) {
+    const promise = deviceWallet.devAddressGen(2, 3, pinCodeReader, wordReader);
+    promise.then(console.log, rejectPromise);
+}
+
+const testPinChange = false;
 if (testPinChange) {
     const promise = deviceWallet.devChangePin(pinCodeReader);
     promise.then(
@@ -86,14 +101,6 @@ if (testGetVersion) {
 
 const testRecovery = false;
 
-const wordReader = function() {
-    return new Promise((resolve) => {
-        console.log("Input word: ");
-        const word = scanf('%s');
-        resolve(word);
-    });
-};
-
 if (testRecovery) {
     const promise = deviceWallet.devRecoveryDevice(wordReader);
     promise.then(console.log, rejectPromise);
@@ -118,7 +125,7 @@ if (testBackup) {
     promise.then(console.log, rejectPromise);
 }
 
-const testMnemonic = true;
+const testMnemonic = false;
 if (testMnemonic) {
     const mnemonic = "cloud flower upset remain green metal below cup stem infant art thank";
     const promise = deviceWallet.devSetMnemonic(mnemonic);

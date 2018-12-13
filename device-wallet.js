@@ -214,6 +214,19 @@ const createGetFeaturesRequest = function() {
     return dataBytesFromChunks(chunks);
 };
 
+const createPassphraseRequest = function(passphrase) {
+    const msgStructure = {
+        passphrase
+    };
+    const msg = messages.PassphraseAck.create(msgStructure);
+    const buffer = messages.PassphraseAck.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_PassphraseAck
+    );
+    return dataBytesFromChunks(chunks);
+};
+
 const createButtonAckRequest = function() {
     const msgStructure = {};
     const msg = messages.ButtonAck.create(msgStructure);
@@ -669,31 +682,57 @@ const devSendPinCodeRequest = function(pinCodeCallback, pinCodeReader) {
     }
 };
 
-const devAddressGen = function(addressN, startIndex, pinCodeReader) {
-    return new Promise((resolve, reject) => {
-        devSendAddressGen(addressN, startIndex, function(kind, dataBuffer) {
-            console.log("Addresses generation kindly returned", messages.MessageType[kind]);
-            if (kind == messages.MessageType.MessageType_Failure) {
-                reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
-            }
-            if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
-                resolve(decodeAddressGenAnswer(kind, dataBuffer));
-            }
-            if (kind == messages.MessageType.MessageType_PinMatrixRequest) {
-                devSendPinCodeRequest(
-                    (answerKind, answerBuffer) => {
-                    console.log("Pin code callback got answerKind", answerKind);
-                    if (answerKind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
-                        resolve(decodeAddressGenAnswer(answerKind, answerBuffer));
-                    }
-                    if (answerKind == messages.MessageType.MessageType_Failure) {
-                        reject(new Error(decodeFailureAndPinCode(answerKind, answerBuffer)));
-                    }
-                },
-                pinCodeReader
-                );
-            }
+const devSendPassphraseAck = function(callback, passphraseReader) {
+    const sendPassphraseAck = function(passphrase) {
+        const dataBytes = createPassphraseRequest(passphrase);
+        const deviceHandle = new DeviceHandler(deviceType);
+        deviceHandle.read((kind, data) => {
+            deviceHandle.close();
+            callback(kind, data);
         });
+        deviceHandle.write(dataBytes);
+    };
+    if (passphraseReader !== null && passphraseReader !== undefined) {
+        const passphrasePromise = passphraseReader();
+        passphrasePromise.then(
+            (passphrase) => {
+                sendPassphraseAck(passphrase);
+            },
+            () => {
+                console.log("Pin code promise rejected");
+                devCancelRequest();
+            }
+        );
+    } else {
+        console.log("Please input your passphrase: ");
+        sendPassphraseAck(scanf('%s'));
+    }
+};
+
+// eslint-disable-next-line max-params
+const devAddressGen = function(addressN, startIndex, pinCodeReader, passphraseReader) {
+    return new Promise((resolve, reject) => {
+        const addressGenHandler = function(kind, dataBuffer) {
+            console.log("Addresses generation received message kind: ", messages.MessageType[kind]);
+            switch (kind) {
+            case messages.MessageType.MessageType_Failure:
+                reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
+                break;
+            case messages.MessageType.MessageType_ResponseSkycoinAddress:
+                resolve(decodeAddressGenAnswer(kind, dataBuffer));
+                break;
+            case messages.MessageType.MessageType_PinMatrixRequest:
+                devSendPinCodeRequest(addressGenHandler, pinCodeReader);
+                break;
+            case messages.MessageType.MessageType_PassphraseRequest:
+                devSendPassphraseAck(addressGenHandler, passphraseReader);
+                break;
+            default:
+                reject(new Error(`Unexpected answer from the device: ${kind}`));
+                break;
+            }
+        };
+        devSendAddressGen(addressN, startIndex, addressGenHandler);
     });
 };
 
