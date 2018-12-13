@@ -631,7 +631,7 @@ const devGetVersionDevice = function() {
     });
 };
 
-const devAddressGen = function(addressN, startIndex, callback) {
+const devSendAddressGen = function(addressN, startIndex, callback) {
     const dataBytes = createAddressGenRequest(addressN, startIndex);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, dataBuffer) {
@@ -669,9 +669,9 @@ const devSendPinCodeRequest = function(pinCodeCallback, pinCodeReader) {
     }
 };
 
-const devAddressGenPinCode = function(addressN, startIndex, pinCodeReader) {
+const devAddressGen = function(addressN, startIndex, pinCodeReader) {
     return new Promise((resolve, reject) => {
-        devAddressGen(addressN, startIndex, function(kind, dataBuffer) {
+        devSendAddressGen(addressN, startIndex, function(kind, dataBuffer) {
             console.log("Addresses generation kindly returned", messages.MessageType[kind]);
             if (kind == messages.MessageType.MessageType_Failure) {
                 reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
@@ -966,7 +966,6 @@ const devGetFeatures = function() {
 module.exports = {
     DeviceTypeEnum,
     devAddressGen,
-    devAddressGenPinCode,
     devBackupDevice,
     devCancelRequest,
     devChangePin,

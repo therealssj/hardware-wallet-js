@@ -19,7 +19,7 @@ const sandbox = function() {
   const rejectPromise = function(msg) {
       console.log("Promise rejected", msg);
   };
-  const addrPromise = deviceWallet.devAddressGenPinCode(2, 3);
+  const addrPromise = deviceWallet.devAddressGen(2, 3);
   addrPromise.then(
     (addresses) => {
       console.log("Address Promise resolved", addresses);
