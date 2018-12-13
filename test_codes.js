@@ -35,11 +35,11 @@ const pinCodeReader = function() {
 const testSign = false;
 
 if (testSign) {
-    const signPromise = deviceWallet.devSkycoinSignMessagePinCode(3, "Hello World!", null);
+    const signPromise = deviceWallet.devSkycoinSignMessage(3, "Hello World!", null);
     signPromise.then(
         (signature) => {
             console.log("Signature promise resolved", signature);
-            const signPromise2 = deviceWallet.devSkycoinSignMessagePinCode(3, "Hello World!", pinCodeReader);
+            const signPromise2 = deviceWallet.devSkycoinSignMessage(3, "Hello World!", pinCodeReader);
             signPromise2.then(
                 (signature2) => {
                     console.log("Signature promise resolved", signature2);

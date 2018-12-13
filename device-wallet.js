@@ -736,7 +736,7 @@ const devAddressGen = function(addressN, startIndex, pinCodeReader, passphraseRe
     });
 };
 
-const devSkycoinSignMessage = function(addressN, message, callback) {
+const devSendSkycoinSignMessage = function(addressN, message, callback) {
     const dataBytes = createSignMessageRequest(addressN, message);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, dataBuffer) {
@@ -747,9 +747,9 @@ const devSkycoinSignMessage = function(addressN, message, callback) {
     deviceHandle.write(dataBytes);
 };
 
-const devSkycoinSignMessagePinCode = function(addressN, message, pinCodeReader) {
+const devSkycoinSignMessage = function(addressN, message, pinCodeReader) {
     return new Promise((resolve, reject) => {
-        devSkycoinSignMessage(addressN, message, function(kind, dataBuffer) {
+        devSendSkycoinSignMessage(addressN, message, function(kind, dataBuffer) {
             console.log("Signature generation kindly returned", messages.MessageType[kind]);
             if (kind == messages.MessageType.MessageType_Failure) {
                 reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
@@ -1014,7 +1014,7 @@ module.exports = {
     devGetVersionDevice,
     devRecoveryDevice,
     devSetMnemonic,
-    devSkycoinSignMessagePinCode,
+    devSkycoinSignMessage,
     devUpdateFirmware,
     devWipeDevice,
     getDevice,

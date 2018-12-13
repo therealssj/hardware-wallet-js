@@ -23,7 +23,7 @@ const sandbox = function() {
   addrPromise.then(
     (addresses) => {
       console.log("Address Promise resolved", addresses);
-      const signPromise = deviceWallet.devSkycoinSignMessagePinCode(3, "Hello World!");
+      const signPromise = deviceWallet.devSkycoinSignMessage(3, "Hello World!");
       signPromise.then(
         (signature) => {
         console.log("Signature promise resolved", signature);
