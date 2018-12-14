@@ -102,7 +102,7 @@ if (testGetVersion) {
 const testRecovery = false;
 
 if (testRecovery) {
-    const promise = deviceWallet.devRecoveryDevice(wordReader);
+    const promise = deviceWallet.devRecoveryDevice(true, wordReader);
     promise.then(console.log, rejectPromise);
 }
 
