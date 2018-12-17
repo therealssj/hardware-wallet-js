@@ -32,7 +32,7 @@ const pinCodeReader = function() {
     });
 };
 
-const testSign = true;
+const testSign = false;
 
 if (testSign) {
     const signPromise = deviceWallet.devSkycoinSignMessage(3, "Hello World!", null);
@@ -132,8 +132,8 @@ if (testMnemonic) {
     promise.then(console.log, rejectPromise);
 }
 
-const testGenerateMnemonic = false;
+const testGenerateMnemonic = true;
 if (testGenerateMnemonic) {
-    const promise = deviceWallet.devGenerateMnemonic();
+    const promise = deviceWallet.devGenerateMnemonic(true);
     promise.then(console.log, rejectPromise);
 }

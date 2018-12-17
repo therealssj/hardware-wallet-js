@@ -1149,6 +1149,7 @@ $root.GenerateMnemonic = (function() {
      * Properties of a GenerateMnemonic.
      * @exports IGenerateMnemonic
      * @interface IGenerateMnemonic
+     * @property {boolean|null} [passphraseProtection] GenerateMnemonic passphraseProtection
      */
 
     /**
@@ -1166,6 +1167,14 @@ $root.GenerateMnemonic = (function() {
                 if (properties[keys[i]] != null)
                     this[keys[i]] = properties[keys[i]];
     }
+
+    /**
+     * GenerateMnemonic passphraseProtection.
+     * @member {boolean} passphraseProtection
+     * @memberof GenerateMnemonic
+     * @instance
+     */
+    GenerateMnemonic.prototype.passphraseProtection = false;
 
     /**
      * Creates a new GenerateMnemonic instance using the specified properties.
@@ -1191,6 +1200,8 @@ $root.GenerateMnemonic = (function() {
     GenerateMnemonic.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
+        if (message.passphraseProtection != null && message.hasOwnProperty("passphraseProtection"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.passphraseProtection);
         return writer;
     };
 
@@ -1225,6 +1236,9 @@ $root.GenerateMnemonic = (function() {
         while (reader.pos < end) {
             var tag = reader.uint32();
             switch (tag >>> 3) {
+            case 1:
+                message.passphraseProtection = reader.bool();
+                break;
             default:
                 reader.skipType(tag & 7);
                 break;
@@ -1260,6 +1274,9 @@ $root.GenerateMnemonic = (function() {
     GenerateMnemonic.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
+        if (message.passphraseProtection != null && message.hasOwnProperty("passphraseProtection"))
+            if (typeof message.passphraseProtection !== "boolean")
+                return "passphraseProtection: boolean expected";
         return null;
     };
 
@@ -1274,7 +1291,10 @@ $root.GenerateMnemonic = (function() {
     GenerateMnemonic.fromObject = function fromObject(object) {
         if (object instanceof $root.GenerateMnemonic)
             return object;
-        return new $root.GenerateMnemonic();
+        var message = new $root.GenerateMnemonic();
+        if (object.passphraseProtection != null)
+            message.passphraseProtection = Boolean(object.passphraseProtection);
+        return message;
     };
 
     /**
@@ -1286,8 +1306,15 @@ $root.GenerateMnemonic = (function() {
      * @param {$protobuf.IConversionOptions} [options] Conversion options
      * @returns {Object.<string,*>} Plain object
      */
-    GenerateMnemonic.toObject = function toObject() {
-        return {};
+    GenerateMnemonic.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults)
+            object.passphraseProtection = false;
+        if (message.passphraseProtection != null && message.hasOwnProperty("passphraseProtection"))
+            object.passphraseProtection = message.passphraseProtection;
+        return object;
     };
 
     /**

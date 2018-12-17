@@ -288,8 +288,10 @@ const createSetMnemonicRequest = function(mnemonic) {
     return dataBytesFromChunks(chunks);
 };
 
-const createGenerateMnemonicRequest = function() {
-    const msgStructure = {};
+const createGenerateMnemonicRequest = function(usePassphrase) {
+    const msgStructure = {
+        "passphraseProtection": usePassphrase
+    };
     const msg = messages.GenerateMnemonic.create(msgStructure);
     const buffer = messages.GenerateMnemonic.encode(msg).finish();
     const chunks = makeTrezorMessage(
@@ -949,9 +951,9 @@ const devSetMnemonic = function(mnemonic) {
     });
 };
 
-const devGenerateMnemonic = function() {
+const devGenerateMnemonic = function(usePassphrase) {
     return new Promise((resolve) => {
-        const dataBytes = createGenerateMnemonicRequest();
+        const dataBytes = createGenerateMnemonicRequest(usePassphrase);
         const deviceHandle = new DeviceHandler(deviceType);
         const devReadCallback = function(kind, d) {
             deviceHandle.close();
