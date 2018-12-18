@@ -578,6 +578,7 @@ const devUpdateFirmware = function(data, hash) {
     return new Promise((resolve, reject) => {
         const dataBytes = createInitializeRequest();
         const deviceHandle = new DeviceHandler(deviceType);
+        console.log("Firmware hash is:", hash);
         const uploadFirmwareCallback = function(kind, d) {
             deviceHandle.close();
             devButtonRequestCallback(kind, d, (datakind) => {

@@ -1,6 +1,7 @@
 const deviceWallet = require('./device-wallet');
 const scanf = require('scanf');
 const fs = require('fs');
+const sha256 = require('js-sha256');
 
 if( deviceWallet.getDevice() === null ) {
     console.log("Skycoin hardware NOT FOUND, using emulator");
@@ -76,14 +77,14 @@ if (testPinChange) {
     );
 }
 
-const testFirmwareUpdate = false;
+const testFirmwareUpdate = true;
 
 if (testFirmwareUpdate) {
-    fs.readFile('fw_magic.bin', function(err, data) {
+    fs.readFile('skycoin-firmware-passphrase-experiment.bin', function(err, data) {
         console.log(err);
         console.log(data);
         console.log(data.length);
-        deviceWallet.devUpdateFirmware(data, []);
+        deviceWallet.devUpdateFirmware(data, sha256(data.slice(0x100)));
   });
 }
 
@@ -132,7 +133,7 @@ if (testMnemonic) {
     promise.then(console.log, rejectPromise);
 }
 
-const testGenerateMnemonic = true;
+const testGenerateMnemonic = false;
 if (testGenerateMnemonic) {
     const promise = deviceWallet.devGenerateMnemonic(true);
     promise.then(console.log, rejectPromise);
