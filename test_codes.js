@@ -52,10 +52,10 @@ if (testSign) {
     );
 }
 
-const testAddressGen = false;
+const testAddressGen = true;
 
 if (testAddressGen) {
-    const promise = deviceWallet.devAddressGen(2, 3, pinCodeReader, wordReader);
+    const promise = deviceWallet.devAddressGen(1, 3, true, pinCodeReader, wordReader);
     promise.then(console.log, rejectPromise);
 }
 
@@ -77,7 +77,7 @@ if (testPinChange) {
     );
 }
 
-const testFirmwareUpdate = true;
+const testFirmwareUpdate = false;
 
 if (testFirmwareUpdate) {
     fs.readFile('skycoin-firmware-passphrase-experiment.bin', function(err, data) {

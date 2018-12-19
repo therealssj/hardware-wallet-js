@@ -364,9 +364,10 @@ const createSignMessageRequest = function(addressN, message) {
     return dataBytesFromChunks(chunks);
 };
 
-const createAddressGenRequest = function(addressN, startIndex) {
+const createAddressGenRequest = function(addressN, startIndex, confirmAddress) {
     const msgStructure = {
         addressN,
+        confirmAddress,
         startIndex
     };
     const msg = messages.SkycoinAddress.create(msgStructure);
@@ -648,8 +649,9 @@ const devGetVersionDevice = function() {
     });
 };
 
-const devSendAddressGen = function(addressN, startIndex, callback) {
-    const dataBytes = createAddressGenRequest(addressN, startIndex);
+// eslint-disable-next-line max-params
+const devSendAddressGen = function(addressN, startIndex, confirmAddress, callback) {
+    const dataBytes = createAddressGenRequest(addressN, startIndex, confirmAddress);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, dataBuffer) {
         deviceHandle.close();
@@ -714,7 +716,7 @@ const devSendPassphraseAck = function(callback, passphraseReader) {
 };
 
 // eslint-disable-next-line max-params
-const devAddressGen = function(addressN, startIndex, pinCodeReader, passphraseReader) {
+const devAddressGen = function(addressN, startIndex, confirmAddress, pinCodeReader, passphraseReader) {
     return new Promise((resolve, reject) => {
         const addressGenHandler = function(kind, dataBuffer) {
             console.log("Addresses generation received message kind: ", messages.MessageType[kind]);
@@ -731,12 +733,15 @@ const devAddressGen = function(addressN, startIndex, pinCodeReader, passphraseRe
             case messages.MessageType.MessageType_PassphraseRequest:
                 devSendPassphraseAck(addressGenHandler, passphraseReader);
                 break;
+            case messages.MessageType.MessageType_ButtonRequest:
+                devButtonRequestCallback(kind, dataBuffer, addressGenHandler);
+                break;
             default:
                 reject(new Error(`Unexpected answer from the device: ${kind}`));
                 break;
             }
         };
-        devSendAddressGen(addressN, startIndex, addressGenHandler);
+        devSendAddressGen(addressN, startIndex, confirmAddress, addressGenHandler);
     });
 };
 

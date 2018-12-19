@@ -1716,6 +1716,7 @@ $root.SkycoinAddress = (function() {
      * @interface ISkycoinAddress
      * @property {number} addressN SkycoinAddress addressN
      * @property {number|null} [startIndex] SkycoinAddress startIndex
+     * @property {boolean|null} [confirmAddress] SkycoinAddress confirmAddress
      */
 
     /**
@@ -1752,6 +1753,14 @@ $root.SkycoinAddress = (function() {
     SkycoinAddress.prototype.startIndex = 0;
 
     /**
+     * SkycoinAddress confirmAddress.
+     * @member {boolean} confirmAddress
+     * @memberof SkycoinAddress
+     * @instance
+     */
+    SkycoinAddress.prototype.confirmAddress = false;
+
+    /**
      * Creates a new SkycoinAddress instance using the specified properties.
      * @function create
      * @memberof SkycoinAddress
@@ -1778,6 +1787,8 @@ $root.SkycoinAddress = (function() {
         writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.addressN);
         if (message.startIndex != null && message.hasOwnProperty("startIndex"))
             writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.startIndex);
+        if (message.confirmAddress != null && message.hasOwnProperty("confirmAddress"))
+            writer.uint32(/* id 3, wireType 0 =*/24).bool(message.confirmAddress);
         return writer;
     };
 
@@ -1817,6 +1828,9 @@ $root.SkycoinAddress = (function() {
                 break;
             case 2:
                 message.startIndex = reader.uint32();
+                break;
+            case 3:
+                message.confirmAddress = reader.bool();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -1860,6 +1874,9 @@ $root.SkycoinAddress = (function() {
         if (message.startIndex != null && message.hasOwnProperty("startIndex"))
             if (!$util.isInteger(message.startIndex))
                 return "startIndex: integer expected";
+        if (message.confirmAddress != null && message.hasOwnProperty("confirmAddress"))
+            if (typeof message.confirmAddress !== "boolean")
+                return "confirmAddress: boolean expected";
         return null;
     };
 
@@ -1879,6 +1896,8 @@ $root.SkycoinAddress = (function() {
             message.addressN = object.addressN >>> 0;
         if (object.startIndex != null)
             message.startIndex = object.startIndex >>> 0;
+        if (object.confirmAddress != null)
+            message.confirmAddress = Boolean(object.confirmAddress);
         return message;
     };
 
@@ -1898,11 +1917,14 @@ $root.SkycoinAddress = (function() {
         if (options.defaults) {
             object.addressN = 0;
             object.startIndex = 0;
+            object.confirmAddress = false;
         }
         if (message.addressN != null && message.hasOwnProperty("addressN"))
             object.addressN = message.addressN;
         if (message.startIndex != null && message.hasOwnProperty("startIndex"))
             object.startIndex = message.startIndex;
+        if (message.confirmAddress != null && message.hasOwnProperty("confirmAddress"))
+            object.confirmAddress = message.confirmAddress;
         return object;
     };
 
