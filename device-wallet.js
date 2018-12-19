@@ -326,7 +326,7 @@ const createWipeDeviceRequest = function() {
 const createRecoveryDeviceRequest = function(usePassphrase) {
     const msgStructure = {
         'dryRun': false,
-        'enforceWordList': true,
+        'enforceWordlist': true,
         "passphraseProtection": usePassphrase,
         'wordCount': 12
     };
