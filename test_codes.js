@@ -33,6 +33,12 @@ const pinCodeReader = function() {
     });
 };
 
+const testApplySettings = true;
+if (testApplySettings) {
+    const promise = deviceWallet.devApplySettings(true);
+    promise.then(console.log, rejectPromise);
+}
+
 const testSign = false;
 
 if (testSign) {
@@ -52,7 +58,7 @@ if (testSign) {
     );
 }
 
-const testAddressGen = true;
+const testAddressGen = false;
 
 if (testAddressGen) {
     const promise = deviceWallet.devAddressGen(1, 3, true, pinCodeReader, wordReader);

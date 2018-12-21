@@ -214,6 +214,21 @@ const createGetFeaturesRequest = function() {
     return dataBytesFromChunks(chunks);
 };
 
+const createApplySettings = function(usePassphrase) {
+    const msgStructure = {
+        "label": "",
+        "language": "",
+        usePassphrase
+    };
+    const msg = messages.ApplySettings.create(msgStructure);
+    const buffer = messages.ApplySettings.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_ApplySettings
+    );
+    return dataBytesFromChunks(chunks);
+};
+
 const createPassphraseRequest = function(passphrase) {
     const msgStructure = {
         passphrase
@@ -745,6 +760,38 @@ const devAddressGen = function(addressN, startIndex, confirmAddress, pinCodeRead
     });
 };
 
+const devApplySettings = function(usePassphrase, pinCodeReader) {
+        return new Promise((resolve, reject) => {
+        const applySettingsCallback = function(kind, dataBuffer) {
+            switch (kind) {
+            case messages.MessageType.MessageType_Success:
+                resolve(decodeSuccess(kind, dataBuffer));
+                break;
+            case messages.MessageType.MessageType_Failure:
+                reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
+                break;
+            case messages.MessageType.MessageType_PinMatrixRequest:
+                devSendPinCodeRequest(applySettingsCallback, pinCodeReader);
+                break;
+            case messages.MessageType.MessageType_ButtonRequest:
+                devButtonRequestCallback(kind, dataBuffer, applySettingsCallback);
+                break;
+            default:
+                reject(new Error(`Unexpected answer from the device: ${kind}`));
+                break;
+            }
+        };
+        const dataBytes = createApplySettings(usePassphrase);
+        const deviceHandle = new DeviceHandler(deviceType);
+        const devReadCallback = function(kind, dataBuffer) {
+            deviceHandle.close();
+            applySettingsCallback(kind, dataBuffer);
+        };
+        deviceHandle.read(devReadCallback);
+        deviceHandle.write(dataBytes);
+    });
+};
+
 const devSendSkycoinSignMessage = function(addressN, message, callback) {
     const dataBytes = createSignMessageRequest(addressN, message);
     const deviceHandle = new DeviceHandler(deviceType);
@@ -1015,6 +1062,7 @@ const devGetFeatures = function() {
 module.exports = {
     DeviceTypeEnum,
     devAddressGen,
+    devApplySettings,
     devBackupDevice,
     devCancelRequest,
     devChangePin,

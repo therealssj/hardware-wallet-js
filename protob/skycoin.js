@@ -29,6 +29,7 @@ var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
  * @property {number} MessageType_PinMatrixRequest=18 MessageType_PinMatrixRequest value
  * @property {number} MessageType_PinMatrixAck=19 MessageType_PinMatrixAck value
  * @property {number} MessageType_Cancel=20 MessageType_Cancel value
+ * @property {number} MessageType_ApplySettings=25 MessageType_ApplySettings value
  * @property {number} MessageType_ButtonRequest=26 MessageType_ButtonRequest value
  * @property {number} MessageType_ButtonAck=27 MessageType_ButtonAck value
  * @property {number} MessageType_BackupDevice=34 MessageType_BackupDevice value
@@ -69,6 +70,7 @@ $root.MessageType = (function() {
     values[valuesById[18] = "MessageType_PinMatrixRequest"] = 18;
     values[valuesById[19] = "MessageType_PinMatrixAck"] = 19;
     values[valuesById[20] = "MessageType_Cancel"] = 20;
+    values[valuesById[25] = "MessageType_ApplySettings"] = 25;
     values[valuesById[26] = "MessageType_ButtonRequest"] = 26;
     values[valuesById[27] = "MessageType_ButtonAck"] = 27;
     values[valuesById[34] = "MessageType_BackupDevice"] = 34;
@@ -1141,6 +1143,272 @@ $root.Features = (function() {
     };
 
     return Features;
+})();
+
+$root.ApplySettings = (function() {
+
+    /**
+     * Properties of an ApplySettings.
+     * @exports IApplySettings
+     * @interface IApplySettings
+     * @property {string|null} [language] ApplySettings language
+     * @property {string|null} [label] ApplySettings label
+     * @property {boolean|null} [usePassphrase] ApplySettings usePassphrase
+     * @property {Uint8Array|null} [homescreen] ApplySettings homescreen
+     */
+
+    /**
+     * Constructs a new ApplySettings.
+     * @exports ApplySettings
+     * @classdesc Request: change language and/or label of the device
+     * @start
+     * @next Success
+     * @next Failure
+     * @implements IApplySettings
+     * @constructor
+     * @param {IApplySettings=} [properties] Properties to set
+     */
+    function ApplySettings(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * ApplySettings language.
+     * @member {string} language
+     * @memberof ApplySettings
+     * @instance
+     */
+    ApplySettings.prototype.language = "";
+
+    /**
+     * ApplySettings label.
+     * @member {string} label
+     * @memberof ApplySettings
+     * @instance
+     */
+    ApplySettings.prototype.label = "";
+
+    /**
+     * ApplySettings usePassphrase.
+     * @member {boolean} usePassphrase
+     * @memberof ApplySettings
+     * @instance
+     */
+    ApplySettings.prototype.usePassphrase = false;
+
+    /**
+     * ApplySettings homescreen.
+     * @member {Uint8Array} homescreen
+     * @memberof ApplySettings
+     * @instance
+     */
+    ApplySettings.prototype.homescreen = $util.newBuffer([]);
+
+    /**
+     * Creates a new ApplySettings instance using the specified properties.
+     * @function create
+     * @memberof ApplySettings
+     * @static
+     * @param {IApplySettings=} [properties] Properties to set
+     * @returns {ApplySettings} ApplySettings instance
+     */
+    ApplySettings.create = function create(properties) {
+        return new ApplySettings(properties);
+    };
+
+    /**
+     * Encodes the specified ApplySettings message. Does not implicitly {@link ApplySettings.verify|verify} messages.
+     * @function encode
+     * @memberof ApplySettings
+     * @static
+     * @param {IApplySettings} message ApplySettings message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    ApplySettings.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.language != null && message.hasOwnProperty("language"))
+            writer.uint32(/* id 1, wireType 2 =*/10).string(message.language);
+        if (message.label != null && message.hasOwnProperty("label"))
+            writer.uint32(/* id 2, wireType 2 =*/18).string(message.label);
+        if (message.usePassphrase != null && message.hasOwnProperty("usePassphrase"))
+            writer.uint32(/* id 3, wireType 0 =*/24).bool(message.usePassphrase);
+        if (message.homescreen != null && message.hasOwnProperty("homescreen"))
+            writer.uint32(/* id 4, wireType 2 =*/34).bytes(message.homescreen);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified ApplySettings message, length delimited. Does not implicitly {@link ApplySettings.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof ApplySettings
+     * @static
+     * @param {IApplySettings} message ApplySettings message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    ApplySettings.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes an ApplySettings message from the specified reader or buffer.
+     * @function decode
+     * @memberof ApplySettings
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {ApplySettings} ApplySettings
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    ApplySettings.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.ApplySettings();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.language = reader.string();
+                break;
+            case 2:
+                message.label = reader.string();
+                break;
+            case 3:
+                message.usePassphrase = reader.bool();
+                break;
+            case 4:
+                message.homescreen = reader.bytes();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes an ApplySettings message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof ApplySettings
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {ApplySettings} ApplySettings
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    ApplySettings.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies an ApplySettings message.
+     * @function verify
+     * @memberof ApplySettings
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    ApplySettings.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.language != null && message.hasOwnProperty("language"))
+            if (!$util.isString(message.language))
+                return "language: string expected";
+        if (message.label != null && message.hasOwnProperty("label"))
+            if (!$util.isString(message.label))
+                return "label: string expected";
+        if (message.usePassphrase != null && message.hasOwnProperty("usePassphrase"))
+            if (typeof message.usePassphrase !== "boolean")
+                return "usePassphrase: boolean expected";
+        if (message.homescreen != null && message.hasOwnProperty("homescreen"))
+            if (!(message.homescreen && typeof message.homescreen.length === "number" || $util.isString(message.homescreen)))
+                return "homescreen: buffer expected";
+        return null;
+    };
+
+    /**
+     * Creates an ApplySettings message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof ApplySettings
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {ApplySettings} ApplySettings
+     */
+    ApplySettings.fromObject = function fromObject(object) {
+        if (object instanceof $root.ApplySettings)
+            return object;
+        var message = new $root.ApplySettings();
+        if (object.language != null)
+            message.language = String(object.language);
+        if (object.label != null)
+            message.label = String(object.label);
+        if (object.usePassphrase != null)
+            message.usePassphrase = Boolean(object.usePassphrase);
+        if (object.homescreen != null)
+            if (typeof object.homescreen === "string")
+                $util.base64.decode(object.homescreen, message.homescreen = $util.newBuffer($util.base64.length(object.homescreen)), 0);
+            else if (object.homescreen.length)
+                message.homescreen = object.homescreen;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from an ApplySettings message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof ApplySettings
+     * @static
+     * @param {ApplySettings} message ApplySettings
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    ApplySettings.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            object.language = "";
+            object.label = "";
+            object.usePassphrase = false;
+            if (options.bytes === String)
+                object.homescreen = "";
+            else {
+                object.homescreen = [];
+                if (options.bytes !== Array)
+                    object.homescreen = $util.newBuffer(object.homescreen);
+            }
+        }
+        if (message.language != null && message.hasOwnProperty("language"))
+            object.language = message.language;
+        if (message.label != null && message.hasOwnProperty("label"))
+            object.label = message.label;
+        if (message.usePassphrase != null && message.hasOwnProperty("usePassphrase"))
+            object.usePassphrase = message.usePassphrase;
+        if (message.homescreen != null && message.hasOwnProperty("homescreen"))
+            object.homescreen = options.bytes === String ? $util.base64.encode(message.homescreen, 0, message.homescreen.length) : options.bytes === Array ? Array.prototype.slice.call(message.homescreen) : message.homescreen;
+        return object;
+    };
+
+    /**
+     * Converts this ApplySettings to JSON.
+     * @function toJSON
+     * @memberof ApplySettings
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    ApplySettings.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return ApplySettings;
 })();
 
 $root.GenerateMnemonic = (function() {
