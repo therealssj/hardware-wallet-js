@@ -1053,6 +1053,7 @@ const devGetFeatures = function() {
         const dataBytes = createGetFeaturesRequest();
         const deviceHandle = new DeviceHandler(deviceType);
         deviceHandle.read((kind, data) => {
+            deviceHandle.close();
             resolve(decodeFeaturesRequest(kind, data));
         });
         deviceHandle.write(dataBytes);
