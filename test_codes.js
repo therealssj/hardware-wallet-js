@@ -33,9 +33,23 @@ const pinCodeReader = function() {
     });
 };
 
-const testApplySettings = true;
+const testApplySettings = false;
 if (testApplySettings) {
     const promise = deviceWallet.devApplySettings(true);
+    promise.then(console.log, rejectPromise);
+}
+
+const testTransactionSign = true;
+
+if (testTransactionSign) {
+    const promise = deviceWallet.devSkycoinTransactionSign(
+        1,
+        "inputTransactions",
+        1,
+        "outputTransactions",
+        pinCodeReader,
+        wordReader
+        );
     promise.then(console.log, rejectPromise);
 }
 

@@ -365,6 +365,38 @@ const createBackupDeviceRequest = function() {
     return dataBytesFromChunks(chunks);
 };
 
+// eslint-disable-next-line max-params, max-statements
+const createTransactionSignRequest = function(nbIn, inputTransactions, nbOut, outputTransactions) {
+    const transactionIn = new ArrayBuffer();
+    const transactionOut = new ArrayBuffer();
+    for (i = 0; i < nbIn; i += 1) {
+        transactionIn[i] = {
+            'hashIn': inputTransactions[i].hashIn,
+            'index': inputTransactions[i].index
+        };
+    }
+    for (i = 0; i < nbOut; i += 1) {
+        transactionOut[i] = {
+            'address': outputTransactions[i].address,
+            'coin': outputTransactions[i].coin,
+            'hour': outputTransactions[i].hour
+        };
+    }
+    const msgStructure = {
+        nbIn,
+        nbOut,
+        transactionIn,
+        transactionOut
+    };
+    const msg = messages.TransactionSign.create(msgStructure);
+    const buffer = messages.TransactionSign.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_TransactionSign
+    );
+    return dataBytesFromChunks(chunks);
+};
+
 const createSignMessageRequest = function(addressN, message) {
     const msgStructure = {
         addressN,
@@ -792,6 +824,18 @@ const devApplySettings = function(usePassphrase, pinCodeReader) {
     });
 };
 
+// eslint-disable-next-line max-params
+const devSendSkycoinTransactionSign = function(nbIn, inputTransactions, nbOut, outputTransactions, callback) {
+    const dataBytes = createTransactionSignRequest(nbIn, inputTransactions, nbOut, outputTransactions);
+    const deviceHandle = new DeviceHandler(deviceType);
+    const devReadCallback = function(kind, dataBuffer) {
+        deviceHandle.close();
+        callback(kind, dataBuffer);
+    };
+    deviceHandle.read(devReadCallback);
+    deviceHandle.write(dataBytes);
+};
+
 const devSendSkycoinSignMessage = function(addressN, message, callback) {
     const dataBytes = createSignMessageRequest(addressN, message);
     const deviceHandle = new DeviceHandler(deviceType);
@@ -827,6 +871,43 @@ const devSkycoinSignMessage = function(addressN, message, pinCodeReader, passphr
             }
         };
         devSendSkycoinSignMessage(addressN, message, skycoinSignHander);
+    });
+};
+
+// eslint-disable-next-line max-params
+const devSkycoinTransactionSign = function(
+    nbIn,
+    inputTransactions,
+    nbOut,
+    outputTransactions,
+    pinCodeReader,
+    passphraseReader
+    ) {
+    return new Promise((resolve, reject) => {
+        const skycoinTransactionSignHander = function(kind, dataBuffer) {
+            console.log("Signature generation received message kind:", messages.MessageType[kind]);
+            switch (kind) {
+            case messages.MessageType.MessageType_Success:
+                resolve(decodeSuccess(kind, dataBuffer));
+                break;
+            case messages.MessageType.MessageType_Failure:
+                reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
+                break;
+            case messages.MessageType.MessageType_ResponseSkycoinSignMessage:
+                console.log(decodeSignMessageAnswer(kind, dataBuffer));
+                break;
+            case messages.MessageType.MessageType_PassphraseRequest:
+                devSendPassphraseAck(skycoinSignHander, passphraseReader);
+                break;
+            case messages.MessageType.MessageType_PinMatrixRequest:
+                devSendPinCodeRequest(skycoinSignHander, pinCodeReader);
+                break;
+             default:
+                reject(new Error(`Unexpected answer from the device: ${kind}`));
+                break;
+            }
+        };
+        devSendSkycoinTransactionSign(nbIn, inputTransactions, nbOut, outputTransactions, skycoinTransactionSignHander);
     });
 };
 
@@ -1074,6 +1155,7 @@ module.exports = {
     devRecoveryDevice,
     devSetMnemonic,
     devSkycoinSignMessage,
+    devSkycoinTransactionSign,
     devUpdateFirmware,
     devWipeDevice,
     getDevice,
