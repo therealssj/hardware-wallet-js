@@ -43,19 +43,19 @@ const testTransactionSign = true;
 
 if (testTransactionSign) {
     const inputTransaction = {
-        'hashIn': "HashHashIn",
-        'index': 5
+        'hashIn': "99a1a50ffa21ab48ee7c31d01e7e14451f9834f5294468bd17e87c5018900b81",
+        'index': 0
     };
     const inputTransactionArray = [inputTransaction];
     const outputTransaction1 = {
-        'address': "AddressOut1",
-        'coin': 12000,
-        'hour': 3
+        'address': "d1hMF1XCCvFXVa2u7NbuWo9dmfNbdpoFLJ",
+        'coin': 125000000,
+        'hour': 4
     };
     const outputTransaction2 = {
-        'address': "AddressOut2",
-        'coin': 20000,
-        'hour': 4
+        'address': "2kVVoMkH7aTVXsiGwZEALpkHZ6sUyumL8hH",
+        'coin': 2000000,
+        'hour': 3
     };
     const outputTransactionArray = [
     outputTransaction1,
