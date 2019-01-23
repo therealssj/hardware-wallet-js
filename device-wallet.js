@@ -367,13 +367,19 @@ const createBackupDeviceRequest = function() {
 
 // eslint-disable-next-line max-params, max-statements
 const createTransactionSignRequest = function(nbIn, inputTransactions, nbOut, outputTransactions) {
-    const transactionIn = new ArrayBuffer();
-    const transactionOut = new ArrayBuffer();
+    const transactionIn = [];
+    const transactionOut = [];
     for (i = 0; i < nbIn; i += 1) {
         transactionIn[i] = {
             'hashIn': inputTransactions[i].hashIn,
             'index': inputTransactions[i].index
         };
+        console.log(
+            "Pushing transaction with hash",
+            inputTransactions[i].hashIn,
+            "index: ",
+            inputTransactions[i].index
+            );
     }
     for (i = 0; i < nbOut; i += 1) {
         transactionOut[i] = {
@@ -381,7 +387,15 @@ const createTransactionSignRequest = function(nbIn, inputTransactions, nbOut, ou
             'coin': outputTransactions[i].coin,
             'hour': outputTransactions[i].hour
         };
+        console.log(
+            "Pushing transaction with address",
+            outputTransactions[i].address,
+            "coin:", outputTransactions[i].coin,
+            "hour:", outputTransactions[i].hour
+            );
     }
+    console.log("ArrayBuffer input len: ", transactionIn.length);
+    console.log("ArrayBuffer output len: ", transactionOut.length);
     const msgStructure = {
         nbIn,
         nbOut,

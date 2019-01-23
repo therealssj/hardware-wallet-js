@@ -42,11 +42,30 @@ if (testApplySettings) {
 const testTransactionSign = true;
 
 if (testTransactionSign) {
+    const inputTransaction = {
+        'hashIn': "HashHashIn",
+        'index': 5
+    };
+    const inputTransactionArray = [inputTransaction];
+    const outputTransaction1 = {
+        'address': "AddressOut1",
+        'coin': 12000,
+        'hour': 3
+    };
+    const outputTransaction2 = {
+        'address': "AddressOut2",
+        'coin': 20000,
+        'hour': 4
+    };
+    const outputTransactionArray = [
+    outputTransaction1,
+    outputTransaction2
+    ];
     const promise = deviceWallet.devSkycoinTransactionSign(
         1,
-        "inputTransactions",
-        1,
-        "outputTransactions",
+        inputTransactionArray,
+        2,
+        outputTransactionArray,
         pinCodeReader,
         wordReader
         );
