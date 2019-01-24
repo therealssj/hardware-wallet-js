@@ -581,6 +581,21 @@ const decodeFailureAndPinCode = function(kind, dataBuffer) {
     return "decodeFailureAndPinCode failed";
 };
 
+const decodeTransactionSignAnswer = function(kind, dataBuffer) {
+    let signatures = [];
+    if (kind == messages.MessageType.
+        MessageType_ResponseTransactionSign) {
+        try {
+            const answer = messages.ResponseTransactionSign.
+                            decode(dataBuffer);
+            signatures = answer.signatures;
+        } catch (e) {
+            console.error("Wire format is invalid", e);
+        }
+    }
+    return signatures;
+};
+
 const decodeSignMessageAnswer = function(kind, dataBuffer) {
     let signature = "";
     decodeFailureAndPinCode(kind, dataBuffer);
@@ -902,8 +917,7 @@ const devSkycoinTransactionSign = function(
             console.log("TransactionSign received message kind:", messages.MessageType[kind]);
             switch (kind) {
             case messages.MessageType.MessageType_ResponseTransactionSign:
-                resolve(dataBuffer);
-                console.log("Received message", kind, dataBuffer);
+                resolve(decodeTransactionSignAnswer(kind, dataBuffer));
                 break;
             case messages.MessageType.MessageType_Success:
                 reject(new Error("Should end with ResponseTransactionSign request"));
