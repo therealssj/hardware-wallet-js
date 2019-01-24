@@ -52,6 +52,7 @@ var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
  * @property {number} MessageType_GenerateMnemonic=119 MessageType_GenerateMnemonic value
  * @property {number} MessageType_GetVersion=120 MessageType_GetVersion value
  * @property {number} MessageType_TransactionSign=122 MessageType_TransactionSign value
+ * @property {number} MessageType_ResponseTransactionSign=123 MessageType_ResponseTransactionSign value
  */
 $root.MessageType = (function() {
     var valuesById = {}, values = Object.create(valuesById);
@@ -94,6 +95,7 @@ $root.MessageType = (function() {
     values[valuesById[119] = "MessageType_GenerateMnemonic"] = 119;
     values[valuesById[120] = "MessageType_GetVersion"] = 120;
     values[valuesById[122] = "MessageType_TransactionSign"] = 122;
+    values[valuesById[123] = "MessageType_ResponseTransactionSign"] = 123;
     return values;
 })();
 
@@ -2414,6 +2416,210 @@ $root.ResponseSkycoinAddress = (function() {
     };
 
     return ResponseSkycoinAddress;
+})();
+
+$root.ResponseTransactionSign = (function() {
+
+    /**
+     * Properties of a ResponseTransactionSign.
+     * @exports IResponseTransactionSign
+     * @interface IResponseTransactionSign
+     * @property {Array.<string>|null} [signatures] ResponseTransactionSign signatures
+     */
+
+    /**
+     * Constructs a new ResponseTransactionSign.
+     * @exports ResponseTransactionSign
+     * @classdesc Response: Return the signatures necessary for the transaction
+     * @prev TransactionSign
+     * @implements IResponseTransactionSign
+     * @constructor
+     * @param {IResponseTransactionSign=} [properties] Properties to set
+     */
+    function ResponseTransactionSign(properties) {
+        this.signatures = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * ResponseTransactionSign signatures.
+     * @member {Array.<string>} signatures
+     * @memberof ResponseTransactionSign
+     * @instance
+     */
+    ResponseTransactionSign.prototype.signatures = $util.emptyArray;
+
+    /**
+     * Creates a new ResponseTransactionSign instance using the specified properties.
+     * @function create
+     * @memberof ResponseTransactionSign
+     * @static
+     * @param {IResponseTransactionSign=} [properties] Properties to set
+     * @returns {ResponseTransactionSign} ResponseTransactionSign instance
+     */
+    ResponseTransactionSign.create = function create(properties) {
+        return new ResponseTransactionSign(properties);
+    };
+
+    /**
+     * Encodes the specified ResponseTransactionSign message. Does not implicitly {@link ResponseTransactionSign.verify|verify} messages.
+     * @function encode
+     * @memberof ResponseTransactionSign
+     * @static
+     * @param {IResponseTransactionSign} message ResponseTransactionSign message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    ResponseTransactionSign.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.signatures != null && message.signatures.length)
+            for (var i = 0; i < message.signatures.length; ++i)
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.signatures[i]);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified ResponseTransactionSign message, length delimited. Does not implicitly {@link ResponseTransactionSign.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof ResponseTransactionSign
+     * @static
+     * @param {IResponseTransactionSign} message ResponseTransactionSign message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    ResponseTransactionSign.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a ResponseTransactionSign message from the specified reader or buffer.
+     * @function decode
+     * @memberof ResponseTransactionSign
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {ResponseTransactionSign} ResponseTransactionSign
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    ResponseTransactionSign.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.ResponseTransactionSign();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.signatures && message.signatures.length))
+                    message.signatures = [];
+                message.signatures.push(reader.string());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a ResponseTransactionSign message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof ResponseTransactionSign
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {ResponseTransactionSign} ResponseTransactionSign
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    ResponseTransactionSign.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a ResponseTransactionSign message.
+     * @function verify
+     * @memberof ResponseTransactionSign
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    ResponseTransactionSign.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.signatures != null && message.hasOwnProperty("signatures")) {
+            if (!Array.isArray(message.signatures))
+                return "signatures: array expected";
+            for (var i = 0; i < message.signatures.length; ++i)
+                if (!$util.isString(message.signatures[i]))
+                    return "signatures: string[] expected";
+        }
+        return null;
+    };
+
+    /**
+     * Creates a ResponseTransactionSign message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof ResponseTransactionSign
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {ResponseTransactionSign} ResponseTransactionSign
+     */
+    ResponseTransactionSign.fromObject = function fromObject(object) {
+        if (object instanceof $root.ResponseTransactionSign)
+            return object;
+        var message = new $root.ResponseTransactionSign();
+        if (object.signatures) {
+            if (!Array.isArray(object.signatures))
+                throw TypeError(".ResponseTransactionSign.signatures: array expected");
+            message.signatures = [];
+            for (var i = 0; i < object.signatures.length; ++i)
+                message.signatures[i] = String(object.signatures[i]);
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a ResponseTransactionSign message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof ResponseTransactionSign
+     * @static
+     * @param {ResponseTransactionSign} message ResponseTransactionSign
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    ResponseTransactionSign.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.signatures = [];
+        if (message.signatures && message.signatures.length) {
+            object.signatures = [];
+            for (var j = 0; j < message.signatures.length; ++j)
+                object.signatures[j] = message.signatures[j];
+        }
+        return object;
+    };
+
+    /**
+     * Converts this ResponseTransactionSign to JSON.
+     * @function toJSON
+     * @memberof ResponseTransactionSign
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    ResponseTransactionSign.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return ResponseTransactionSign;
 })();
 
 $root.SkycoinCheckMessageSignature = (function() {

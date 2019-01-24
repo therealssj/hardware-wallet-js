@@ -898,22 +898,18 @@ const devSkycoinTransactionSign = function(
     passphraseReader
     ) {
     return new Promise((resolve, reject) => {
-        const signatureList = [];
-        let i = 0;
         const skycoinTransactionSignHander = function(kind, dataBuffer) {
             console.log("TransactionSign received message kind:", messages.MessageType[kind]);
             switch (kind) {
+            case messages.MessageType.MessageType_ResponseTransactionSign:
+                resolve(dataBuffer);
+                console.log("Received message", kind, dataBuffer);
+                break;
             case messages.MessageType.MessageType_Success:
-                console.log("Transaction processed:", decodeSuccess(kind, dataBuffer));
-                resolve(signatureList);
+                reject(new Error("Should end with ResponseTransactionSign request"));
                 break;
             case messages.MessageType.MessageType_Failure:
                 reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
-                break;
-            case messages.MessageType.MessageType_ResponseSkycoinSignMessage:
-                signatureList[i] = decodeSignMessageAnswer(kind, dataBuffer);
-                console.log("Received signature:", signatureList[i], "at:", i);
-                i += 1;
                 break;
             case messages.MessageType.MessageType_ButtonRequest:
                 devButtonRequestCallback(kind, dataBuffer, skycoinTransactionSignHander);
