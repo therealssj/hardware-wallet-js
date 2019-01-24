@@ -915,6 +915,9 @@ const devSkycoinTransactionSign = function(
                 console.log("Received signature:", signatureList[i], "at:", i);
                 i += 1;
                 break;
+            case messages.MessageType.MessageType_ButtonRequest:
+                devButtonRequestCallback(kind, dataBuffer, skycoinTransactionSignHander);
+                break;
             case messages.MessageType.MessageType_PassphraseRequest:
                 devSendPassphraseAck(skycoinTransactionSignHander, passphraseReader);
                 break;
