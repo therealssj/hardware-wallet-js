@@ -898,23 +898,28 @@ const devSkycoinTransactionSign = function(
     passphraseReader
     ) {
     return new Promise((resolve, reject) => {
+        const signatureList = [];
+        let i = 0;
         const skycoinTransactionSignHander = function(kind, dataBuffer) {
-            console.log("Signature generation received message kind:", messages.MessageType[kind]);
+            console.log("TransactionSign received message kind:", messages.MessageType[kind]);
             switch (kind) {
             case messages.MessageType.MessageType_Success:
-                resolve(decodeSuccess(kind, dataBuffer));
+                console.log("Transaction processed:", decodeSuccess(kind, dataBuffer));
+                resolve(signatureList);
                 break;
             case messages.MessageType.MessageType_Failure:
                 reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
                 break;
             case messages.MessageType.MessageType_ResponseSkycoinSignMessage:
-                console.log(decodeSignMessageAnswer(kind, dataBuffer));
+                signatureList[i] = decodeSignMessageAnswer(kind, dataBuffer);
+                console.log("Received signature:", signatureList[i], "at:", i);
+                i += 1;
                 break;
             case messages.MessageType.MessageType_PassphraseRequest:
-                devSendPassphraseAck(skycoinSignHander, passphraseReader);
+                devSendPassphraseAck(skycoinTransactionSignHander, passphraseReader);
                 break;
             case messages.MessageType.MessageType_PinMatrixRequest:
-                devSendPinCodeRequest(skycoinSignHander, pinCodeReader);
+                devSendPinCodeRequest(skycoinTransactionSignHander, pinCodeReader);
                 break;
              default:
                 reject(new Error(`Unexpected answer from the device: ${kind}`));
