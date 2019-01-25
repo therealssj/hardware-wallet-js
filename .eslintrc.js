@@ -88,7 +88,7 @@ module.exports = {
         "no-array-constructor": "error",
         "no-async-promise-executor": "error",
         "no-await-in-loop": "error",
-        "no-bitwise": "error",
+        "no-bitwise": "off",
         "no-buffer-constructor": "error",
         "no-caller": "error",
         "no-catch-shadow": "error",

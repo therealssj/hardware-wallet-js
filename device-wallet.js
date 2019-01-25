@@ -365,10 +365,12 @@ const createBackupDeviceRequest = function() {
     return dataBytesFromChunks(chunks);
 };
 
-// eslint-disable-next-line max-params, max-statements
-const createTransactionSignRequest = function(nbIn, inputTransactions, nbOut, outputTransactions) {
+// eslint-disable-next-line max-statements
+const createTransactionSignRequest = function(inputTransactions, outputTransactions) {
     const transactionIn = [];
     const transactionOut = [];
+    const nbIn = inputTransactions.length;
+    const nbOut = outputTransactions.length;
     for (i = 0; i < nbIn; i += 1) {
         transactionIn[i] = {
             'hashIn': inputTransactions[i].hashIn,
@@ -586,6 +588,7 @@ const decodeTransactionSignAnswer = function(kind, dataBuffer) {
     if (kind == messages.MessageType.
         MessageType_ResponseTransactionSign) {
         try {
+            console.log(dataBuffer);
             const answer = messages.ResponseTransactionSign.
                             decode(dataBuffer);
             signatures = answer.signatures;
@@ -634,7 +637,7 @@ const devButtonRequestCallback = function(kind, data, callback) {
         const dataBytes = createButtonAckRequest();
         const deviceHandle = new DeviceHandler(deviceType);
         const devReadCallback = function(datakind, dta) {
-            console.log("User hit a button, calling: ", callback);
+            console.log("User hit a button");
             deviceHandle.close();
             if (callback !== null && callback !== undefined) {
                 // eslint-disable-next-line callback-return
@@ -853,9 +856,8 @@ const devApplySettings = function(usePassphrase, pinCodeReader) {
     });
 };
 
-// eslint-disable-next-line max-params
-const devSendSkycoinTransactionSign = function(nbIn, inputTransactions, nbOut, outputTransactions, callback) {
-    const dataBytes = createTransactionSignRequest(nbIn, inputTransactions, nbOut, outputTransactions);
+const devSendSkycoinTransactionSign = function(inputTransactions, outputTransactions, callback) {
+    const dataBytes = createTransactionSignRequest(inputTransactions, outputTransactions);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, dataBuffer) {
         deviceHandle.close();
@@ -905,9 +907,7 @@ const devSkycoinSignMessage = function(addressN, message, pinCodeReader, passphr
 
 // eslint-disable-next-line max-params
 const devSkycoinTransactionSign = function(
-    nbIn,
     inputTransactions,
-    nbOut,
     outputTransactions,
     pinCodeReader,
     passphraseReader
@@ -939,7 +939,7 @@ const devSkycoinTransactionSign = function(
                 break;
             }
         };
-        devSendSkycoinTransactionSign(nbIn, inputTransactions, nbOut, outputTransactions, skycoinTransactionSignHander);
+        devSendSkycoinTransactionSign(inputTransactions, outputTransactions, skycoinTransactionSignHander);
     });
 };
 
