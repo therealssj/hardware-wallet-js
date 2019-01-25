@@ -39,14 +39,17 @@ if (testApplySettings) {
     promise.then(console.log, rejectPromise);
 }
 
-const testTransactionSign = true;
+const testTransactionSign = false;
 
 if (testTransactionSign) {
     const inputTransaction = {
         'hashIn': "99a1a50ffa21ab48ee7c31d01e7e14451f9834f5294468bd17e87c5018900b81",
         'index': 0
     };
-    const inputTransactionArray = [inputTransaction];
+    const inputTransactionArray = [
+    inputTransaction,
+    inputTransaction
+    ];
     const outputTransaction1 = {
         'address': "d1hMF1XCCvFXVa2u7NbuWo9dmfNbdpoFLJ",
         'coin': 125000000,
@@ -62,9 +65,7 @@ if (testTransactionSign) {
     outputTransaction2
     ];
     const promise = deviceWallet.devSkycoinTransactionSign(
-        1,
         inputTransactionArray,
-        2,
         outputTransactionArray,
         pinCodeReader,
         wordReader
@@ -91,10 +92,10 @@ if (testSign) {
     );
 }
 
-const testAddressGen = false;
+const testAddressGen = true;
 
 if (testAddressGen) {
-    const promise = deviceWallet.devAddressGen(1, 3, true, pinCodeReader, wordReader);
+    const promise = deviceWallet.devAddressGen(9, 3, true, pinCodeReader, wordReader);
     promise.then(console.log, rejectPromise);
 }
 
