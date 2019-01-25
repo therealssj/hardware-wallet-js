@@ -375,7 +375,7 @@ const createTransactionSignRequest = function(nbIn, inputTransactions, nbOut, ou
             'index': inputTransactions[i].index
         };
         console.log(
-            "Pushing transaction with hash",
+            "Pushing input:",
             inputTransactions[i].hashIn,
             "index: ",
             inputTransactions[i].index
@@ -388,7 +388,7 @@ const createTransactionSignRequest = function(nbIn, inputTransactions, nbOut, ou
             'hour': outputTransactions[i].hour
         };
         console.log(
-            "Pushing transaction with address",
+            "Pushing output:",
             outputTransactions[i].address,
             "coin:", outputTransactions[i].coin,
             "hour:", outputTransactions[i].hour
