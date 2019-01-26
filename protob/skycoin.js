@@ -13479,6 +13479,7 @@ $root.SkycoinTransactionOutput = (function() {
      * @property {string} address SkycoinTransactionOutput address
      * @property {number} coin SkycoinTransactionOutput coin
      * @property {number} hour SkycoinTransactionOutput hour
+     * @property {number|null} [addressIndex] SkycoinTransactionOutput addressIndex
      */
 
     /**
@@ -13521,6 +13522,14 @@ $root.SkycoinTransactionOutput = (function() {
     SkycoinTransactionOutput.prototype.hour = 0;
 
     /**
+     * SkycoinTransactionOutput addressIndex.
+     * @member {number} addressIndex
+     * @memberof SkycoinTransactionOutput
+     * @instance
+     */
+    SkycoinTransactionOutput.prototype.addressIndex = 0;
+
+    /**
      * Creates a new SkycoinTransactionOutput instance using the specified properties.
      * @function create
      * @memberof SkycoinTransactionOutput
@@ -13547,6 +13556,8 @@ $root.SkycoinTransactionOutput = (function() {
         writer.uint32(/* id 1, wireType 2 =*/10).string(message.address);
         writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.coin);
         writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.hour);
+        if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
+            writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.addressIndex);
         return writer;
     };
 
@@ -13589,6 +13600,9 @@ $root.SkycoinTransactionOutput = (function() {
                 break;
             case 3:
                 message.hour = reader.uint32();
+                break;
+            case 4:
+                message.addressIndex = reader.uint32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -13637,6 +13651,9 @@ $root.SkycoinTransactionOutput = (function() {
             return "coin: integer expected";
         if (!$util.isInteger(message.hour))
             return "hour: integer expected";
+        if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
+            if (!$util.isInteger(message.addressIndex))
+                return "addressIndex: integer expected";
         return null;
     };
 
@@ -13658,6 +13675,8 @@ $root.SkycoinTransactionOutput = (function() {
             message.coin = object.coin >>> 0;
         if (object.hour != null)
             message.hour = object.hour >>> 0;
+        if (object.addressIndex != null)
+            message.addressIndex = object.addressIndex >>> 0;
         return message;
     };
 
@@ -13678,6 +13697,7 @@ $root.SkycoinTransactionOutput = (function() {
             object.address = "";
             object.coin = 0;
             object.hour = 0;
+            object.addressIndex = 0;
         }
         if (message.address != null && message.hasOwnProperty("address"))
             object.address = message.address;
@@ -13685,6 +13705,8 @@ $root.SkycoinTransactionOutput = (function() {
             object.coin = message.coin;
         if (message.hour != null && message.hasOwnProperty("hour"))
             object.hour = message.hour;
+        if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
+            object.addressIndex = message.addressIndex;
         return object;
     };
 

@@ -51,7 +51,8 @@ if (testTransactionSign) {
     inputTransaction
     ];
     const outputTransaction1 = {
-        'address': "d1hMF1XCCvFXVa2u7NbuWo9dmfNbdpoFLJ",
+        'address': "BCbAa3vS7bPLH2bwL7MvedND5uta5bceHj",
+        'address_index': 2,
         'coin': 125000000,
         'hour': 4
     };

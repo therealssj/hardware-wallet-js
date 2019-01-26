@@ -378,22 +378,24 @@ const createTransactionSignRequest = function(inputTransactions, outputTransacti
         };
         console.log(
             "Pushing input:",
-            inputTransactions[i].hashIn,
+            transactionIn[i].hashIn,
             "index: ",
-            inputTransactions[i].index
+            transactionIn[i].index
             );
     }
     for (i = 0; i < nbOut; i += 1) {
         transactionOut[i] = {
             'address': outputTransactions[i].address,
+            'addressIndex': outputTransactions[i].address_index,
             'coin': outputTransactions[i].coin,
             'hour': outputTransactions[i].hour
         };
         console.log(
             "Pushing output:",
-            outputTransactions[i].address,
-            "coin:", outputTransactions[i].coin,
-            "hour:", outputTransactions[i].hour
+            transactionOut[i].address,
+            "coin:", transactionOut[i].coin,
+            "hour:", transactionOut[i].hour,
+            "address_index:", transactionOut[i].addressIndex
             );
     }
     console.log("ArrayBuffer input len: ", transactionIn.length);
