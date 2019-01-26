@@ -39,7 +39,7 @@ if (testApplySettings) {
     promise.then(console.log, rejectPromise);
 }
 
-const testTransactionSign = false;
+const testTransactionSign = true;
 
 if (testTransactionSign) {
     const inputTransaction = {
@@ -92,7 +92,7 @@ if (testSign) {
     );
 }
 
-const testAddressGen = true;
+const testAddressGen = false;
 
 if (testAddressGen) {
     const promise = deviceWallet.devAddressGen(9, 3, true, pinCodeReader, wordReader);

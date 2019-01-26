@@ -588,7 +588,7 @@ const decodeTransactionSignAnswer = function(kind, dataBuffer) {
     if (kind == messages.MessageType.
         MessageType_ResponseTransactionSign) {
         try {
-            console.log(dataBuffer);
+            console.log(dataBuffer.slice(-5), dataBuffer.length);
             const answer = messages.ResponseTransactionSign.
                             decode(dataBuffer);
             signatures = answer.signatures;

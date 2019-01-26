@@ -2425,6 +2425,7 @@ $root.ResponseTransactionSign = (function() {
      * @exports IResponseTransactionSign
      * @interface IResponseTransactionSign
      * @property {Array.<string>|null} [signatures] ResponseTransactionSign signatures
+     * @property {boolean} padding ResponseTransactionSign padding
      */
 
     /**
@@ -2453,6 +2454,14 @@ $root.ResponseTransactionSign = (function() {
     ResponseTransactionSign.prototype.signatures = $util.emptyArray;
 
     /**
+     * ResponseTransactionSign padding.
+     * @member {boolean} padding
+     * @memberof ResponseTransactionSign
+     * @instance
+     */
+    ResponseTransactionSign.prototype.padding = false;
+
+    /**
      * Creates a new ResponseTransactionSign instance using the specified properties.
      * @function create
      * @memberof ResponseTransactionSign
@@ -2479,6 +2488,7 @@ $root.ResponseTransactionSign = (function() {
         if (message.signatures != null && message.signatures.length)
             for (var i = 0; i < message.signatures.length; ++i)
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.signatures[i]);
+        writer.uint32(/* id 2, wireType 0 =*/16).bool(message.padding);
         return writer;
     };
 
@@ -2518,11 +2528,16 @@ $root.ResponseTransactionSign = (function() {
                     message.signatures = [];
                 message.signatures.push(reader.string());
                 break;
+            case 2:
+                message.padding = reader.bool();
+                break;
             default:
                 reader.skipType(tag & 7);
                 break;
             }
         }
+        if (!message.hasOwnProperty("padding"))
+            throw $util.ProtocolError("missing required 'padding'", { instance: message });
         return message;
     };
 
@@ -2560,6 +2575,8 @@ $root.ResponseTransactionSign = (function() {
                 if (!$util.isString(message.signatures[i]))
                     return "signatures: string[] expected";
         }
+        if (typeof message.padding !== "boolean")
+            return "padding: boolean expected";
         return null;
     };
 
@@ -2582,6 +2599,8 @@ $root.ResponseTransactionSign = (function() {
             for (var i = 0; i < object.signatures.length; ++i)
                 message.signatures[i] = String(object.signatures[i]);
         }
+        if (object.padding != null)
+            message.padding = Boolean(object.padding);
         return message;
     };
 
@@ -2600,11 +2619,15 @@ $root.ResponseTransactionSign = (function() {
         var object = {};
         if (options.arrays || options.defaults)
             object.signatures = [];
+        if (options.defaults)
+            object.padding = false;
         if (message.signatures && message.signatures.length) {
             object.signatures = [];
             for (var j = 0; j < message.signatures.length; ++j)
                 object.signatures[j] = message.signatures[j];
         }
+        if (message.padding != null && message.hasOwnProperty("padding"))
+            object.padding = message.padding;
         return object;
     };
 

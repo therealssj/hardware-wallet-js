@@ -59,7 +59,8 @@ class BufferReceiver {
             "Received data", " msg kind: ",
             messages.MessageType[this.kind],
             " size: ", this.msgSize, "buffer lenght: ",
-            this.dataBuffer.byteLength
+            this.dataBuffer.byteLength,
+            "\nRemaining bytesToGet:", this.bytesToGet
             );
 
         if (this.bytesToGet > 0) {
