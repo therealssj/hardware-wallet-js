@@ -985,7 +985,7 @@ const devWipeDevice = function() {
                     if (datakind == messages.MessageType.MessageType_Success) {
                         resolve("Wipe Device operation completed");
                     } else {
-                        resolve("Wipe Device operation failed or refused");
+                        reject("Wipe Device operation failed or refused");
                     }
                 });
             };
