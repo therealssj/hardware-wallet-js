@@ -531,7 +531,7 @@ const sample_10 = function(t) {
     });
 };
 
-suite.test('Transactions', (t) => {
+suite.test('Transactions', async (t) => {
     if (deviceWallet.getDevice() === null) {
         console.log("Skycoin hardware NOT FOUND, using emulator");
         deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
@@ -539,35 +539,23 @@ suite.test('Transactions', (t) => {
         console.log("Skycoin hardware is plugged in");
         deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
     }
-    const sample_1_promise = sample_1(t);
-    sample_1_promise.then(() => {
-        const sample_2_promise = sample_2(t);
-        sample_2_promise.then(() => {
-            const sample_3_promise = sample_3(t);
-            sample_3_promise.then(() => {
-                const sample_4_promise = sample_4(t);
-                sample_4_promise.then(() => {
-                    const sample_5_promise = sample_5(t);
-                    sample_5_promise.then(() => {
-                        const sample_6_promise = sample_6(t);
-                        sample_6_promise.then(() => {
-                        }, rejectPromise);
-                        const sample_7_promise = sample_7(t);
-                        sample_7_promise.then(() => {
-                            const sample_8_promise = sample_8(t);
-                            sample_8_promise.then(() => {
-                                const sample_9_promise = sample_9(t);
-                                sample_9_promise.then(() => {
-                                    const sample_10_promise = sample_10(t);
-                                    sample_10_promise.then(() => {
-                                        console.log("Test success");
-                                    }, rejectPromise);
-                                }, rejectPromise);
-                            }, rejectPromise);
-                        }, rejectPromise);
-                    }, rejectPromise);
-                }, rejectPromise);
-            }, rejectPromise);
-        }, rejectPromise);
-    }, rejectPromise);
+    await sample_1(t).then(() => {
+        return sample_2(t);
+    }).then(() => {
+        return sample_3(t);
+    }).then(() => {
+        return sample_4(t);
+    }).then(() => {
+        return sample_5(t);
+    }).then(() => {
+        return sample_6(t);
+    }).then(() => {
+        return sample_7(t);
+    }).then(() => {
+        return sample_8(t);
+    }).then(() => {
+        return sample_9(t);
+    }).then(() => {
+        return sample_10(t);
+    }).catch(rejectPromise);
 });
