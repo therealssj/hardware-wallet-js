@@ -2,7 +2,7 @@ const deviceWallet = require('./device-wallet');
 const DeviceDetectionEvent = require('./device-detection-lib/device-detection/DeviceEventObserver');
 const transportNodeHid = require('./device-detection-lib/device-detection/TransportNodeHid');
 
-console.log(deviceDetectionEvent);
+console.log(DeviceDetectionEvent);
 const observer = new DeviceDetectionEvent();
 transportNodeHid.listen(observer);
 
