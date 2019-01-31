@@ -112,7 +112,6 @@ const sample_2 = function(t) {
                 );
             checkSignPromise.then((check) => {
                 t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
-                resolve("Test success");
                 const checkSignPromise1 = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "f947b0352b19672f7b7d04dc2f1fdc47bc5355878f3c47a43d4d4cfbae07d026",
@@ -179,7 +178,6 @@ transactionOutput1
                 );
             checkSignPromise.then((check) => {
                 t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
-                resolve("Test success");
                 const checkSignPromise1 = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "c918d83d8d3b1ee85c1d2af6885a0067bacc636d2ebb77655150f86e80bf4417",
@@ -188,7 +186,6 @@ transactionOutput1
                     );
                 checkSignPromise1.then((check1) => {
                     t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
-                    resolve("Test success");
                     const checkSignPromise2 = deviceWallet.devCheckMessageSignature(
                         "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                         "0e827c5d16bab0c3451850cc6deeaa332cbcb88322deea4ea939424b072e9b97",
@@ -243,7 +240,6 @@ transactionInput1
                 );
             checkSignPromise.then((check) => {
                 t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
-                resolve("Test success");
                 const checkSignPromise1 = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "5e0a5a8c7ea4a2a500c24e3a4bfd83ef9f74f3c2ff4bdc01240b66a41e34ebbf",
@@ -391,7 +387,6 @@ transactionInput2
                 );
             checkSignPromise.then((check) => {
                 t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
-                resolve("Test success");
                 const checkSignPromise1 = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "332534f92c27b31f5b73d8d0c7dde4527b540024f8daa965fe9140e97f3c2b06",
@@ -400,7 +395,6 @@ transactionInput2
                     );
                 checkSignPromise1.then((check1) => {
                     t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
-                    resolve("Test success");
                     const checkSignPromise2 = deviceWallet.devCheckMessageSignature(
                         "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                         "63f955205ceb159415268bad68acaae6ac8be0a9f33ef998a84d1c09a8b52798",
