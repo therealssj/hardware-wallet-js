@@ -1418,6 +1418,7 @@ $root.GenerateMnemonic = (function() {
      * @exports IGenerateMnemonic
      * @interface IGenerateMnemonic
      * @property {boolean|null} [passphraseProtection] GenerateMnemonic passphraseProtection
+     * @property {number|null} [wordCount] GenerateMnemonic wordCount
      */
 
     /**
@@ -1445,6 +1446,14 @@ $root.GenerateMnemonic = (function() {
     GenerateMnemonic.prototype.passphraseProtection = false;
 
     /**
+     * GenerateMnemonic wordCount.
+     * @member {number} wordCount
+     * @memberof GenerateMnemonic
+     * @instance
+     */
+    GenerateMnemonic.prototype.wordCount = 0;
+
+    /**
      * Creates a new GenerateMnemonic instance using the specified properties.
      * @function create
      * @memberof GenerateMnemonic
@@ -1470,6 +1479,8 @@ $root.GenerateMnemonic = (function() {
             writer = $Writer.create();
         if (message.passphraseProtection != null && message.hasOwnProperty("passphraseProtection"))
             writer.uint32(/* id 1, wireType 0 =*/8).bool(message.passphraseProtection);
+        if (message.wordCount != null && message.hasOwnProperty("wordCount"))
+            writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.wordCount);
         return writer;
     };
 
@@ -1506,6 +1517,9 @@ $root.GenerateMnemonic = (function() {
             switch (tag >>> 3) {
             case 1:
                 message.passphraseProtection = reader.bool();
+                break;
+            case 2:
+                message.wordCount = reader.uint32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -1545,6 +1559,9 @@ $root.GenerateMnemonic = (function() {
         if (message.passphraseProtection != null && message.hasOwnProperty("passphraseProtection"))
             if (typeof message.passphraseProtection !== "boolean")
                 return "passphraseProtection: boolean expected";
+        if (message.wordCount != null && message.hasOwnProperty("wordCount"))
+            if (!$util.isInteger(message.wordCount))
+                return "wordCount: integer expected";
         return null;
     };
 
@@ -1562,6 +1579,8 @@ $root.GenerateMnemonic = (function() {
         var message = new $root.GenerateMnemonic();
         if (object.passphraseProtection != null)
             message.passphraseProtection = Boolean(object.passphraseProtection);
+        if (object.wordCount != null)
+            message.wordCount = object.wordCount >>> 0;
         return message;
     };
 
@@ -1578,10 +1597,14 @@ $root.GenerateMnemonic = (function() {
         if (!options)
             options = {};
         var object = {};
-        if (options.defaults)
+        if (options.defaults) {
             object.passphraseProtection = false;
+            object.wordCount = 0;
+        }
         if (message.passphraseProtection != null && message.hasOwnProperty("passphraseProtection"))
             object.passphraseProtection = message.passphraseProtection;
+        if (message.wordCount != null && message.hasOwnProperty("wordCount"))
+            object.wordCount = message.wordCount;
         return object;
     };
 
@@ -7478,9 +7501,6 @@ $root.RecoveryDevice = (function() {
      * @property {boolean|null} [pinProtection] RecoveryDevice pinProtection
      * @property {string|null} [language] RecoveryDevice language
      * @property {string|null} [label] RecoveryDevice label
-     * @property {boolean|null} [enforceWordlist] RecoveryDevice enforceWordlist
-     * @property {number|null} [type] RecoveryDevice type
-     * @property {boolean|null} [dryRun] RecoveryDevice dryRun
      */
 
     /**
@@ -7541,30 +7561,6 @@ $root.RecoveryDevice = (function() {
     RecoveryDevice.prototype.label = "";
 
     /**
-     * RecoveryDevice enforceWordlist.
-     * @member {boolean} enforceWordlist
-     * @memberof RecoveryDevice
-     * @instance
-     */
-    RecoveryDevice.prototype.enforceWordlist = false;
-
-    /**
-     * RecoveryDevice type.
-     * @member {number} type
-     * @memberof RecoveryDevice
-     * @instance
-     */
-    RecoveryDevice.prototype.type = 0;
-
-    /**
-     * RecoveryDevice dryRun.
-     * @member {boolean} dryRun
-     * @memberof RecoveryDevice
-     * @instance
-     */
-    RecoveryDevice.prototype.dryRun = false;
-
-    /**
      * Creates a new RecoveryDevice instance using the specified properties.
      * @function create
      * @memberof RecoveryDevice
@@ -7598,12 +7594,6 @@ $root.RecoveryDevice = (function() {
             writer.uint32(/* id 4, wireType 2 =*/34).string(message.language);
         if (message.label != null && message.hasOwnProperty("label"))
             writer.uint32(/* id 5, wireType 2 =*/42).string(message.label);
-        if (message.enforceWordlist != null && message.hasOwnProperty("enforceWordlist"))
-            writer.uint32(/* id 6, wireType 0 =*/48).bool(message.enforceWordlist);
-        if (message.type != null && message.hasOwnProperty("type"))
-            writer.uint32(/* id 8, wireType 0 =*/64).uint32(message.type);
-        if (message.dryRun != null && message.hasOwnProperty("dryRun"))
-            writer.uint32(/* id 10, wireType 0 =*/80).bool(message.dryRun);
         return writer;
     };
 
@@ -7652,15 +7642,6 @@ $root.RecoveryDevice = (function() {
                 break;
             case 5:
                 message.label = reader.string();
-                break;
-            case 6:
-                message.enforceWordlist = reader.bool();
-                break;
-            case 8:
-                message.type = reader.uint32();
-                break;
-            case 10:
-                message.dryRun = reader.bool();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -7712,15 +7693,6 @@ $root.RecoveryDevice = (function() {
         if (message.label != null && message.hasOwnProperty("label"))
             if (!$util.isString(message.label))
                 return "label: string expected";
-        if (message.enforceWordlist != null && message.hasOwnProperty("enforceWordlist"))
-            if (typeof message.enforceWordlist !== "boolean")
-                return "enforceWordlist: boolean expected";
-        if (message.type != null && message.hasOwnProperty("type"))
-            if (!$util.isInteger(message.type))
-                return "type: integer expected";
-        if (message.dryRun != null && message.hasOwnProperty("dryRun"))
-            if (typeof message.dryRun !== "boolean")
-                return "dryRun: boolean expected";
         return null;
     };
 
@@ -7746,12 +7718,6 @@ $root.RecoveryDevice = (function() {
             message.language = String(object.language);
         if (object.label != null)
             message.label = String(object.label);
-        if (object.enforceWordlist != null)
-            message.enforceWordlist = Boolean(object.enforceWordlist);
-        if (object.type != null)
-            message.type = object.type >>> 0;
-        if (object.dryRun != null)
-            message.dryRun = Boolean(object.dryRun);
         return message;
     };
 
@@ -7774,9 +7740,6 @@ $root.RecoveryDevice = (function() {
             object.pinProtection = false;
             object.language = "english";
             object.label = "";
-            object.enforceWordlist = false;
-            object.type = 0;
-            object.dryRun = false;
         }
         if (message.wordCount != null && message.hasOwnProperty("wordCount"))
             object.wordCount = message.wordCount;
@@ -7788,12 +7751,6 @@ $root.RecoveryDevice = (function() {
             object.language = message.language;
         if (message.label != null && message.hasOwnProperty("label"))
             object.label = message.label;
-        if (message.enforceWordlist != null && message.hasOwnProperty("enforceWordlist"))
-            object.enforceWordlist = message.enforceWordlist;
-        if (message.type != null && message.hasOwnProperty("type"))
-            object.type = message.type;
-        if (message.dryRun != null && message.hasOwnProperty("dryRun"))
-            object.dryRun = message.dryRun;
         return object;
     };
 
@@ -8997,27 +8954,6 @@ $root.PinMatrixRequestType = (function() {
     values[valuesById[1] = "PinMatrixRequestType_Current"] = 1;
     values[valuesById[2] = "PinMatrixRequestType_NewFirst"] = 2;
     values[valuesById[3] = "PinMatrixRequestType_NewSecond"] = 3;
-    return values;
-})();
-
-/**
- * Type of recovery procedure. These should be used as bitmask, e.g.,
- * `RecoveryDeviceType_ScrambledWords | RecoveryDeviceType_Matrix`
- * listing every method supported by the host computer.
- * 
- * Note that ScrambledWords must be supported by every implementation
- * for backward compatibility; there is no way to not support it.
- * 
- * @used_in RecoveryDevice
- * @exports RecoveryDeviceType
- * @enum {string}
- * @property {number} RecoveryDeviceType_ScrambledWords=0 RecoveryDeviceType_ScrambledWords value
- * @property {number} RecoveryDeviceType_Matrix=1 RecoveryDeviceType_Matrix value
- */
-$root.RecoveryDeviceType = (function() {
-    var valuesById = {}, values = Object.create(valuesById);
-    values[valuesById[0] = "RecoveryDeviceType_ScrambledWords"] = 0;
-    values[valuesById[1] = "RecoveryDeviceType_Matrix"] = 1;
     return values;
 })();
 

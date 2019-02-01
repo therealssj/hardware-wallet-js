@@ -3,14 +3,14 @@ const scanf = require('scanf');
 const fs = require('fs');
 const sha256 = require('js-sha256');
 
-if( deviceWallet.getDevice() === null ) {
+if (deviceWallet.getDevice() === null) {
     console.log("Skycoin hardware NOT FOUND, using emulator");
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
 } else {
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
 }
 const rejectPromise = function(msg) {
-  console.log("Promise rejected", msg);
+    console.log("Promise rejected", msg);
 };
 
 const wordReader = function() {
@@ -91,7 +91,7 @@ if (testFirmwareUpdate) {
         console.log(data);
         console.log(data.length);
         deviceWallet.devUpdateFirmware(data, sha256(data.slice(0x100)));
-  });
+    });
 }
 
 const testGetVersion = false;
@@ -109,7 +109,7 @@ if (testGetVersion) {
 const testRecovery = false;
 
 if (testRecovery) {
-    const promise = deviceWallet.devRecoveryDevice(true, wordReader);
+    const promise = deviceWallet.devRecoveryDevice(12, true, wordReader);
     promise.then(console.log, rejectPromise);
 }
 
@@ -141,6 +141,6 @@ if (testMnemonic) {
 
 const testGenerateMnemonic = false;
 if (testGenerateMnemonic) {
-    const promise = deviceWallet.devGenerateMnemonic(true);
+    const promise = deviceWallet.devGenerateMnemonic(12, true);
     promise.then(console.log, rejectPromise);
 }
