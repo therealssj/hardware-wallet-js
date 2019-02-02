@@ -574,4 +574,4 @@ suite.test('Transactions', async function (t) {
     catch (err) {
         console.log('Not success');
     }
-}).setTimeout(99999);
+}).setTimeout(Infinity);
