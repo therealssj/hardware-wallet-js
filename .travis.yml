@@ -15,4 +15,3 @@ matrix:
     script:
       - npm run lint
       - npm test
-      - node test/transaction-test.js
