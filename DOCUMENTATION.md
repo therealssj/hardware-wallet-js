@@ -519,9 +519,10 @@ was called, the auxiliary function to obtain the PIN always has the same form.
 The auxiliary function does not receive any parameter.
 
 The auxiliary function must return a promise that returns a string with the PIN entered by the user, or be
-rejected if the user decided not to enter the PIN (this causes the operation to be canceled). It is
-important to keep in mind that the PIN that the promise must return is not the PIN number in plain text,
-but the position of the numbers within the matrix shown on the hardware wallet screen.
+rejected if the user decided not to enter the PIN (this causes the operation to be canceled without returning
+anything through the promise). It is important to keep in mind that the PIN that the promise must return is
+not the PIN number in plain text, but the position of the numbers within the matrix shown on the hardware
+wallet screen.
 
 For example, if the hardware wallet displays on the screen a matrix like this:
 ```
@@ -546,7 +547,7 @@ const pinCodeReader = function() {
         console.log("Enter your PIN:");
         const pinCode = scanf('%s');
         // Just as an example, the operation is canceled if the PIN has less than 4 digits (the error message is not relevant).
-        if (pinCode.length != 4) {
+        if (pinCode.length < 4) {
             reject(new Error("Bad pin code"));
             return;
         }
@@ -564,8 +565,9 @@ function was called, the auxiliary function to obtain the passphrase always has 
 
 The auxiliary function does not receive any parameter.
 
-The auxiliary function must return a promise that returns a string with the passphrase entered by the user. The
-promise must not be rejected.
+The auxiliary function must return a promise that returns a string with the passphrase entered by the user, or be
+rejected if the user decided not to enter the passphrase (this causes the operation to be canceled without
+returning anything through the promise).
 
 This is an example of an auxiliary function:
 
@@ -576,6 +578,11 @@ const passphraseReader = function() {
         // Get the passphrase using the console.
         console.log("Enter your passphrase:");
         const passphrase = scanf('%s');
+        // Just as an example, the operation is canceled if the passphrase has less than 4 characters (the error message is not relevant).
+        if (passphrase.length < 4) {
+            reject(new Error("Bad passphrase"));
+            return;
+        }
         // Return the passphrase.
         resolve(passphrase);
     });
