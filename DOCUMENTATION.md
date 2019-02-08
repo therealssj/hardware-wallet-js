@@ -5,6 +5,54 @@ sending instructions.
 
 This documentation contains general information about how to use the library.
 
+<!-- MarkdownTOC autolink="true" bracket="round" levels="1,2,3" -->
+
+- [Use case summary](#)
+- [General characteristics to take into account](#general-characteristics-to-take-into-account)
+- [Functions reference](#functions-reference)
+  - [devAddressGen](#devAddressGen)
+  - [devApplySettings](#devApplySettings)
+  - [devBackupDevice](#devBackupDevice)
+  - [devCancelRequest](#devCancelRequest)
+  - [devChangePin](#devChangePin)
+  - [devCheckMessageSignature](#devCheckMessageSignature)
+  - [devGenerateMnemonic](#devGenerateMnemonic)
+  - [devGetFeatures](#devGetFeatures)
+  - [devGetVersionDevice](#devGetVersionDevice)
+  - [devRecoveryDevice](#devRecoveryDevice)
+  - [devSetMnemonic](#devSetMnemonic)
+  - [devSkycoinSignMessage](#devSkycoinSignMessage)
+  - [devSkycoinTransactionSign](#devSkycoinTransactionSign)
+  - [devUpdateFirmware](#devUpdateFirmware)
+  - [devWipeDevice](#devWipeDevice)
+  - [getDevice](#getDevice)
+  - [setDeviceType](#setDeviceType)
+- [Auxiliary functions](#auxiliary-functions)
+  - [Auxiliary function to obtain the PIN](#auxiliary-function-to-obtain-the-pin)
+  - [Auxiliary function to obtain the passphrase](#auxiliary-function-to-obtain-the-passphrase)
+
+<!-- /MarkdownTOC -->
+
+## Use case summary
+
+The following actions are possible
+
+- Apply settings like activate or desactivate the passphrase protection - see [devApplySettings](#devApplySettings)
+- Update firmware - see [devUpdateFirmware](#devUpdateFirmware)
+- Ask device to generate addresses - see [devAddressGen](#devAddressGen)
+- Configure device mnemonic - see [devSetMnemonic](#devSetMnemonic)
+- Ask device to generate mnemonic - see [devGenerateMnemonic](#devGenerateMnemonic)
+- Configure device PIN code - see [devChangePin](#devChangePin)
+- Get firmware version - see [devGetVersionDevice](#devGetVersionDevice)
+- Ask device to sign message - see [devSkycoinSignMessage](#devSkycoinSignMessage)
+- Ask device to check signature - see [devCheckMessageSignature](#devCheckMessageSignature)
+- Wipe device - see [devWipeDevice](#devWipeDevice)
+- Ask the device to perform the seed backup procedure - see [devBackupDevice](#devBackupDevice)
+- Ask the device to perform the seed recovery procedure - see [devRecoveryDevice](#devRecoveryDevice)
+- Ask the device Features - see [devGetFeatures](#devGetFeatures)
+- Ask the device to cancel the ongoing procedure - see [devCancelRequest](#devCancelRequest)
+- Ask the device to sign a transaction using the provided information - see [devSkycoinTransactionSign](#devSkycoinTransactionSign)
+
 ## General characteristics to take into account
 
 - As many of the operations performed by the hardware wallet can be slow, most of the functions of the library
@@ -29,7 +77,7 @@ function before starting a new operation.
 - When a function returns a promise and the procedure fails, the promise could be rejected, but some functions
 don't do that, so it is important to be aware of the particular way in which each function responds.
 
-## Functions
+## Functions reference
 
 - [devAddressGen](#devAddressGen)
 - [devApplySettings](#devApplySettings)
@@ -43,6 +91,7 @@ don't do that, so it is important to be aware of the particular way in which eac
 - [devRecoveryDevice](#devRecoveryDevice)
 - [devSetMnemonic](#devSetMnemonic)
 - [devSkycoinSignMessage](#devSkycoinSignMessage)
+- [devSkycoinTransactionSign](#devSkycoinTransactionSign)
 - [devUpdateFirmware](#devUpdateFirmware)
 - [devWipeDevice](#devWipeDevice)
 - [getDevice](#getDevice)
@@ -391,6 +440,49 @@ A promise that receives a text string that depends on the result of the operatio
 *Notes:*
 - Since the hardware wallet internally recovers the addresses sequentially, starting with the first one, the
 process will be slower if an address with high index is used.
+
+### devSkycoinTransactionSign
+
+*Signature:*
+```
+devSkycoinTransactionSign(inputTransactions, outputTransactions, pinCodeReader, passphraseReader)
+```
+
+*Purpose:*
+
+Allows to sign a transaction with the hardware wallet.
+
+*Params:*
+- inputTransactions: List of objects with the following fields:
+  * `hashIn`: Input hash.
+  * `index`: Index of the address, in the hardware wallet, to which the input belongs.
+- outputTransactions: List of objects with the following fields:
+  * `address`: Skycoin address in `Base58` format.
+  * `addressIndex`: If the output is used for returning coins/hours to one of the addresses of the hardware
+  wallet, this parameter must contain the index of the address in the hardware wallet, so that the user is
+  not asked for confirmation for this specific output. If this is not the case, this parameter is not necessary.
+  * `coin`: Output coins.
+  * `hour`: Output hours.
+- pinCodeReader: [Auxiliary function to obtain the PIN.](#auxiliary-function-to-obtain-the-PIN)
+- passphraseReader: [Auxiliary function to obtain the passphrase.](#auxiliary-function-to-obtain-the-passphrase)
+
+*Return value:*
+
+A promise that receives a text string that depends on the result of the operation:
+- If the user cancels the operation (promise rejected): `Error: Action cancelled by user`.
+- If the `addressIndex` property is set but the hardware wallet has a different address in that index (promise
+rejected): `Error: Wrong return address`
+- If the wallet does not have a seed (promise rejected): `Error: Mnemonic not set`.
+- If the operation ends correctly: a JSON array with the signatures returned by the hardware wallet. The
+hardware wallet returns one signature for each input. Example response:
+```
+[ 'GvKS4S3CA2YTpEPFA47yFdC5CP3y3qB18jwiX1URXqWQ9tmP77GFxm43ZbW1DDxhQto2a3kVpr9SgvHoUWpPrDM6X' '7pS82nJg78TCvuZmBusXRqTJG48UBnqYsELNzzm7oYSQpiENgjJsSe9AnvwWz6uFzwLAi4fgjjHMEZcgajZ3bsZUs' ]
+```
+
+*Notes:*
+- Since the hardware wallet internally recovers the addresses sequentially, starting with the first one, the
+process will be slower if an address with high index is used.
+- A security alert must accepted in the hardware wallet for the operation to be completed.
 
 ### devUpdateFirmware
 
