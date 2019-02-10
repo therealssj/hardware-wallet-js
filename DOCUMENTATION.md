@@ -533,7 +533,7 @@ Wipes the hardware wallet, so that it is possible to configure it again as a new
 *Return value:*
 
 A promise that receives a text string that depends on the result of the operation:
-- If the user cancels the operation: `Wipe Device operation failed or refused`.
+- If the user cancels the operation (promise rejected): `Error: Wipe Device operation failed or refused`.
 - If the operation ends correctly: `Wipe Device operation completed`.
 
 *Notes:*

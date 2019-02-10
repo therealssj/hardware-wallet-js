@@ -976,7 +976,7 @@ const devCheckMessageSignature = function(address, message, signature, passphras
 };
 
 const devWipeDevice = function() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
             const dataBytes = createWipeDeviceRequest();
             const deviceHandle = new DeviceHandler(deviceType);
             const devReadCallback = function(kind, d) {
@@ -985,7 +985,7 @@ const devWipeDevice = function() {
                     if (datakind == messages.MessageType.MessageType_Success) {
                         resolve("Wipe Device operation completed");
                     } else {
-                        reject("Wipe Device operation failed or refused");
+                        reject(new Error("Wipe Device operation failed or refused"));
                     }
                 });
             };
