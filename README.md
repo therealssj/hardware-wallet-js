@@ -5,3 +5,7 @@
 Generate messages.js library:
 
     npm run make-protobuf-files
+
+## Documentation
+
+The documentation of the library is in [DOCUMENTATION.md](DOCUMENTATION.md)

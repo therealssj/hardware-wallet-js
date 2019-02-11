@@ -3,14 +3,14 @@ const scanf = require('scanf');
 const fs = require('fs');
 const sha256 = require('js-sha256');
 
-if (deviceWallet.getDevice() === null) {
+if( deviceWallet.getDevice() === null ) {
     console.log("Skycoin hardware NOT FOUND, using emulator");
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
 } else {
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
 }
 const rejectPromise = function(msg) {
-    console.log("Promise rejected", msg);
+  console.log("Promise rejected", msg);
 };
 
 const wordReader = function() {
@@ -33,9 +33,44 @@ const pinCodeReader = function() {
     });
 };
 
-const testApplySettings = true;
+const testApplySettings = false;
 if (testApplySettings) {
     const promise = deviceWallet.devApplySettings(true);
+    promise.then(console.log, rejectPromise);
+}
+
+const testTransactionSign = true;
+
+if (testTransactionSign) {
+    const inputTransaction = {
+        'hashIn': "99a1a50ffa21ab48ee7c31d01e7e14451f9834f5294468bd17e87c5018900b81",
+        'index': 0
+    };
+    const inputTransactionArray = [
+    inputTransaction,
+    inputTransaction
+    ];
+    const outputTransaction1 = {
+        'address': "BCbAa3vS7bPLH2bwL7MvedND5uta5bceHj",
+        'address_index': 2,
+        'coin': 125000000,
+        'hour': 4
+    };
+    const outputTransaction2 = {
+        'address': "2kVVoMkH7aTVXsiGwZEALpkHZ6sUyumL8hH",
+        'coin': 2000000,
+        'hour': 3
+    };
+    const outputTransactionArray = [
+    outputTransaction1,
+    outputTransaction2
+    ];
+    const promise = deviceWallet.devSkycoinTransactionSign(
+        inputTransactionArray,
+        outputTransactionArray,
+        pinCodeReader,
+        wordReader
+        );
     promise.then(console.log, rejectPromise);
 }
 
@@ -61,7 +96,7 @@ if (testSign) {
 const testAddressGen = false;
 
 if (testAddressGen) {
-    const promise = deviceWallet.devAddressGen(1, 3, true, pinCodeReader, wordReader);
+    const promise = deviceWallet.devAddressGen(9, 3, true, pinCodeReader, wordReader);
     promise.then(console.log, rejectPromise);
 }
 
@@ -91,7 +126,7 @@ if (testFirmwareUpdate) {
         console.log(data);
         console.log(data.length);
         deviceWallet.devUpdateFirmware(data, sha256(data.slice(0x100)));
-    });
+  });
 }
 
 const testGetVersion = false;
