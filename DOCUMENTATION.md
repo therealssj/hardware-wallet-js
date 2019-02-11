@@ -273,7 +273,7 @@ Address emiting that signature: 2MQU26XaiERSZNvThT4ST3iCBEGEcCEPpjB
 
 *Signature:*
 ```
-devGenerateMnemonic(usePassphrase)
+devGenerateMnemonic(wordCount, usePassphrase)
 ```
 
 *Purpose:*
@@ -281,6 +281,7 @@ devGenerateMnemonic(usePassphrase)
 Asks the hardware wallet to create a new random mnemonic (seed) and use it.
 
 *Params:*
+- wordCount: Should be set to 12 or 24, this will be the number of words for the seed.
 - usePassphrase: If set to true, a passphrase will be requested before being able to perform
 some operations (the hardware wallet may save the passphrase until it is disconnected, to avoid
 asking for it very frequently).
@@ -360,7 +361,7 @@ Firmware Version 1.6.1
 
 *Signature:*
 ```
-devRecoveryDevice(usePassphrase, wordReader)
+devRecoveryDevice(wordCount, usePassphrase, wordReader)
 ```
 
 *Purpose:*
@@ -368,6 +369,7 @@ devRecoveryDevice(usePassphrase, wordReader)
 Makes the hardware wallet initiate the procedure to safely restore a previously saved mnemonic (seed).
 
 *Params:*
+- wordCount: Should be set to 12 or 24 depending on the number of words in the seed you are trying to recover.
 - usePassphrase: If set to true, a passphrase will be requested before being able to perform
 some operations (the hardware wallet may save the passphrase until it is disconnected, to avoid
 asking for it very frequently).
