@@ -1128,7 +1128,7 @@ const devGenerateMnemonic = function(wordCount, usePassphrase) {
                 if (datakind == messages.MessageType.MessageType_Success) {
                     resolve("Generate Mnemonic operation completed");
                 } else {
-                    resolve("Generate Mnemonic operation failed or refused");
+                    reject("Generate Mnemonic operation failed or refused");
                 }
             });
         };
