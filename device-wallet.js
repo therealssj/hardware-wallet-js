@@ -306,7 +306,7 @@ const createSetMnemonicRequest = function(mnemonic) {
 const createGenerateMnemonicRequest = function(wordCount, usePassphrase) {
     const msgStructure = {
         "passphraseProtection": usePassphrase,
-        "wordCount": wordCount,
+        wordCount
     };
     const msg = messages.GenerateMnemonic.create(msgStructure);
     const buffer = messages.GenerateMnemonic.encode(msg).finish();
@@ -342,7 +342,7 @@ const createWipeDeviceRequest = function() {
 const createRecoveryDeviceRequest = function(wordCount, usePassphrase) {
     const msgStructure = {
         "passphraseProtection": usePassphrase,
-        'wordCount': wordCount,
+        wordCount
     };
     const msg = messages.RecoveryDevice.create(msgStructure);
     const buffer = messages.RecoveryDevice.encode(msg).finish();
