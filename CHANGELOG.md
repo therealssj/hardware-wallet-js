@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - In `devGenerateMnemonic` message (function) you can specify the `word_count` for the seed.
 
   - In `devRecoveryDevice` message (function) you can specify the `word_count` for the seed.
+  
+  - Remove fields (`enforce_wordlist`, `type` and `dry_run` ) from `RecoveryDevice` protobuf message.
+  
+  - Add `word_count` field for `GenerateMnemonic` protobuf message.
 
 ### Fixed
 
