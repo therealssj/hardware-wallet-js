@@ -303,9 +303,10 @@ const createSetMnemonicRequest = function(mnemonic) {
     return dataBytesFromChunks(chunks);
 };
 
-const createGenerateMnemonicRequest = function(usePassphrase) {
+const createGenerateMnemonicRequest = function(wordCount, usePassphrase) {
     const msgStructure = {
-        "passphraseProtection": usePassphrase
+        "passphraseProtection": usePassphrase,
+        wordCount
     };
     const msg = messages.GenerateMnemonic.create(msgStructure);
     const buffer = messages.GenerateMnemonic.encode(msg).finish();
@@ -338,12 +339,10 @@ const createWipeDeviceRequest = function() {
     return dataBytesFromChunks(chunks);
 };
 
-const createRecoveryDeviceRequest = function(usePassphrase) {
+const createRecoveryDeviceRequest = function(wordCount, usePassphrase) {
     const msgStructure = {
-        'dryRun': false,
-        'enforceWordlist': true,
         "passphraseProtection": usePassphrase,
-        'wordCount': 12
+        wordCount
     };
     const msg = messages.RecoveryDevice.create(msgStructure);
     const buffer = messages.RecoveryDevice.encode(msg).finish();
@@ -1065,9 +1064,9 @@ const wordAckLoop = function(kind, wordReader, callback) {
     wordAckCallback(kind);
 };
 
-const devRecoveryDevice = function(usePassphrase, wordReader) {
+const devRecoveryDevice = function(wordCount, usePassphrase, wordReader) {
     return new Promise((resolve, reject) => {
-        const dataBytes = createRecoveryDeviceRequest(usePassphrase);
+        const dataBytes = createRecoveryDeviceRequest(wordCount, usePassphrase);
         const deviceHandle = new DeviceHandler(deviceType);
         // eslint-disable-next-line max-statements
         const buttonAckLoop = function(kind) {
@@ -1119,9 +1118,9 @@ const devSetMnemonic = function(mnemonic) {
     });
 };
 
-const devGenerateMnemonic = function(usePassphrase) {
+const devGenerateMnemonic = function(wordCount, usePassphrase) {
     return new Promise((resolve) => {
-        const dataBytes = createGenerateMnemonicRequest(usePassphrase);
+        const dataBytes = createGenerateMnemonicRequest(wordCount, usePassphrase);
         const deviceHandle = new DeviceHandler(deviceType);
         const devReadCallback = function(kind, d) {
             deviceHandle.close();
@@ -1129,7 +1128,7 @@ const devGenerateMnemonic = function(usePassphrase) {
                 if (datakind == messages.MessageType.MessageType_Success) {
                     resolve("Generate Mnemonic operation completed");
                 } else {
-                    resolve("Generate Mnemonic operation failed or refused");
+                    reject("Generate Mnemonic operation failed or refused");
                 }
             });
         };

@@ -144,7 +144,7 @@ if (testGetVersion) {
 const testRecovery = false;
 
 if (testRecovery) {
-    const promise = deviceWallet.devRecoveryDevice(true, wordReader);
+    const promise = deviceWallet.devRecoveryDevice(12, true, wordReader);
     promise.then(console.log, rejectPromise);
 }
 
@@ -176,6 +176,6 @@ if (testMnemonic) {
 
 const testGenerateMnemonic = false;
 if (testGenerateMnemonic) {
-    const promise = deviceWallet.devGenerateMnemonic(true);
+    const promise = deviceWallet.devGenerateMnemonic(12, true);
     promise.then(console.log, rejectPromise);
 }
