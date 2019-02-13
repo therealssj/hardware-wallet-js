@@ -63,3 +63,9 @@ typings/
 # IDE
 .idea
 .vscode
+
+# Temporary files
+*.swp
+*.swo
+*.orig
+DS_Store

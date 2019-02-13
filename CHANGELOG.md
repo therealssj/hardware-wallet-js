@@ -8,15 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- [\#41](https://github.com/skycoin/hardware-wallet-js/issues/41)
-
-  - In `devGenerateMnemonic` message (function) you can specify the `word_count` for the seed.
-
-  - In `devRecoveryDevice` message (function) you can specify the `word_count` for the seed.
-  
-  - Remove fields (`enforce_wordlist`, `type` and `dry_run` ) from `RecoveryDevice` protobuf message.
-  
-  - Add `word_count` field for `GenerateMnemonic` protobuf message.
+- In `devGenerateMnemonic` message (function) it is possible to specify the `word_count` for the seed.
+- In `devRecoveryDevice` message (function) it is possible to specify the `word_count` for the seed.
+- Remove fields (`enforce_wordlist`, `type` and `dry_run` ) from `RecoveryDevice` protobuf message.
+- Add `word_count` field in `GenerateMnemonic` protobuf message.
 
 ### Fixed
 
