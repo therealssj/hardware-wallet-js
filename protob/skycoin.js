@@ -7732,6 +7732,7 @@ $root.RecoveryDevice = (function() {
      * @property {boolean|null} [pinProtection] RecoveryDevice pinProtection
      * @property {string|null} [language] RecoveryDevice language
      * @property {string|null} [label] RecoveryDevice label
+     * @property {boolean|null} [dryRun] RecoveryDevice dryRun
      */
 
     /**
@@ -7792,6 +7793,14 @@ $root.RecoveryDevice = (function() {
     RecoveryDevice.prototype.label = "";
 
     /**
+     * RecoveryDevice dryRun.
+     * @member {boolean} dryRun
+     * @memberof RecoveryDevice
+     * @instance
+     */
+    RecoveryDevice.prototype.dryRun = false;
+
+    /**
      * Creates a new RecoveryDevice instance using the specified properties.
      * @function create
      * @memberof RecoveryDevice
@@ -7825,6 +7834,8 @@ $root.RecoveryDevice = (function() {
             writer.uint32(/* id 4, wireType 2 =*/34).string(message.language);
         if (message.label != null && message.hasOwnProperty("label"))
             writer.uint32(/* id 5, wireType 2 =*/42).string(message.label);
+        if (message.dryRun != null && message.hasOwnProperty("dryRun"))
+            writer.uint32(/* id 6, wireType 0 =*/48).bool(message.dryRun);
         return writer;
     };
 
@@ -7873,6 +7884,9 @@ $root.RecoveryDevice = (function() {
                 break;
             case 5:
                 message.label = reader.string();
+                break;
+            case 6:
+                message.dryRun = reader.bool();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -7924,6 +7938,9 @@ $root.RecoveryDevice = (function() {
         if (message.label != null && message.hasOwnProperty("label"))
             if (!$util.isString(message.label))
                 return "label: string expected";
+        if (message.dryRun != null && message.hasOwnProperty("dryRun"))
+            if (typeof message.dryRun !== "boolean")
+                return "dryRun: boolean expected";
         return null;
     };
 
@@ -7949,6 +7966,8 @@ $root.RecoveryDevice = (function() {
             message.language = String(object.language);
         if (object.label != null)
             message.label = String(object.label);
+        if (object.dryRun != null)
+            message.dryRun = Boolean(object.dryRun);
         return message;
     };
 
@@ -7971,6 +7990,7 @@ $root.RecoveryDevice = (function() {
             object.pinProtection = false;
             object.language = "english";
             object.label = "";
+            object.dryRun = false;
         }
         if (message.wordCount != null && message.hasOwnProperty("wordCount"))
             object.wordCount = message.wordCount;
@@ -7982,6 +8002,8 @@ $root.RecoveryDevice = (function() {
             object.language = message.language;
         if (message.label != null && message.hasOwnProperty("label"))
             object.label = message.label;
+        if (message.dryRun != null && message.hasOwnProperty("dryRun"))
+            object.dryRun = message.dryRun;
         return object;
     };
 
