@@ -1065,6 +1065,7 @@ const wordAckLoop = function(kind, wordReader, callback) {
     wordAckCallback(kind);
 };
 
+// eslint-disable-next-line max-params
 const devRecoveryDevice = function(wordCount, usePassphrase, wordReader, dryRun) {
     return new Promise((resolve, reject) => {
         const dataBytes = createRecoveryDeviceRequest(wordCount, usePassphrase, dryRun);
