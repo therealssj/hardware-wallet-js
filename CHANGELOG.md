@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- Recover `dry_run` from `RecoveryDevice` protobuf message.
 - In `devGenerateMnemonic` message (function) it is possible to specify the `word_count` for the seed.
 - In `devRecoveryDevice` message (function) it is possible to specify the `word_count` for the seed.
 - Add `word_count` field in `GenerateMnemonic` protobuf message.
@@ -19,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
-- Remove fields (`enforce_wordlist`, `type` and `dry_run` ) from `RecoveryDevice` protobuf message.
+- Remove fields (`enforce_wordlist`, `type`) from `RecoveryDevice` protobuf message.
 
 ### Fixed
 
