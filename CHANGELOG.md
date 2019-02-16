@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
+- Remove fields (`enforce_wordlist`, `type`) from `RecoveryDevice` protobuf message.
 - Change protobuf messages for check signature to be consistent with [harware-wallet](https://github.com/skycoin/hardware-wallet/blob/2648cf384b5455c994ba54acf6a31cd1272c6f66/tiny-firmware/protob/messages.options#L21).
-- Remove fields (`enforce_wordlist`, `type` and `dry_run` ) from `RecoveryDevice` protobuf message.
 
 ### Fixed
 
