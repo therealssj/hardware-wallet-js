@@ -13512,8 +13512,8 @@ $root.SkycoinTransactionOutput = (function() {
         if (!writer)
             writer = $Writer.create();
         writer.uint32(/* id 1, wireType 2 =*/10).string(message.address);
-        writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.coin);
-        writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.hour);
+        writer.uint64(/* id 2, wireType 0 =*/16).uint64(message.coin);
+        writer.uint64(/* id 3, wireType 0 =*/24).uint64(message.hour);
         if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
             writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.addressIndex);
         return writer;
@@ -13554,10 +13554,10 @@ $root.SkycoinTransactionOutput = (function() {
                 message.address = reader.string();
                 break;
             case 2:
-                message.coin = reader.uint32();
+                message.coin = reader.uint64();
                 break;
             case 3:
-                message.hour = reader.uint32();
+                message.hour = reader.uint64();
                 break;
             case 4:
                 message.addressIndex = reader.uint32();
