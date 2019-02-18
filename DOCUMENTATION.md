@@ -363,7 +363,7 @@ Firmware Version 1.6.1
 
 *Signature:*
 ```
-devRecoveryDevice(wordCount, usePassphrase, wordReader)
+devRecoveryDevice(wordCount, usePassphrase, wordReader, dryRun)
 ```
 
 *Purpose:*
@@ -376,6 +376,7 @@ Makes the hardware wallet initiate the procedure to safely restore a previously 
 some operations (the hardware wallet may save the passphrase until it is disconnected, to avoid
 asking for it very frequently).
 - wordReader: [Auxiliary function to obtain the passphrase.](#auxiliary-function-to-obtain-the-passphrase)
+- dryRun: boolean to signal if should perform dry-run recovery workflow (for safe mnemonic validation).
 
 *Return value:*
 

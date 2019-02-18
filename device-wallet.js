@@ -339,8 +339,9 @@ const createWipeDeviceRequest = function() {
     return dataBytesFromChunks(chunks);
 };
 
-const createRecoveryDeviceRequest = function(wordCount, usePassphrase) {
+const createRecoveryDeviceRequest = function(wordCount, usePassphrase, dryRun) {
     const msgStructure = {
+        dryRun,
         "passphraseProtection": usePassphrase,
         wordCount
     };
@@ -1064,9 +1065,10 @@ const wordAckLoop = function(kind, wordReader, callback) {
     wordAckCallback(kind);
 };
 
-const devRecoveryDevice = function(wordCount, usePassphrase, wordReader) {
+// eslint-disable-next-line max-params
+const devRecoveryDevice = function(wordCount, usePassphrase, wordReader, dryRun) {
     return new Promise((resolve, reject) => {
-        const dataBytes = createRecoveryDeviceRequest(wordCount, usePassphrase);
+        const dataBytes = createRecoveryDeviceRequest(wordCount, usePassphrase, dryRun);
         const deviceHandle = new DeviceHandler(deviceType);
         // eslint-disable-next-line max-statements
         const buttonAckLoop = function(kind) {
