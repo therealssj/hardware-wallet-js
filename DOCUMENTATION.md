@@ -137,7 +137,7 @@ process will be slower if addresses with high indexes are requested.
 
 *Signature:*
 ```
-devApplySettings(usePassphrase, pinCodeReader)
+devApplySettings(usePassphrase, deviceLabel, pinCodeReader)
 ```
 
 *Purpose:*
@@ -146,6 +146,7 @@ Enable or disable the passphrase protection.
 
 *Params:*
 - usePassphrase: Indicates if the passphrase protection must be enabled (true) or disable (false).
+- deviceLabel: Label to identify the device through application and/or device screen.
 - pinCodeReader: [Auxiliary function to obtain the PIN.](#auxiliary-function-to-obtain-the-PIN)
 
 
@@ -321,6 +322,7 @@ Features {
   deviceId: '0123456789ABCDEF12345678',
   pinProtection: true,
   passphraseProtection: false,
+  Label: 'My device 1',
   initialized: true,
   bootloaderHash: Uint8Array [195, 166, 187, 155, 8, 246, 210, 232, 110, 9, 30, 81, 134, 25, 35, 61, 227, 14, 68, 145, 239, 81, 6, 157, 32, 171, 91, 60, 200, 33, 53, 217 ],
   pinCached: false,
