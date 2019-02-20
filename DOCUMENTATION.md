@@ -386,7 +386,10 @@ A promise that receives a text string that depends on the result of the operatio
 - If the user enters a word that is not part of the dictionary (promise rejected):
 `Error: Word not found in a wordlist`.
 - If the user enters an invalid seed (promise rejected): `Error: Invalid seed, are words in correct order?`.
-- If the operation ends correctly: `Device recovered`.
+- If `dryRun` is `true` and the user enters a valid seed different from the one used by the hardware wallet
+(promise rejected): `Error: The seed is valid but does not match the one in the device`.
+- If `dryRun` is `false` and the operation ends correctly: `Device recovered`.
+- If `dryRun` is `true` and the operation ends correctly: `The seed is valid and matches the one in the device`.
 
 *Notes:*
 - A security alert must accepted in the hardware wallet for the operation to be completed.
