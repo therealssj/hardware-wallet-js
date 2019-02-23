@@ -129,18 +129,6 @@ if (testFirmwareUpdate) {
   });
 }
 
-const testGetVersion = false;
-
-if (testGetVersion) {
-    const promise = deviceWallet.devGetVersionDevice();
-    promise.then(
-        (version) => {
-            console.log("Version is: ", version);
-        },
-        rejectPromise
-    );
-}
-
 const testRecovery = false;
 
 if (testRecovery) {

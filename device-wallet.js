@@ -317,17 +317,6 @@ const createGenerateMnemonicRequest = function(wordCount, usePassphrase) {
     return dataBytesFromChunks(chunks);
 };
 
-const createGetVersionRequest = function() {
-    const msgStructure = {};
-    const msg = messages.GetVersion.create(msgStructure);
-    const buffer = messages.GetVersion.encode(msg).finish();
-    const chunks = makeTrezorMessage(
-        buffer,
-        messages.MessageType.MessageType_GetVersion
-    );
-    return dataBytesFromChunks(chunks);
-};
-
 const createWipeDeviceRequest = function() {
     const msgStructure = {};
     const msg = messages.WipeDevice.create(msgStructure);
@@ -709,24 +698,6 @@ const devCancelRequest = function() {
         };
         deviceHandle.read(devReadCallback);
         deviceHandle.write(dataBytes);
-    });
-};
-
-const devGetVersionDevice = function() {
-    return new Promise((resolve) => {
-            const dataBytes = createGetVersionRequest();
-            const deviceHandle = new DeviceHandler(deviceType);
-            const devReadCallback = function(kind, data) {
-                deviceHandle.close();
-                const version = decodeSuccess(kind, data);
-                if (version == "") {
-                    reject(new Error("Could not get version from the device"));
-                } else {
-                    resolve(version);
-                }
-            };
-            deviceHandle.read(devReadCallback);
-            deviceHandle.write(dataBytes);
     });
 };
 
@@ -1186,7 +1157,6 @@ module.exports = {
     devCheckMessageSignature,
     devGenerateMnemonic,
     devGetFeatures,
-    devGetVersionDevice,
     devRecoveryDevice,
     devSetMnemonic,
     devSkycoinSignMessage,
