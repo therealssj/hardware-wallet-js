@@ -21,8 +21,6 @@ var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
  * @property {number} MessageType_WipeDevice=5 MessageType_WipeDevice value
  * @property {number} MessageType_FirmwareErase=6 MessageType_FirmwareErase value
  * @property {number} MessageType_FirmwareUpload=7 MessageType_FirmwareUpload value
- * @property {number} MessageType_GetEntropy=9 MessageType_GetEntropy value
- * @property {number} MessageType_Entropy=10 MessageType_Entropy value
  * @property {number} MessageType_LoadDevice=13 MessageType_LoadDevice value
  * @property {number} MessageType_ResetDevice=14 MessageType_ResetDevice value
  * @property {number} MessageType_Features=17 MessageType_Features value
@@ -63,8 +61,6 @@ $root.MessageType = (function() {
     values[valuesById[5] = "MessageType_WipeDevice"] = 5;
     values[valuesById[6] = "MessageType_FirmwareErase"] = 6;
     values[valuesById[7] = "MessageType_FirmwareUpload"] = 7;
-    values[valuesById[9] = "MessageType_GetEntropy"] = 9;
-    values[valuesById[10] = "MessageType_Entropy"] = 10;
     values[valuesById[13] = "MessageType_LoadDevice"] = 13;
     values[valuesById[14] = "MessageType_ResetDevice"] = 14;
     values[valuesById[17] = "MessageType_Features"] = 17;
@@ -305,8 +301,7 @@ $root.GetFeatures = (function() {
     /**
      * Constructs a new GetFeatures.
      * @exports GetFeatures
-     * @classdesc Request: Ask for device details (no device reset)
-     * @next Features
+     * @classdesc Represents a GetFeatures.
      * @implements IGetFeatures
      * @constructor
      * @param {IGetFeatures=} [properties] Properties to set
@@ -1421,6 +1416,7 @@ $root.GenerateMnemonic = (function() {
      * @interface IGenerateMnemonic
      * @property {boolean|null} [passphraseProtection] GenerateMnemonic passphraseProtection
      * @property {number|null} [wordCount] GenerateMnemonic wordCount
+     * @property {Uint8Array} entropy GenerateMnemonic entropy
      */
 
     /**
@@ -1456,6 +1452,14 @@ $root.GenerateMnemonic = (function() {
     GenerateMnemonic.prototype.wordCount = 0;
 
     /**
+     * GenerateMnemonic entropy.
+     * @member {Uint8Array} entropy
+     * @memberof GenerateMnemonic
+     * @instance
+     */
+    GenerateMnemonic.prototype.entropy = $util.newBuffer([]);
+
+    /**
      * Creates a new GenerateMnemonic instance using the specified properties.
      * @function create
      * @memberof GenerateMnemonic
@@ -1483,6 +1487,7 @@ $root.GenerateMnemonic = (function() {
             writer.uint32(/* id 1, wireType 0 =*/8).bool(message.passphraseProtection);
         if (message.wordCount != null && message.hasOwnProperty("wordCount"))
             writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.wordCount);
+        writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.entropy);
         return writer;
     };
 
@@ -1523,11 +1528,16 @@ $root.GenerateMnemonic = (function() {
             case 2:
                 message.wordCount = reader.uint32();
                 break;
+            case 3:
+                message.entropy = reader.bytes();
+                break;
             default:
                 reader.skipType(tag & 7);
                 break;
             }
         }
+        if (!message.hasOwnProperty("entropy"))
+            throw $util.ProtocolError("missing required 'entropy'", { instance: message });
         return message;
     };
 
@@ -1564,6 +1574,8 @@ $root.GenerateMnemonic = (function() {
         if (message.wordCount != null && message.hasOwnProperty("wordCount"))
             if (!$util.isInteger(message.wordCount))
                 return "wordCount: integer expected";
+        if (!(message.entropy && typeof message.entropy.length === "number" || $util.isString(message.entropy)))
+            return "entropy: buffer expected";
         return null;
     };
 
@@ -1583,6 +1595,11 @@ $root.GenerateMnemonic = (function() {
             message.passphraseProtection = Boolean(object.passphraseProtection);
         if (object.wordCount != null)
             message.wordCount = object.wordCount >>> 0;
+        if (object.entropy != null)
+            if (typeof object.entropy === "string")
+                $util.base64.decode(object.entropy, message.entropy = $util.newBuffer($util.base64.length(object.entropy)), 0);
+            else if (object.entropy.length)
+                message.entropy = object.entropy;
         return message;
     };
 
@@ -1602,11 +1619,20 @@ $root.GenerateMnemonic = (function() {
         if (options.defaults) {
             object.passphraseProtection = false;
             object.wordCount = 0;
+            if (options.bytes === String)
+                object.entropy = "";
+            else {
+                object.entropy = [];
+                if (options.bytes !== Array)
+                    object.entropy = $util.newBuffer(object.entropy);
+            }
         }
         if (message.passphraseProtection != null && message.hasOwnProperty("passphraseProtection"))
             object.passphraseProtection = message.passphraseProtection;
         if (message.wordCount != null && message.hasOwnProperty("wordCount"))
             object.wordCount = message.wordCount;
+        if (message.entropy != null && message.hasOwnProperty("entropy"))
+            object.entropy = options.bytes === String ? $util.base64.encode(message.entropy, 0, message.entropy.length) : options.bytes === Array ? Array.prototype.slice.call(message.entropy) : message.entropy;
         return object;
     };
 
@@ -2446,7 +2472,7 @@ $root.ResponseTransactionSign = (function() {
      * @exports IResponseTransactionSign
      * @interface IResponseTransactionSign
      * @property {Array.<string>|null} [signatures] ResponseTransactionSign signatures
-     * @property {boolean|null} [padding] ResponseTransactionSign padding
+     * @property {boolean} padding ResponseTransactionSign padding
      */
 
     /**
@@ -2509,8 +2535,7 @@ $root.ResponseTransactionSign = (function() {
         if (message.signatures != null && message.signatures.length)
             for (var i = 0; i < message.signatures.length; ++i)
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.signatures[i]);
-        if (message.padding != null && message.hasOwnProperty("padding"))
-            writer.uint32(/* id 2, wireType 0 =*/16).bool(message.padding);
+        writer.uint32(/* id 2, wireType 0 =*/16).bool(message.padding);
         return writer;
     };
 
@@ -2558,6 +2583,8 @@ $root.ResponseTransactionSign = (function() {
                 break;
             }
         }
+        if (!message.hasOwnProperty("padding"))
+            throw $util.ProtocolError("missing required 'padding'", { instance: message });
         return message;
     };
 
@@ -2595,9 +2622,8 @@ $root.ResponseTransactionSign = (function() {
                 if (!$util.isString(message.signatures[i]))
                     return "signatures: string[] expected";
         }
-        if (message.padding != null && message.hasOwnProperty("padding"))
-            if (typeof message.padding !== "boolean")
-                return "padding: boolean expected";
+        if (typeof message.padding !== "boolean")
+            return "padding: boolean expected";
         return null;
     };
 
@@ -5793,393 +5819,6 @@ $root.PassphraseStateAck = (function() {
     };
 
     return PassphraseStateAck;
-})();
-
-$root.GetEntropy = (function() {
-
-    /**
-     * Properties of a GetEntropy.
-     * @exports IGetEntropy
-     * @interface IGetEntropy
-     * @property {number} size GetEntropy size
-     */
-
-    /**
-     * Constructs a new GetEntropy.
-     * @exports GetEntropy
-     * @classdesc Request: Request a sample of random data generated by hardware RNG. May be used for testing.
-     * @next ButtonRequest
-     * @next Entropy
-     * @next Failure
-     * @implements IGetEntropy
-     * @constructor
-     * @param {IGetEntropy=} [properties] Properties to set
-     */
-    function GetEntropy(properties) {
-        if (properties)
-            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                if (properties[keys[i]] != null)
-                    this[keys[i]] = properties[keys[i]];
-    }
-
-    /**
-     * GetEntropy size.
-     * @member {number} size
-     * @memberof GetEntropy
-     * @instance
-     */
-    GetEntropy.prototype.size = 0;
-
-    /**
-     * Creates a new GetEntropy instance using the specified properties.
-     * @function create
-     * @memberof GetEntropy
-     * @static
-     * @param {IGetEntropy=} [properties] Properties to set
-     * @returns {GetEntropy} GetEntropy instance
-     */
-    GetEntropy.create = function create(properties) {
-        return new GetEntropy(properties);
-    };
-
-    /**
-     * Encodes the specified GetEntropy message. Does not implicitly {@link GetEntropy.verify|verify} messages.
-     * @function encode
-     * @memberof GetEntropy
-     * @static
-     * @param {IGetEntropy} message GetEntropy message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    GetEntropy.encode = function encode(message, writer) {
-        if (!writer)
-            writer = $Writer.create();
-        writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.size);
-        return writer;
-    };
-
-    /**
-     * Encodes the specified GetEntropy message, length delimited. Does not implicitly {@link GetEntropy.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof GetEntropy
-     * @static
-     * @param {IGetEntropy} message GetEntropy message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    GetEntropy.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
-     * Decodes a GetEntropy message from the specified reader or buffer.
-     * @function decode
-     * @memberof GetEntropy
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @param {number} [length] Message length if known beforehand
-     * @returns {GetEntropy} GetEntropy
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    GetEntropy.decode = function decode(reader, length) {
-        if (!(reader instanceof $Reader))
-            reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetEntropy();
-        while (reader.pos < end) {
-            var tag = reader.uint32();
-            switch (tag >>> 3) {
-            case 1:
-                message.size = reader.uint32();
-                break;
-            default:
-                reader.skipType(tag & 7);
-                break;
-            }
-        }
-        if (!message.hasOwnProperty("size"))
-            throw $util.ProtocolError("missing required 'size'", { instance: message });
-        return message;
-    };
-
-    /**
-     * Decodes a GetEntropy message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof GetEntropy
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {GetEntropy} GetEntropy
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    GetEntropy.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
-    };
-
-    /**
-     * Verifies a GetEntropy message.
-     * @function verify
-     * @memberof GetEntropy
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    GetEntropy.verify = function verify(message) {
-        if (typeof message !== "object" || message === null)
-            return "object expected";
-        if (!$util.isInteger(message.size))
-            return "size: integer expected";
-        return null;
-    };
-
-    /**
-     * Creates a GetEntropy message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof GetEntropy
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {GetEntropy} GetEntropy
-     */
-    GetEntropy.fromObject = function fromObject(object) {
-        if (object instanceof $root.GetEntropy)
-            return object;
-        var message = new $root.GetEntropy();
-        if (object.size != null)
-            message.size = object.size >>> 0;
-        return message;
-    };
-
-    /**
-     * Creates a plain object from a GetEntropy message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof GetEntropy
-     * @static
-     * @param {GetEntropy} message GetEntropy
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    GetEntropy.toObject = function toObject(message, options) {
-        if (!options)
-            options = {};
-        var object = {};
-        if (options.defaults)
-            object.size = 0;
-        if (message.size != null && message.hasOwnProperty("size"))
-            object.size = message.size;
-        return object;
-    };
-
-    /**
-     * Converts this GetEntropy to JSON.
-     * @function toJSON
-     * @memberof GetEntropy
-     * @instance
-     * @returns {Object.<string,*>} JSON object
-     */
-    GetEntropy.prototype.toJSON = function toJSON() {
-        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    return GetEntropy;
-})();
-
-$root.Entropy = (function() {
-
-    /**
-     * Properties of an Entropy.
-     * @exports IEntropy
-     * @interface IEntropy
-     * @property {Uint8Array} entropy Entropy entropy
-     */
-
-    /**
-     * Constructs a new Entropy.
-     * @exports Entropy
-     * @classdesc Response: Reply with random data generated by internal RNG
-     * @prev GetEntropy
-     * @implements IEntropy
-     * @constructor
-     * @param {IEntropy=} [properties] Properties to set
-     */
-    function Entropy(properties) {
-        if (properties)
-            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                if (properties[keys[i]] != null)
-                    this[keys[i]] = properties[keys[i]];
-    }
-
-    /**
-     * Entropy entropy.
-     * @member {Uint8Array} entropy
-     * @memberof Entropy
-     * @instance
-     */
-    Entropy.prototype.entropy = $util.newBuffer([]);
-
-    /**
-     * Creates a new Entropy instance using the specified properties.
-     * @function create
-     * @memberof Entropy
-     * @static
-     * @param {IEntropy=} [properties] Properties to set
-     * @returns {Entropy} Entropy instance
-     */
-    Entropy.create = function create(properties) {
-        return new Entropy(properties);
-    };
-
-    /**
-     * Encodes the specified Entropy message. Does not implicitly {@link Entropy.verify|verify} messages.
-     * @function encode
-     * @memberof Entropy
-     * @static
-     * @param {IEntropy} message Entropy message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    Entropy.encode = function encode(message, writer) {
-        if (!writer)
-            writer = $Writer.create();
-        writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.entropy);
-        return writer;
-    };
-
-    /**
-     * Encodes the specified Entropy message, length delimited. Does not implicitly {@link Entropy.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof Entropy
-     * @static
-     * @param {IEntropy} message Entropy message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    Entropy.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
-     * Decodes an Entropy message from the specified reader or buffer.
-     * @function decode
-     * @memberof Entropy
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @param {number} [length] Message length if known beforehand
-     * @returns {Entropy} Entropy
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    Entropy.decode = function decode(reader, length) {
-        if (!(reader instanceof $Reader))
-            reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Entropy();
-        while (reader.pos < end) {
-            var tag = reader.uint32();
-            switch (tag >>> 3) {
-            case 1:
-                message.entropy = reader.bytes();
-                break;
-            default:
-                reader.skipType(tag & 7);
-                break;
-            }
-        }
-        if (!message.hasOwnProperty("entropy"))
-            throw $util.ProtocolError("missing required 'entropy'", { instance: message });
-        return message;
-    };
-
-    /**
-     * Decodes an Entropy message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof Entropy
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {Entropy} Entropy
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    Entropy.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
-    };
-
-    /**
-     * Verifies an Entropy message.
-     * @function verify
-     * @memberof Entropy
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    Entropy.verify = function verify(message) {
-        if (typeof message !== "object" || message === null)
-            return "object expected";
-        if (!(message.entropy && typeof message.entropy.length === "number" || $util.isString(message.entropy)))
-            return "entropy: buffer expected";
-        return null;
-    };
-
-    /**
-     * Creates an Entropy message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof Entropy
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {Entropy} Entropy
-     */
-    Entropy.fromObject = function fromObject(object) {
-        if (object instanceof $root.Entropy)
-            return object;
-        var message = new $root.Entropy();
-        if (object.entropy != null)
-            if (typeof object.entropy === "string")
-                $util.base64.decode(object.entropy, message.entropy = $util.newBuffer($util.base64.length(object.entropy)), 0);
-            else if (object.entropy.length)
-                message.entropy = object.entropy;
-        return message;
-    };
-
-    /**
-     * Creates a plain object from an Entropy message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof Entropy
-     * @static
-     * @param {Entropy} message Entropy
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    Entropy.toObject = function toObject(message, options) {
-        if (!options)
-            options = {};
-        var object = {};
-        if (options.defaults)
-            if (options.bytes === String)
-                object.entropy = "";
-            else {
-                object.entropy = [];
-                if (options.bytes !== Array)
-                    object.entropy = $util.newBuffer(object.entropy);
-            }
-        if (message.entropy != null && message.hasOwnProperty("entropy"))
-            object.entropy = options.bytes === String ? $util.base64.encode(message.entropy, 0, message.entropy.length) : options.bytes === Array ? Array.prototype.slice.call(message.entropy) : message.entropy;
-        return object;
-    };
-
-    /**
-     * Converts this Entropy to JSON.
-     * @function toJSON
-     * @memberof Entropy
-     * @instance
-     * @returns {Object.<string,*>} JSON object
-     */
-    Entropy.prototype.toJSON = function toJSON() {
-        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    return Entropy;
 })();
 
 $root.WipeDevice = (function() {
@@ -13272,8 +12911,8 @@ $root.SkycoinTransactionOutput = (function() {
      * @exports ISkycoinTransactionOutput
      * @interface ISkycoinTransactionOutput
      * @property {string} address SkycoinTransactionOutput address
-     * @property {number} coin SkycoinTransactionOutput coin
-     * @property {number} hour SkycoinTransactionOutput hour
+     * @property {number|Long} coin SkycoinTransactionOutput coin
+     * @property {number|Long} hour SkycoinTransactionOutput hour
      * @property {number|null} [addressIndex] SkycoinTransactionOutput addressIndex
      */
 
@@ -13302,19 +12941,19 @@ $root.SkycoinTransactionOutput = (function() {
 
     /**
      * SkycoinTransactionOutput coin.
-     * @member {number} coin
+     * @member {number|Long} coin
      * @memberof SkycoinTransactionOutput
      * @instance
      */
-    SkycoinTransactionOutput.prototype.coin = 0;
+    SkycoinTransactionOutput.prototype.coin = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * SkycoinTransactionOutput hour.
-     * @member {number} hour
+     * @member {number|Long} hour
      * @memberof SkycoinTransactionOutput
      * @instance
      */
-    SkycoinTransactionOutput.prototype.hour = 0;
+    SkycoinTransactionOutput.prototype.hour = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * SkycoinTransactionOutput addressIndex.
@@ -13349,8 +12988,8 @@ $root.SkycoinTransactionOutput = (function() {
         if (!writer)
             writer = $Writer.create();
         writer.uint32(/* id 1, wireType 2 =*/10).string(message.address);
-        writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.coin);
-        writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.hour);
+        writer.uint32(/* id 2, wireType 0 =*/16).uint64(message.coin);
+        writer.uint32(/* id 3, wireType 0 =*/24).uint64(message.hour);
         if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
             writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.addressIndex);
         return writer;
@@ -13391,10 +13030,10 @@ $root.SkycoinTransactionOutput = (function() {
                 message.address = reader.string();
                 break;
             case 2:
-                message.coin = reader.uint32();
+                message.coin = reader.uint64();
                 break;
             case 3:
-                message.hour = reader.uint32();
+                message.hour = reader.uint64();
                 break;
             case 4:
                 message.addressIndex = reader.uint32();
@@ -13442,10 +13081,10 @@ $root.SkycoinTransactionOutput = (function() {
             return "object expected";
         if (!$util.isString(message.address))
             return "address: string expected";
-        if (!$util.isInteger(message.coin))
-            return "coin: integer expected";
-        if (!$util.isInteger(message.hour))
-            return "hour: integer expected";
+        if (!$util.isInteger(message.coin) && !(message.coin && $util.isInteger(message.coin.low) && $util.isInteger(message.coin.high)))
+            return "coin: integer|Long expected";
+        if (!$util.isInteger(message.hour) && !(message.hour && $util.isInteger(message.hour.low) && $util.isInteger(message.hour.high)))
+            return "hour: integer|Long expected";
         if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
             if (!$util.isInteger(message.addressIndex))
                 return "addressIndex: integer expected";
@@ -13467,9 +13106,23 @@ $root.SkycoinTransactionOutput = (function() {
         if (object.address != null)
             message.address = String(object.address);
         if (object.coin != null)
-            message.coin = object.coin >>> 0;
+            if ($util.Long)
+                (message.coin = $util.Long.fromValue(object.coin)).unsigned = true;
+            else if (typeof object.coin === "string")
+                message.coin = parseInt(object.coin, 10);
+            else if (typeof object.coin === "number")
+                message.coin = object.coin;
+            else if (typeof object.coin === "object")
+                message.coin = new $util.LongBits(object.coin.low >>> 0, object.coin.high >>> 0).toNumber(true);
         if (object.hour != null)
-            message.hour = object.hour >>> 0;
+            if ($util.Long)
+                (message.hour = $util.Long.fromValue(object.hour)).unsigned = true;
+            else if (typeof object.hour === "string")
+                message.hour = parseInt(object.hour, 10);
+            else if (typeof object.hour === "number")
+                message.hour = object.hour;
+            else if (typeof object.hour === "object")
+                message.hour = new $util.LongBits(object.hour.low >>> 0, object.hour.high >>> 0).toNumber(true);
         if (object.addressIndex != null)
             message.addressIndex = object.addressIndex >>> 0;
         return message;
@@ -13490,16 +13143,30 @@ $root.SkycoinTransactionOutput = (function() {
         var object = {};
         if (options.defaults) {
             object.address = "";
-            object.coin = 0;
-            object.hour = 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, true);
+                object.coin = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.coin = options.longs === String ? "0" : 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, true);
+                object.hour = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.hour = options.longs === String ? "0" : 0;
             object.addressIndex = 0;
         }
         if (message.address != null && message.hasOwnProperty("address"))
             object.address = message.address;
         if (message.coin != null && message.hasOwnProperty("coin"))
-            object.coin = message.coin;
+            if (typeof message.coin === "number")
+                object.coin = options.longs === String ? String(message.coin) : message.coin;
+            else
+                object.coin = options.longs === String ? $util.Long.prototype.toString.call(message.coin) : options.longs === Number ? new $util.LongBits(message.coin.low >>> 0, message.coin.high >>> 0).toNumber(true) : message.coin;
         if (message.hour != null && message.hasOwnProperty("hour"))
-            object.hour = message.hour;
+            if (typeof message.hour === "number")
+                object.hour = options.longs === String ? String(message.hour) : message.hour;
+            else
+                object.hour = options.longs === String ? $util.Long.prototype.toString.call(message.hour) : options.longs === Number ? new $util.LongBits(message.hour.low >>> 0, message.hour.high >>> 0).toNumber(true) : message.hour;
         if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
             object.addressIndex = message.addressIndex;
         return object;
