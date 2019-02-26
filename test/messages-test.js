@@ -50,14 +50,14 @@ const generateTwentyFourWordsSeedOk = function (t) {
 const generateSeventeenWordsSeedFail = function (t) {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
-        setupPromise.then(rejectPromise, (msg) => {
+        setupPromise.then((msg) => {
             const gMnemonicPromise = deviceWallet.devGenerateMnemonic(17, false);
             gMnemonicPromise.then((msg) => {
-                resolve("Test generate with 17 words failed as expected.", msg);
+                rejectPromise('Should work wih 12 or 24 word count only ' + msg);
             }, (msg) => {
-                rejectPromise('Should work wih 12 or 24 word count only' + msg);
+                resolve("Test generate with 17 words failed as expected.", msg);
             });
-        });
+        }, rejectPromise);
     });
 };
 
