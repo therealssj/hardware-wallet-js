@@ -4,6 +4,7 @@ const bufReceiver = require('./buffer-receiver');
 const dgram = require('dgram');
 const scanf = require('scanf');
 const os = require('os');
+const secureRandom = require('secure-random');
 
 let deviceType = 0;
 
@@ -304,7 +305,9 @@ const createSetMnemonicRequest = function(mnemonic) {
 };
 
 const createGenerateMnemonicRequest = function(wordCount, usePassphrase) {
+    const entropy = secureRandom.randomUint8Array(32);
     const msgStructure = {
+        entropy,
         "passphraseProtection": usePassphrase,
         wordCount
     };
@@ -1092,7 +1095,7 @@ const devSetMnemonic = function(mnemonic) {
 };
 
 const devGenerateMnemonic = function(wordCount, usePassphrase) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const dataBytes = createGenerateMnemonicRequest(wordCount, usePassphrase);
         const deviceHandle = new DeviceHandler(deviceType);
         const devReadCallback = function(kind, d) {
