@@ -301,8 +301,7 @@ $root.GetFeatures = (function() {
     /**
      * Constructs a new GetFeatures.
      * @exports GetFeatures
-     * @classdesc Request: Ask for device details (no device reset)
-     * @next Features
+     * @classdesc Represents a GetFeatures.
      * @implements IGetFeatures
      * @constructor
      * @param {IGetFeatures=} [properties] Properties to set
@@ -2473,7 +2472,7 @@ $root.ResponseTransactionSign = (function() {
      * @exports IResponseTransactionSign
      * @interface IResponseTransactionSign
      * @property {Array.<string>|null} [signatures] ResponseTransactionSign signatures
-     * @property {boolean|null} [padding] ResponseTransactionSign padding
+     * @property {boolean} padding ResponseTransactionSign padding
      */
 
     /**
@@ -2536,8 +2535,7 @@ $root.ResponseTransactionSign = (function() {
         if (message.signatures != null && message.signatures.length)
             for (var i = 0; i < message.signatures.length; ++i)
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.signatures[i]);
-        if (message.padding != null && message.hasOwnProperty("padding"))
-            writer.uint32(/* id 2, wireType 0 =*/16).bool(message.padding);
+        writer.uint32(/* id 2, wireType 0 =*/16).bool(message.padding);
         return writer;
     };
 
@@ -2585,6 +2583,8 @@ $root.ResponseTransactionSign = (function() {
                 break;
             }
         }
+        if (!message.hasOwnProperty("padding"))
+            throw $util.ProtocolError("missing required 'padding'", { instance: message });
         return message;
     };
 
@@ -2622,9 +2622,8 @@ $root.ResponseTransactionSign = (function() {
                 if (!$util.isString(message.signatures[i]))
                     return "signatures: string[] expected";
         }
-        if (message.padding != null && message.hasOwnProperty("padding"))
-            if (typeof message.padding !== "boolean")
-                return "padding: boolean expected";
+        if (typeof message.padding !== "boolean")
+            return "padding: boolean expected";
         return null;
     };
 
@@ -12912,8 +12911,8 @@ $root.SkycoinTransactionOutput = (function() {
      * @exports ISkycoinTransactionOutput
      * @interface ISkycoinTransactionOutput
      * @property {string} address SkycoinTransactionOutput address
-     * @property {number} coin SkycoinTransactionOutput coin
-     * @property {number} hour SkycoinTransactionOutput hour
+     * @property {number|Long} coin SkycoinTransactionOutput coin
+     * @property {number|Long} hour SkycoinTransactionOutput hour
      * @property {number|null} [addressIndex] SkycoinTransactionOutput addressIndex
      */
 
@@ -12942,19 +12941,19 @@ $root.SkycoinTransactionOutput = (function() {
 
     /**
      * SkycoinTransactionOutput coin.
-     * @member {number} coin
+     * @member {number|Long} coin
      * @memberof SkycoinTransactionOutput
      * @instance
      */
-    SkycoinTransactionOutput.prototype.coin = 0;
+    SkycoinTransactionOutput.prototype.coin = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * SkycoinTransactionOutput hour.
-     * @member {number} hour
+     * @member {number|Long} hour
      * @memberof SkycoinTransactionOutput
      * @instance
      */
-    SkycoinTransactionOutput.prototype.hour = 0;
+    SkycoinTransactionOutput.prototype.hour = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * SkycoinTransactionOutput addressIndex.
@@ -12989,8 +12988,8 @@ $root.SkycoinTransactionOutput = (function() {
         if (!writer)
             writer = $Writer.create();
         writer.uint32(/* id 1, wireType 2 =*/10).string(message.address);
-        writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.coin);
-        writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.hour);
+        writer.uint32(/* id 2, wireType 0 =*/16).uint64(message.coin);
+        writer.uint32(/* id 3, wireType 0 =*/24).uint64(message.hour);
         if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
             writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.addressIndex);
         return writer;
@@ -13031,10 +13030,10 @@ $root.SkycoinTransactionOutput = (function() {
                 message.address = reader.string();
                 break;
             case 2:
-                message.coin = reader.uint32();
+                message.coin = reader.uint64();
                 break;
             case 3:
-                message.hour = reader.uint32();
+                message.hour = reader.uint64();
                 break;
             case 4:
                 message.addressIndex = reader.uint32();
@@ -13082,10 +13081,10 @@ $root.SkycoinTransactionOutput = (function() {
             return "object expected";
         if (!$util.isString(message.address))
             return "address: string expected";
-        if (!$util.isInteger(message.coin))
-            return "coin: integer expected";
-        if (!$util.isInteger(message.hour))
-            return "hour: integer expected";
+        if (!$util.isInteger(message.coin) && !(message.coin && $util.isInteger(message.coin.low) && $util.isInteger(message.coin.high)))
+            return "coin: integer|Long expected";
+        if (!$util.isInteger(message.hour) && !(message.hour && $util.isInteger(message.hour.low) && $util.isInteger(message.hour.high)))
+            return "hour: integer|Long expected";
         if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
             if (!$util.isInteger(message.addressIndex))
                 return "addressIndex: integer expected";
@@ -13107,9 +13106,23 @@ $root.SkycoinTransactionOutput = (function() {
         if (object.address != null)
             message.address = String(object.address);
         if (object.coin != null)
-            message.coin = object.coin >>> 0;
+            if ($util.Long)
+                (message.coin = $util.Long.fromValue(object.coin)).unsigned = true;
+            else if (typeof object.coin === "string")
+                message.coin = parseInt(object.coin, 10);
+            else if (typeof object.coin === "number")
+                message.coin = object.coin;
+            else if (typeof object.coin === "object")
+                message.coin = new $util.LongBits(object.coin.low >>> 0, object.coin.high >>> 0).toNumber(true);
         if (object.hour != null)
-            message.hour = object.hour >>> 0;
+            if ($util.Long)
+                (message.hour = $util.Long.fromValue(object.hour)).unsigned = true;
+            else if (typeof object.hour === "string")
+                message.hour = parseInt(object.hour, 10);
+            else if (typeof object.hour === "number")
+                message.hour = object.hour;
+            else if (typeof object.hour === "object")
+                message.hour = new $util.LongBits(object.hour.low >>> 0, object.hour.high >>> 0).toNumber(true);
         if (object.addressIndex != null)
             message.addressIndex = object.addressIndex >>> 0;
         return message;
@@ -13130,16 +13143,30 @@ $root.SkycoinTransactionOutput = (function() {
         var object = {};
         if (options.defaults) {
             object.address = "";
-            object.coin = 0;
-            object.hour = 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, true);
+                object.coin = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.coin = options.longs === String ? "0" : 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, true);
+                object.hour = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.hour = options.longs === String ? "0" : 0;
             object.addressIndex = 0;
         }
         if (message.address != null && message.hasOwnProperty("address"))
             object.address = message.address;
         if (message.coin != null && message.hasOwnProperty("coin"))
-            object.coin = message.coin;
+            if (typeof message.coin === "number")
+                object.coin = options.longs === String ? String(message.coin) : message.coin;
+            else
+                object.coin = options.longs === String ? $util.Long.prototype.toString.call(message.coin) : options.longs === Number ? new $util.LongBits(message.coin.low >>> 0, message.coin.high >>> 0).toNumber(true) : message.coin;
         if (message.hour != null && message.hasOwnProperty("hour"))
-            object.hour = message.hour;
+            if (typeof message.hour === "number")
+                object.hour = options.longs === String ? String(message.hour) : message.hour;
+            else
+                object.hour = options.longs === String ? $util.Long.prototype.toString.call(message.hour) : options.longs === Number ? new $util.LongBits(message.hour.low >>> 0, message.hour.high >>> 0).toNumber(true) : message.hour;
         if (message.addressIndex != null && message.hasOwnProperty("addressIndex"))
             object.addressIndex = message.addressIndex;
         return object;

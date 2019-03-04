@@ -70,6 +70,7 @@ message Initialize {
  * Request: Ask for device details (no device reset)
  * @next Features
  */
+// can be removed
 message GetFeatures {
 }
 
@@ -171,7 +172,7 @@ message SkycoinAddress {
  */
  message ResponseTransactionSign {
 	repeated string signatures = 1; // generated signatures in base58 format
-	optional bool padding = 2;
+	required bool padding = 2;
 }
 
 /**
