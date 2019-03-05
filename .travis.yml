@@ -11,7 +11,8 @@ before_install:
   - sudo apt install libudev-dev
   - sudo apt install libusb-1.0-0-dev
 before_script:
-  - npm install
+  - npm install  
+  - git submodule update --remote
 script:
   - npm run lint
   - npm test
