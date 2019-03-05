@@ -1,5 +1,5 @@
 const HID = require('node-hid');
-const messages = require('./protob/skycoin');
+const messages = require('./protob/js/skycoin');
 const bufReceiver = require('./buffer-receiver');
 const dgram = require('dgram');
 const scanf = require('scanf');
