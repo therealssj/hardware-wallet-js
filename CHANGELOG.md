@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- Use `protobuf` file definitions from a [`git submodule`](http://github.com/skycoin/hardware-wallet-protob.git).
 - In `devGenerateMnemonic` message (function) it is possible to specify the `word_count` for the seed.
 - In `devRecoveryDevice` message (function) it is possible to specify the `word_count` for the seed.
 - Add `word_count` field in `GenerateMnemonic` protobuf message.
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
+- Removed `protobuf` file from the project.
 - Remove fields (`enforce_wordlist`, `type`) from `RecoveryDevice` protobuf message.
 - Change protobuf messages for check signature to be consistent with [harware-wallet](https://github.com/skycoin/hardware-wallet/blob/2648cf384b5455c994ba54acf6a31cd1272c6f66/tiny-firmware/protob/messages.options#L21).
 
