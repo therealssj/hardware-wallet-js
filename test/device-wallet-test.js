@@ -1,6 +1,6 @@
 'use strict';
 const Suite = require('node-test');
-const messages = require('../protob/skycoin');
+const messages = require('../protob/js/skycoin');
 const deviceWallet = require('../device-wallet');
 
 const suite = new Suite('Device wallet buffer creation');
