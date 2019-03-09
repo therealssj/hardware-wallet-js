@@ -1,7 +1,5 @@
-const Suite = require('node-test');
 const deviceWallet = require('../device-wallet');
-
-const suite = new Suite('Transaction testing');
+const assert = require('chai').assert;
 
 const rejectPromise = function (msg) {
     console.log("Promise rejected", msg);
@@ -40,7 +38,7 @@ const setup = function () {
     });
 };
 
-const sample_1 = function (t) {
+const sample_1 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -61,7 +59,7 @@ const sample_1 = function (t) {
     });
 };
 
-const sample_2 = function (t) {
+const sample_2 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -82,7 +80,7 @@ const sample_2 = function (t) {
     });
 };
 
-suite.test('Sign message', async function (t) {
+describe('Sign message', function () {
     if (deviceWallet.getDevice() === null) {
         console.log("Skycoin hardware NOT FOUND, using emulator");
         deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
@@ -93,18 +91,19 @@ suite.test('Sign message', async function (t) {
 
     var testPromise = new Promise(function (resolve, reject) {
         setTimeout(function () {
-            sample_1(t).then(() => {
-                return sample_2(t);
-            });
+            sample_1().then(() => {
+                return sample_2();
+            }).then(() => {
+                resolve(0);
+            }).catch(reject);
         }, 200);
     });
 
-    try {
-        var result = await testPromise;
-        expect(result).to.equal(0);
-        process.exit(0);
-    }
-    catch (err) {
-        console.log('Not success');
-    }
-}).setTimeout(Infinity);
+    it('Should have a result equal to zero', function() {
+        this.timeout(0);
+        return testPromise.then(function(result) {
+            assert.equal(result, 0);
+        });
+    });
+
+});
