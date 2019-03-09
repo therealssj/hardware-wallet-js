@@ -6,9 +6,50 @@ const scanf = require('scanf');
 const os = require('os');
 
 let deviceType = 0;
+let autoPressButtons = false;
+let autoPressValue = 'YES';
 
 const setDeviceType = function(devType) {
     deviceType = devType;
+};
+
+const setAutoPressButton = function(value, def) {
+    if ( deviceType === DeviceTypeEnum.EMULATOR ) {
+        if ( [ 'YES', 'NO', 'BOTH' ].indexOf(def) > -1 ) {
+            autoPressButtons = !!value;
+            autoPressValue = def;
+        }
+    }
+};
+
+const pressButton = function(socket, type) {
+    /**
+     * The message to press the button is composed by two parts:
+     * [0, 1, 2, 3, 4] => Acknowledgement of the fake press event
+     * [0 | 1 | 2]
+     *  - 0: Press the Left button
+     *  - 1: Press the Right button
+     *  - 2: Press both
+     //*/
+    socket.send(Buffer.from([0, 1, 2, 3, 4, type]), 0, 6, 21324, '127.0.0.1', function(err) {
+        if ( err ) {
+            console.log('\n\nError trying to send the button signal\n\n');
+            return;
+        }
+        console.log('\n\nPress the button signal sent\n\n');
+    });//*/
+};
+
+const pressButtonLeft = function(socket) {
+    pressButton(socket, 0);
+};
+
+const pressButtonRight = function(socket) {
+    pressButton(socket, 1);
+};
+
+const pressButtonLeftAndRight = function(socket) {
+    pressButton(socket, 2);
 };
 
 const dataBytesFromChunks = function(chunks) {
@@ -134,7 +175,7 @@ class DeviceHandler {
         case DeviceTypeEnum.EMULATOR:
             this.devHandle.on('message', function(data, rinfo) {
                 if (rinfo) {
-                    console.log(`server got: 
+                    console.log(`server got:
                         ${data} from ${rinfo.address}:${rinfo.port}`);
                 }
                 bufferReceiver.receiveBuffer(data, devReadCallback);
@@ -637,6 +678,17 @@ const devButtonRequestCallback = function(kind, data, callback) {
         };
         deviceHandle.read(devReadCallback);
         deviceHandle.write(dataBytes);
+
+        if ( autoPressButtons === true ) {
+            if ( autoPressValue === 'YES' ) {
+                pressButtonRight(deviceHandle.devHandle);
+            } else if ( autoPressValue === 'NO' ) {
+                pressButtonLeft(deviceHandle.devHandle);
+            } else {
+                pressButtonLeftAndRight(deviceHandle.devHandle);
+            }
+        }
+
         return;
     }
     if (callback !== null && callback !== undefined) {
@@ -1165,5 +1217,6 @@ module.exports = {
     devWipeDevice,
     getDevice,
     makeTrezorMessage,
-    setDeviceType
+    setDeviceType,
+    setAutoPressButton
 };
