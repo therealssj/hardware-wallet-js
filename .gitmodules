@@ -1,0 +1,4 @@
+[submodule "protob"]
+	path = protob
+	url = http://github.com/skycoin/hardware-wallet-protob.git
+	branch = master

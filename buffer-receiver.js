@@ -1,4 +1,4 @@
-const messages = require('./protob/skycoin');
+const messages = require('./protob/js/skycoin');
 
 class BufferReceiver {
     constructor() {

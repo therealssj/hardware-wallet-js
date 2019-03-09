@@ -6,7 +6,7 @@
     "start": "node main.js",
     "lint": "./node_modules/.bin/eslint ./*.js",
     "make-device-detection": "./node_modules/.bin/babel ./device-detection/*.js ./device-detection/hw-transport/*.js -d device-detection-lib/",
-    "make-protobuf-files": "./node_modules/.bin/pbjs -t static-module -w commonjs -o protob/skycoin.js protob/messages.proto protob/types.proto",
+    "make-protobuf-files": "make -C protob build-js",
     "test": "./node_modules/.bin/mocha test/*.js"
   },
   "repository": {

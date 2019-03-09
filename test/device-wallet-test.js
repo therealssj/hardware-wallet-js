@@ -1,5 +1,5 @@
 'use strict';
-const messages = require('../protob/skycoin');
+const messages = require('../protob/js/skycoin');
 const deviceWallet = require('../device-wallet');
 const assert = require('chai').assert;
 
