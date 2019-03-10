@@ -64,6 +64,7 @@ describe('Transactions', function () {
     if (deviceWallet.getDevice() === null) {
         console.log("Skycoin hardware NOT FOUND, using emulator");
         deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
+        deviceWallet.setAutoPressButton(true, 'R');
     } else {
         console.log("Skycoin hardware is plugged in");
         deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);

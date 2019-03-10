@@ -7,7 +7,7 @@
     "lint": "./node_modules/.bin/eslint ./*.js",
     "make-device-detection": "./node_modules/.bin/babel ./device-detection/*.js ./device-detection/hw-transport/*.js -d device-detection-lib/",
     "make-protobuf-files": "make -C protob build-js",
-    "test": "./node_modules/.bin/mocha test/*.js"
+    "test": "./node_modules/.bin/serial-mocha ./test/*.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "node-hid": "^0.7.3",
     "protobufjs": "^6.8.8",
     "scanf": "^1.0.2",
+    "serial-mocha": "0.0.4",
     "usb": "^1.3.3"
   },
   "devDependencies": {

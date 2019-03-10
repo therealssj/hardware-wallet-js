@@ -7,7 +7,7 @@ const os = require('os');
 
 let deviceType = 0;
 let autoPressButtons = false;
-let autoPressValue = 'YES';
+let autoPressValue = 'R';
 
 const setDeviceType = function(devType) {
     deviceType = devType;
@@ -15,7 +15,7 @@ const setDeviceType = function(devType) {
 
 const setAutoPressButton = function(value, def) {
     if ( deviceType === DeviceTypeEnum.EMULATOR ) {
-        if ( [ 'YES', 'NO', 'BOTH' ].indexOf(def) > -1 ) {
+        if ( [ 'R', 'L', 'B' ].indexOf(def) > -1 ) {
             autoPressButtons = !!value;
             autoPressValue = def;
         }
@@ -680,9 +680,9 @@ const devButtonRequestCallback = function(kind, data, callback) {
         deviceHandle.write(dataBytes);
 
         if ( autoPressButtons === true ) {
-            if ( autoPressValue === 'YES' ) {
+            if ( autoPressValue === 'R' ) {
                 pressButtonRight(deviceHandle.devHandle);
-            } else if ( autoPressValue === 'NO' ) {
+            } else if ( autoPressValue === 'L' ) {
                 pressButtonLeft(deviceHandle.devHandle);
             } else {
                 pressButtonLeftAndRight(deviceHandle.devHandle);

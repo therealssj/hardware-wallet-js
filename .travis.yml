@@ -6,17 +6,25 @@ matrix:
       os:
         - linux
         - osx
+      env:
+        - PIP='sudo pip'
 before_install:
   - sudo apt-get update
   - sudo apt install libudev-dev
   - sudo apt install libusb-1.0-0-dev
 before_script:
-  - npm install  
+  - npm install
   - git submodule update --remote
   - npm run make-protobuf-files
+  - git clone https://github.com/skycoin/hardware-wallet.git temporalFolder
+  - git -C temporalFolder checkout develop
+  - make clean -C ./temporalFolder
+  - make run-emulator -C ./temporalFolder
 script:
   - npm run lint
   - npm test
+after_script:
+  - kill -s KILL $(pgrep emulator)
 notifications:
   # https://github.com/kvld/travisci-telegram TravisCI Telegram Bot integration
   webhooks: https://fathomless-fjord-24024.herokuapp.com/notify
