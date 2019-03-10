@@ -1,13 +1,12 @@
+language: node_js
+node_js: "8"
+
 matrix:
   include:
-    - language: node_js
-      node_js:
-        - "8"
-      os:
-        - linux
-        - osx
+    - os: linux
       env:
         - PIP='sudo pip'
+    - os: osx
 before_install:
   - sudo apt-get update
   - sudo apt install libudev-dev
