@@ -7,11 +7,6 @@ matrix:
       env:
         - PIP='sudo pip'
     - os: osx
-before_install:
-  - sudo apt-get update
-  - sudo apt install libudev-dev
-  - sudo apt install libusb-1.0-0-dev
-  - sudo apt install libsdl2-dev libsdl2-image-dev
 before_script:
   - npm install
   - git submodule update --remote
@@ -23,8 +18,12 @@ before_script:
   - sh "./temporalFolder/tiny-firmware/protob/ci-scripts/install-${TRAVIS_OS_NAME}.sh" ;
   # Define env vars for Linux builds
   - if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
-    ls -l /usr/local/bin/protoc ;
-    export PATH="/usr/local/bin:$(pwd)/protoc/bin:$PATH" ;
+    sudo apt-get update;
+    sudo apt install libudev-dev;
+    sudo apt install libusb-1.0-0-dev;
+    sudo apt install libsdl2-dev libsdl2-image-dev;
+    ls -l /usr/local/bin/protoc;
+    export PATH="/usr/local/bin:$(pwd)/protoc/bin:$PATH";
     echo "PATH=$PATH";
     echo "PIP=$PIP";
     fi
