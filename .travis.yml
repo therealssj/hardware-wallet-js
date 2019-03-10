@@ -16,8 +16,10 @@ before_script:
   - npm install
   - git submodule update --remote
   - npm run make-protobuf-files
-  - git clone https://github.com/skycoin/hardware-wallet.git temporalFolder
+  - git clone --depth=1 https://github.com/skycoin/hardware-wallet.git temporalFolder
   - git -C temporalFolder checkout develop
+  - git -C temporalFolder submodule init
+  - git -C temporalFolder submodule update
   - make clean -C ./temporalFolder
   - make run-emulator -C ./temporalFolder
 script:
