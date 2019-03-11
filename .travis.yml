@@ -40,7 +40,6 @@ before_script:
 script:
   - make -C tmp/hardware-wallet clean
   - make -C tmp/hardware-wallet emulator
-#  - screen -S emulator -md make -C ./tmp/hardware-wallet run-emulator
   - make -C ./tmp/hardware-wallet run-emulator
   # Run linter while emulator gets built
   - npm run lint
