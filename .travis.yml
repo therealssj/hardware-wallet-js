@@ -45,6 +45,8 @@ script:
   - npm run lint
   # Suspend for a while to wait for emulator
   - sleep 20
+  - screen -ls
+  - ps aux | grep emulator
   - npm test
 after_script:
   - kill -s KILL $(pgrep emulator)
