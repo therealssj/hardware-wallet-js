@@ -39,6 +39,7 @@ before_script:
   - echo "PIP=$PIP";
 script:
   - npm run lint
+  - pwd
   - make -C tmp/hardware-emulator clean
   - make -C tmp/hardware-emulator emulator
   - screen -S emulator -md make run-emulator -C ./tmp/hardware-wallet
