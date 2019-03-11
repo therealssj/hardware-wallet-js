@@ -304,10 +304,22 @@ const createSetMnemonicRequest = function(mnemonic) {
     return dataBytesFromChunks(chunks);
 };
 
-const createGenerateMnemonicRequest = function(wordCount, usePassphrase) {
-    const entropy = secureRandom.randomUint8Array(32);
+const createEntropyAckRequest = function(bufferSize) {
+    const entropy = secureRandom.randomUint8Array(bufferSize);
     const msgStructure = {
-        entropy,
+        entropy
+    };
+    const msg = messages.GenerateMnemonic.create(msgStructure);
+    const buffer = messages.GenerateMnemonic.encode(msg).finish();
+    const chunks = makeTrezorMessage(
+        buffer,
+        messages.MessageType.MessageType_EntropyAck
+    );
+    return dataBytesFromChunks(chunks);
+};
+
+const createGenerateMnemonicRequest = function(wordCount, usePassphrase) {
+    const msgStructure = {
         "passphraseProtection": usePassphrase,
         wordCount
     };
@@ -1101,8 +1113,22 @@ const devGenerateMnemonic = function(wordCount, usePassphrase) {
         const devReadCallback = function(kind, d) {
             deviceHandle.close();
             devButtonRequestCallback(kind, d, (datakind) => {
-                if (datakind == messages.MessageType.MessageType_Success) {
+                if (datakind === messages.MessageType.MessageType_Success) {
                     resolve("Generate Mnemonic operation completed");
+                } else if (datakind === messages.MessageType.MessageType_EntropyRequest) {
+                    console.warn('internal device entropy is not enough, trying to send external...');
+                    const deviceHandleForEntropyAck = new DeviceHandler(deviceType);
+                    const devReadCallbackAfterEntropyAck = function(kindAfterEntropyAck) {
+                        deviceHandleForEntropyAck.close();
+                        if (kindAfterEntropyAck === messages.MessageType.MessageType_Success) {
+                            resolve("Generate Mnemonic operation completed");
+                        } else {
+                            reject(new Error("Generate Mnemonic operation failed or refused"));
+                        }
+                    };
+                    deviceHandleForEntropyAck.read(devReadCallbackAfterEntropyAck);
+                    const entropyAckDataBytes = createEntropyAckRequest(32);
+                    deviceHandleForEntropyAck.write(entropyAckDataBytes);
                 } else {
                     reject(new Error("Generate Mnemonic operation failed or refused"));
                 }
