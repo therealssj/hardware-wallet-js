@@ -45,7 +45,7 @@ script:
   # Run linter while emulator gets built
   - npm run lint
   # Suspend for a while to wait for emulator
-  - sleep 20
+  - sleep 60
   - screen -ls
   - ps aux | grep emulator
   - npm test
