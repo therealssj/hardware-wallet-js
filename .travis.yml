@@ -41,7 +41,7 @@ before_script:
 script:
   - make -C tmp/hardware-wallet clean
   - make -C tmp/hardware-wallet emulator
-  - xvfb-run make -C ./tmp/hardware-wallet run-emulator
+  - screen -S emulator -dm xvfb-run make -C ./tmp/hardware-wallet run-emulator
   # Run linter while emulator gets built
   - npm run lint
   # Suspend for a while to wait for emulator
