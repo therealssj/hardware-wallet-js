@@ -8,6 +8,7 @@ matrix:
       env:
         - PIP='sudo pip'
     - os: osx
+      env: PIP=pip
 install:
   # Install OS-specific test and build dependencies
   - sh "ci-scripts/install-${TRAVIS_OS_NAME}.sh"
