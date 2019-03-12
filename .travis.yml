@@ -44,7 +44,8 @@ script:
   - make -C tmp/hardware-wallet/tiny-firmware/protob install-protoc
   - make -C tmp/hardware-wallet/tiny-firmware/protob/nanopb/vendor/nanopb/generator/proto
   - make -C tmp/hardware-wallet emulator
-  - screen -S emulator -dm xvfb-run make -C ./tmp/hardware-wallet run-emulator
+  # screen -S emulator -dm xvfb-run make -C ./tmp/hardware-wallet run-emulator
+  - xvfb-run make -C ./tmp/hardware-wallet run-emulator &
   # Run linter while emulator gets built
   - npm run lint
   # Suspend for a while to wait for emulator
@@ -54,7 +55,7 @@ script:
   - npm test
 after_script:
   - kill -s KILL $(pgrep emulator)
-  - screen -S emulator -X quit
+  # screen -S emulator -X quit
 notifications:
   # https://github.com/kvld/travisci-telegram TravisCI Telegram Bot integration
   webhooks: https://fathomless-fjord-24024.herokuapp.com/notify
