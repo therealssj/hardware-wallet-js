@@ -46,7 +46,7 @@ script:
   - make -C tmp/hardware-wallet/tiny-firmware/protob/nanopb/vendor/nanopb/generator/proto
   - make -C tmp/hardware-wallet emulator
   # screen -S emulator -dm xvfb-run make -C ./tmp/hardware-wallet run-emulator
-  - xvfb-run make -C ./tmp/hardware-wallet run-emulator &
+  - xvfb-run --server-args="-screen 0 1024x768x24" make -C ./tmp/hardware-wallet run-emulator &
   # Run linter while emulator gets built
   - npm run lint
   # Suspend for a while to wait for emulator
