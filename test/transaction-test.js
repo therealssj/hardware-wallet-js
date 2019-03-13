@@ -1,7 +1,5 @@
-const Suite = require('node-test');
 const deviceWallet = require('../device-wallet');
-
-const suite = new Suite('Transaction testing');
+const assert = require('chai').assert;
 
 const rejectPromise = function (msg) {
     console.log("Promise rejected", msg);
@@ -42,7 +40,7 @@ const setup = function () {
     });
 };
 
-const sample_1 = function (t) {
+const sample_1 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -62,7 +60,7 @@ const sample_1 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, 1);
+                assert.equal(signatures.length, 1);
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "d11c62b1e0e9abf629b1f5f4699cef9fbc504b45ceedf0047ead686979498218",
@@ -70,7 +68,7 @@ const sample_1 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     resolve("Test success");
                 }, rejectPromise);
             }, rejectPromise);
@@ -78,7 +76,7 @@ const sample_1 = function (t) {
     });
 };
 
-const sample_2 = function (t) {
+const sample_2 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -105,7 +103,7 @@ const sample_2 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, transactionInputs.length);
+                assert.equal(signatures.length, transactionInputs.length);
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "9bbde062d665a8b11ae15aee6d4f32f0f3d61af55160c142060795a219378a54",
@@ -113,7 +111,7 @@ const sample_2 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     const checkSignPromise1 = deviceWallet.devCheckMessageSignature(
                         "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                         "f947b0352b19672f7b7d04dc2f1fdc47bc5355878f3c47a43d4d4cfbae07d026",
@@ -121,7 +119,7 @@ const sample_2 = function (t) {
                         wordReader
                     );
                     checkSignPromise1.then((check1) => {
-                        t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
+                        assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
                         resolve("Test success");
                     }, rejectPromise);
                 }, rejectPromise);
@@ -131,7 +129,7 @@ const sample_2 = function (t) {
     });
 };
 
-const sample_3 = function (t) {
+const sample_3 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -171,7 +169,7 @@ const sample_3 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, transactionInputs.length);
+                assert.equal(signatures.length, transactionInputs.length);
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "ff383c647551a3ba0387f8334b3f397e45f9fc7b3b5c3b18ab9f2b9737bce039",
@@ -179,7 +177,7 @@ const sample_3 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     const checkSignPromise1 = deviceWallet.devCheckMessageSignature(
                         "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                         "c918d83d8d3b1ee85c1d2af6885a0067bacc636d2ebb77655150f86e80bf4417",
@@ -187,7 +185,7 @@ const sample_3 = function (t) {
                         wordReader
                     );
                     checkSignPromise1.then((check1) => {
-                        t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
+                        assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
                         const checkSignPromise2 = deviceWallet.devCheckMessageSignature(
                             "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                             "0e827c5d16bab0c3451850cc6deeaa332cbcb88322deea4ea939424b072e9b97",
@@ -195,7 +193,7 @@ const sample_3 = function (t) {
                             wordReader
                         );
                         checkSignPromise2.then((check2) => {
-                            t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check2);
+                            assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check2);
                             resolve("Test success");
                         }, rejectPromise);
                     }, rejectPromise);
@@ -206,7 +204,7 @@ const sample_3 = function (t) {
     });
 };
 
-const sample_4 = function (t) {
+const sample_4 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -233,7 +231,7 @@ const sample_4 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, transactionInputs.length);
+                assert.equal(signatures.length, transactionInputs.length);
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "42a26380399172f2024067a17704fceda607283a0f17cb0024ab7a96fc6e4ac6",
@@ -241,7 +239,7 @@ const sample_4 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     const checkSignPromise1 = deviceWallet.devCheckMessageSignature(
                         "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                         "5e0a5a8c7ea4a2a500c24e3a4bfd83ef9f74f3c2ff4bdc01240b66a41e34ebbf",
@@ -249,7 +247,7 @@ const sample_4 = function (t) {
                         wordReader
                     );
                     checkSignPromise1.then((check1) => {
-                        t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
+                        assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
                         resolve("Test success");
                     }, rejectPromise);
                 }, rejectPromise);
@@ -259,7 +257,7 @@ const sample_4 = function (t) {
     });
 };
 
-const sample_5 = function (t) {
+const sample_5 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -279,7 +277,7 @@ const sample_5 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, transactionInputs.length);
+                assert.equal(signatures.length, transactionInputs.length);
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "c40e110f5e460532bfb03a5a0e50262d92d8913a89c87869adb5a443463dea69",
@@ -287,7 +285,7 @@ const sample_5 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     resolve("Test success");
                 }, rejectPromise);
             }, rejectPromise);
@@ -296,7 +294,7 @@ const sample_5 = function (t) {
     });
 };
 
-const sample_6 = function (t) {
+const sample_6 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -330,7 +328,7 @@ const sample_6 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, transactionInputs.length);
+                assert.equal(signatures.length, transactionInputs.length);
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "7edea77354eca0999b1b023014eb04638b05313d40711707dd03a9935696ccd1",
@@ -338,7 +336,7 @@ const sample_6 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     resolve("Test success");
                 }, rejectPromise);
             }, rejectPromise);
@@ -347,7 +345,7 @@ const sample_6 = function (t) {
     });
 };
 
-const sample_7 = function (t) {
+const sample_7 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -379,7 +377,7 @@ const sample_7 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, transactionInputs.length);
+                assert.equal(signatures.length, transactionInputs.length);
 
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
@@ -388,7 +386,7 @@ const sample_7 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     const checkSignPromise1 = deviceWallet.devCheckMessageSignature(
                         "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                         "332534f92c27b31f5b73d8d0c7dde4527b540024f8daa965fe9140e97f3c2b06",
@@ -396,7 +394,7 @@ const sample_7 = function (t) {
                         wordReader
                     );
                     checkSignPromise1.then((check1) => {
-                        t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
+                        assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check1);
                         const checkSignPromise2 = deviceWallet.devCheckMessageSignature(
                             "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                             "63f955205ceb159415268bad68acaae6ac8be0a9f33ef998a84d1c09a8b52798",
@@ -404,7 +402,7 @@ const sample_7 = function (t) {
                             wordReader
                         );
                         checkSignPromise2.then((check2) => {
-                            t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check2);
+                            assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check2);
                             resolve("Test success");
                         }, rejectPromise);
                     }, rejectPromise);
@@ -415,7 +413,7 @@ const sample_7 = function (t) {
     });
 };
 
-const sample_8 = function (t) {
+const sample_8 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -435,7 +433,7 @@ const sample_8 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, transactionInputs.length);
+                assert.equal(signatures.length, transactionInputs.length);
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "47bfa37c79f7960df8e8a421250922c5165167f4c91ecca5682c1106f9010a7f",
@@ -443,7 +441,7 @@ const sample_8 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     resolve("Test success");
                 }, rejectPromise);
             }, rejectPromise);
@@ -452,7 +450,7 @@ const sample_8 = function (t) {
     });
 };
 
-const sample_9 = function (t) {
+const sample_9 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -480,7 +478,7 @@ const sample_9 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, transactionInputs.length);
+                assert.equal(signatures.length, transactionInputs.length);
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "e0c6e4982b1b8c33c5be55ac115b69be68f209c5d9054954653e14874664b57d",
@@ -488,7 +486,7 @@ const sample_9 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     resolve("Test success");
                 }, rejectPromise);
             }, rejectPromise);
@@ -497,7 +495,7 @@ const sample_9 = function (t) {
     });
 };
 
-const sample_10 = function (t) {
+const sample_10 = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -517,7 +515,7 @@ const sample_10 = function (t) {
 
             const transactionPromise = deviceWallet.devSkycoinTransactionSign(transactionInputs, transactionOutputs, pinCodeReader, wordReader);
             transactionPromise.then((signatures) => {
-                t.equal(signatures.length, transactionInputs.length);
+                assert.equal(signatures.length, transactionInputs.length);
                 const checkSignPromise = deviceWallet.devCheckMessageSignature(
                     "2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw",
                     "457648543755580ad40ab461bbef2b0ffe19f2130f2f220cbb2f196b05d436b4",
@@ -525,7 +523,7 @@ const sample_10 = function (t) {
                     wordReader
                 );
                 checkSignPromise.then((check) => {
-                    t.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
+                    assert.equal("Address emiting that signature: 2EU3JbveHdkxW6z5tdhbbB2kRAWvXC2pLzw", check);
                     resolve("Test success");
                 }, rejectPromise);
             }, rejectPromise);
@@ -533,45 +531,44 @@ const sample_10 = function (t) {
     });
 };
 
-suite.test('Transactions', async function (t) {
+describe('Transactions', function () {
     if (deviceWallet.getDevice() === null) {
         console.log("Skycoin hardware NOT FOUND, using emulator");
         deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
+        deviceWallet.setAutoPressButton(true, 'R');
     } else {
         console.log("Skycoin hardware is plugged in");
         deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
     }
 
-    var testPromise = new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            sample_1(t).then(() => {
-                return sample_2(t);
-            }).then(() => {
-                return sample_3(t);
-            }).then(() => {
-                return sample_4(t);
-            }).then(() => {
-                return sample_5(t);
-            }).then(() => {
-                return sample_6(t);
-            }).then(() => {
-                return sample_7(t);
-            }).then(() => {
-                return sample_8(t);
-            }).then(() => {
-                return sample_9(t);
-            }).then(() => {
-                return sample_10(t);
-            });
-        }, 200);
+    it('Should return zero', function() {
+        this.timeout(0);
+        return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+                sample_1().then(() => {
+                    return sample_2();
+                }).then(() => {
+                    return sample_3();
+                }).then(() => {
+                    return sample_4();
+                }).then(() => {
+                    return sample_5();
+                }).then(() => {
+                    return sample_6();
+                }).then(() => {
+                    return sample_7();
+                }).then(() => {
+                    return sample_8();
+                }).then(() => {
+                    return sample_9();
+                }).then(() => {
+                    return sample_10();
+                }).then(() => {
+                    resolve(0);
+                }).catch(reject);
+            }, 200);
+        }).then(function(result) {
+            assert.equal(result, 0);
+        });
     });
-
-    try {
-        var result = await testPromise;
-        expect(result).to.equal(0);
-        process.exit(0);
-    }
-    catch (err) {
-        console.log('Not success');
-    }
-}).setTimeout(Infinity);
+});
