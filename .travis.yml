@@ -9,6 +9,9 @@ matrix:
         - PIP='sudo pip'
     - os: osx
       env: PIP=pip
+env:
+  global:
+    - XARGS="-screen 0 1024x768x24"
 install:
   # Install OS-specific test and build dependencies
   - sh "ci-scripts/install-${TRAVIS_OS_NAME}.sh"
@@ -20,6 +23,10 @@ install:
   - npm install
   - npm run make-protobuf-files
 before_script:
+  # Start Xvfb
+  - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+    ( sudo Xvfb :99 -ac ${XARGS}; echo "Xvfb ok" )&
+    fi
   # Install hardware wallet for running tests against emulator
   - mkdir -p tmp/hardware-wallet
   - git clone --depth=1 --single-branch --branch develop https://github.com/skycoin/hardware-wallet.git tmp/hardware-wallet
@@ -45,18 +52,22 @@ script:
   - make -C tmp/hardware-wallet/tiny-firmware/protob install-protoc
   - make -C tmp/hardware-wallet/tiny-firmware/protob/nanopb/vendor/nanopb/generator/proto
   - make -C tmp/hardware-wallet emulator
-  # screen -S emulator -dm xvfb-run make -C ./tmp/hardware-wallet run-emulator
-  - xvfb-run --server-args="-screen 0 1024x768x24" make -C ./tmp/hardware-wallet run-emulator &
+  # On GNU/Linux wrap emulator in xvfb graphics context
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    xvfb-run --server-args="${XARGS}" make -C ./tmp/hardware-wallet run-emulator & ;
+    fi
+  # On osx Xvfb started in before_script step
+  - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+    make -C ./tmp/hardware-wallet run-emulator & ;
+    fi
   # Run linter while emulator gets built
   - npm run lint
-  # Suspend for a while to wait for emulator
-  - sleep 60
   - screen -ls || true
   - ps aux | grep emulator
   - npm test
 after_script:
   - kill -s KILL $(pgrep emulator)
-  # screen -S emulator -X quit
+  # screen -S xvfbsrv -X quit
 notifications:
   # https://github.com/kvld/travisci-telegram TravisCI Telegram Bot integration
   webhooks: https://fathomless-fjord-24024.herokuapp.com/notify
