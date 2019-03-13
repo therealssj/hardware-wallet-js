@@ -54,11 +54,11 @@ script:
   - make -C tmp/hardware-wallet emulator
   # On GNU/Linux wrap emulator in xvfb graphics context
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    xvfb-run --server-args="${XARGS}" make -C ./tmp/hardware-wallet run-emulator & ;
+    xvfb-run --server-args="${XARGS}" make -C ./tmp/hardware-wallet run-emulator & true ;
     fi
   # On osx Xvfb started in before_script step
   - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-    make -C ./tmp/hardware-wallet run-emulator & ;
+    make -C ./tmp/hardware-wallet run-emulator & true ;
     fi
   # Run linter while emulator gets built
   - npm run lint
