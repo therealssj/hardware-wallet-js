@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- Support device label in message to apply settings
 - Use `protobuf` file definitions from a [`git submodule`](http://github.com/skycoin/hardware-wallet-protob.git).
 - In `devGenerateMnemonic` message (function) it is possible to specify the `word_count` for the seed.
 - In `devRecoveryDevice` message (function) it is possible to specify the `word_count` for the seed.
