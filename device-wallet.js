@@ -4,7 +4,7 @@ const bufReceiver = require('./buffer-receiver');
 const dgram = require('dgram');
 const scanf = require('scanf');
 const os = require('os');
-const secureRandom = require('secure-random');
+const randomBytes = require('randombytes');
 
 let deviceType = 0;
 let autoPressButtons = false;
@@ -348,7 +348,7 @@ const createSetMnemonicRequest = function(mnemonic) {
 };
 
 const createEntropyAckRequest = function(bufferSize) {
-    const entropy = secureRandom.randomUint8Array(bufferSize);
+    const entropy = randomBytes(bufferSize);
     const msgStructure = {
         entropy
     };
