@@ -1,8 +1,11 @@
 const deviceWallet = require('../device-wallet');
 const assert = require('chai').assert;
 
-const rejectPromise = function (msg) {
-    console.log("Promise rejected", msg);
+const rejectPromise = function (reject, errMsg) {
+    return function(msg) {
+        console.log("Promise rejected", msg);
+        reject(new Error(errMsg || msg));
+    };
 };
 
 const setup = function () {
