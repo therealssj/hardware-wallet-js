@@ -1,76 +1,56 @@
-const Suite = require('node-test');
 const deviceWallet = require('../device-wallet');
 
-const suite = new Suite('Transaction testing');
-
-const rejectPromise = function (msg) {
-    console.log("Promise rejected", msg);
+const rejectPromise = function (reject, errMsg) {
+    return function(msg) {
+        console.log("Promise rejected", msg);
+        reject(new Error(errMsg || msg));
+    };
 };
 
 const setup = function () {
-    return new Promise((resolve, reject) => {
-        const wipePromise = deviceWallet.devWipeDevice();
-        wipePromise.then(() => {
-            resolve("Set up done.");
-        }, (msg) => {
-            console.log(msg);
-            reject(new Error("setup failed"));
-        });
+    return new Promise(function(resolve, reject) {
+        deviceWallet.devWipeDevice().
+        then(
+            () => {
+                resolve('Set up done');
+            },
+            rejectPromise(reject, "setup failed")
+        );
     });
 };
 
-const sample_1 = function (t) {
-    return new Promise((resolve, reject) => {
-        const setupPromise = setup();
-        setupPromise.then(() => {
-            const getFeaturesPromise1 = deviceWallet.devGetFeatures();
-            getFeaturesPromise1.then((features1) => {
-                var deviceLabel = 'My dev device';
-                if (features1.label !== deviceLabel) {
-                    var applySettingsPromise = deviceWallet.devApplySettings(false, deviceLabel);
-                    applySettingsPromise.then(() => {
-                        var getFeaturesPromise2 = deviceWallet.devGetFeatures();
-                        getFeaturesPromise2.then((features2) => {
-                            if (deviceLabel === features2.label) {
-                                resolve("Setting applied as expected.");
-                            } else {
-                                reject("Apply setting failed.");
-                            }
-                        }, rejectPromise);
-                    }, rejectPromise);
-                } else {
-                    reject("Label should be different at test startup.");
+describe('Apply Setting -> label', function () {
+    it("Should apply device label settings", function() {
+        this.timeout(0);
+        if (deviceWallet.getDevice() === null) {
+            console.log("Skycoin hardware NOT FOUND, using emulator");
+            deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
+            deviceWallet.setAutoPressButton(true, 'R');
+        } else {
+            console.log("Skycoin hardware is plugged in");
+            deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
+        }
+
+        return setup().
+            then(deviceWallet.devGetFeatures).
+            then(function(features1) {
+                const deviceLabel = 'My dev device';
+                if (features1.label === deviceLabel) {
+                    return Promise.reject(new Error("Label should be different at test startup."));
                 }
-            }, rejectPromise);
-        }, rejectPromise);
-    });
-};
-
-suite.test('Apply Setting -> label', async function (t) {
-    if (deviceWallet.getDevice() === null) {
-        console.log("Skycoin hardware NOT FOUND, using emulator");
-        deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
-    } else {
-        console.log("Skycoin hardware is plugged in");
-        deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
-    }
-
-    var testPromise = new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            sample_1(t).then(() => {
-                return 0;
-            }, () => {
-                return -1;
+                return deviceWallet.devApplySettings(false, deviceLabel);
+            }).
+            then(deviceWallet.devGetFeatures).
+            then(function(features2) {
+                const deviceLabel = 'My dev device';
+                if (deviceLabel === features2.label) {
+                    return "Setting applied as expected.";
+                }
+                return Promise.reject(new Error("Apply setting failed."));
+            }).
+            catch(function(err) {
+                console.log(err);
+                return Promise.reject(err);
             });
-        }, 200);
     });
-
-    try {
-        var result = await testPromise;
-        expect(result).to.equal(0);
-        process.exit(0);
-    }
-    catch (err) {
-        console.log('Not success');
-    }
-}).setTimeout(Infinity);
+});
