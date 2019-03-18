@@ -1020,10 +1020,14 @@ const devWipeDevice = function() {
   });
 };
 
+// eslint-disable-next-line max-lines-per-function
 const devBackupDevice = function(pinCodeReader) {
+  // eslint-disable-next-line max-lines-per-function
   return new Promise((resolve, reject) => {
     const dataBytes = createBackupDeviceRequest();
     const deviceHandle = new DeviceHandler(deviceType);
+
+    // eslint-disable-next-line max-statements
     const buttonAckLoop = function(kind) {
       if (kind != messages.MessageType.MessageType_ButtonRequest) {
         if (kind == messages.MessageType.MessageType_Success) {
@@ -1040,6 +1044,15 @@ const devBackupDevice = function(pinCodeReader) {
         buttonAckLoop(k);
       });
       buttonDevHandle.write(buttonAckBytes);
+      if ( autoPressButtons === true ) {
+        if ( autoPressValue === 'R' ) {
+          pressButtonRight(buttonDevHandle.devHandle);
+        } else if ( autoPressValue === 'L' ) {
+          pressButtonLeft(buttonDevHandle.devHandle);
+        } else {
+          pressButtonLeftAndRight(buttonDevHandle.devHandle);
+        }
+      }
     };
     const backupReader = function(kind) {
       deviceHandle.close();
