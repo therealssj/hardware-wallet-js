@@ -1,7 +1,5 @@
-const Suite = require('node-test');
 const deviceWallet = require('../device-wallet');
-
-const suite = new Suite('Transaction testing');
+const assert = require('chai').assert;
 
 const rejectPromise = function (msg) {
     console.log("Promise rejected", msg);
@@ -19,7 +17,7 @@ const setup = function () {
     });
 };
 
-const generateTwelveWordsSeedOk = function (t) {
+const generateTwelveWordsSeedOk = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -33,7 +31,7 @@ const generateTwelveWordsSeedOk = function (t) {
     });
 };
 
-const generateTwentyFourWordsSeedOk = function (t) {
+const generateTwentyFourWordsSeedOk = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
         setupPromise.then(() => {
@@ -47,45 +45,46 @@ const generateTwentyFourWordsSeedOk = function (t) {
     });
 };
 
-const generateSeventeenWordsSeedFail = function (t) {
+const generateSeventeenWordsSeedFail = function () {
     return new Promise((resolve, reject) => {
         const setupPromise = setup();
-        setupPromise.then(rejectPromise, (msg) => {
+        setupPromise.then(() => {
             const gMnemonicPromise = deviceWallet.devGenerateMnemonic(17, false);
             gMnemonicPromise.then((msg) => {
-                resolve("Test generate with 17 words failed as expected.", msg);
+                rejectPromise('Should work with 12 or 24 word count only' + msg);
+                reject();
             }, (msg) => {
-                rejectPromise('Should work wih 12 or 24 word count only' + msg);
+                resolve("Test generate with 17 words failed as expected.", msg);
             });
-        });
+        }, rejectPromise);
     });
 };
 
-suite.test('Transactions', async function (t) {
+describe('Transactions', function () {
     if (deviceWallet.getDevice() === null) {
         console.log("Skycoin hardware NOT FOUND, using emulator");
         deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
+        deviceWallet.setAutoPressButton(true, 'R');
     } else {
         console.log("Skycoin hardware is plugged in");
         deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
     }
 
-    var testPromise = new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            generateTwelveWordsSeedOk(t).then(() => {
-                return generateTwentyFourWordsSeedOk(t);
-            }).then(() => {
-                return generateSeventeenWordsSeedFail(t);
-            });
-        }, 200);
+    it('Should have a result equal to zero', function() {
+        this.timeout(0);
+        return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+                generateTwelveWordsSeedOk().then(() => {
+                    return generateTwentyFourWordsSeedOk();
+                }).then(() => {
+                    return generateSeventeenWordsSeedFail();
+                }).then(() => {
+                    resolve(0);
+                }).catch(reject);
+            }, 200);
+        }).then(function(result) {
+            assert.equal(result, 0);
+        });
     });
 
-    try {
-        var result = await testPromise;
-        expect(result).to.equal(0);
-        process.exit(0);
-    }
-    catch (err) {
-        console.log('Not success');
-    }
-}).setTimeout(Infinity);
+});
