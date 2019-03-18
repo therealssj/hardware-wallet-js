@@ -23,7 +23,7 @@ const pinCodeReader = function () {
 };
 
 module.exports = {
+  pinCodeReader,
   rejectPromise,
-  wordReader,
-  pinCodeReader
+  wordReader
 };
