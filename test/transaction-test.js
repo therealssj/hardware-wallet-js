@@ -1,29 +1,8 @@
 const deviceWallet = require('../device-wallet');
 const assert = require('chai').assert;
-
-const rejectPromise = function (msg) {
-    console.log("Promise rejected", msg);
-};
-
-const wordReader = function () {
-    return new Promise((resolve) => {
-        console.log("Inside wordReader callback, please input word: ");
-        const word = scanf('%s');
-        resolve(word);
-    });
-};
-
-const pinCodeReader = function () {
-    return new Promise((resolve, reject) => {
-        console.log("Got inside pinCodeReader");
-        const pinCode = scanf('%s');
-        if (pinCode.length != 4) {
-            reject(new Error("Bad bad pin code"));
-            return;
-        }
-        resolve(pinCode);
-    });
-};
+const rejectPromise = require('../utils').rejectPromise;
+const wordReader = require('../utils').wordReader;
+const pinCodeReader = require('../utils').pinCodeReader;
 
 const setup = function () {
     return new Promise((resolve, reject) => {

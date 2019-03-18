@@ -1,11 +1,5 @@
 const deviceWallet = require('../device-wallet');
-
-const rejectPromise = function (reject, errMsg) {
-    return function(msg) {
-        console.log("Promise rejected", msg);
-        reject(new Error(errMsg || msg));
-    };
-};
+const rejectPromise = require('../utils').rejectPromise;
 
 const setup = function () {
     return new Promise(function(resolve, reject) {
@@ -14,7 +8,10 @@ const setup = function () {
             () => {
                 resolve('Set up done');
             },
-            rejectPromise(reject, "setup failed")
+            (msg) => {
+                rejectPromise("setup failed");
+                reject(msg);
+            }
         );
     });
 };
