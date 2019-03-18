@@ -2,10 +2,10 @@ const deviceWallet = require('../device-wallet');
 
 const pinCodeReader = function() {
   return new Promise((resolve, reject) => {
-      console.log("Got inside pinCodeReader");
+      console.log("PinCodeReader activated for device backup");
       const pinCode = scanf('%s');
       if (pinCode.length != 4) {
-          reject(new Error("Bad bad pin code"));
+          reject(new Error("Bad pin code"));
           return;
       }
       resolve(pinCode);
