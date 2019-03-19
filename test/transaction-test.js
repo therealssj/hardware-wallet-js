@@ -1,8 +1,10 @@
 const deviceWallet = require('../device-wallet');
 const assert = require('chai').assert;
 const rejectPromise = require('../utils').rejectPromise;
-const wordReader = require('../utils').wordReader;
-const pinCodeReader = require('../utils').pinCodeReader;
+const utils = require('../utils');
+
+const wordReader = utils.wordReader;
+const pinCodeReader = utils.pinCodeReader("Transaction test");
 
 const setup = function () {
     return new Promise((resolve, reject) => {

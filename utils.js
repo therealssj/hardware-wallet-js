@@ -10,16 +10,18 @@ const wordReader = function () {
   });
 };
 
-const pinCodeReader = function () {
-  return new Promise((resolve, reject) => {
-      console.log("Got inside pinCodeReader");
-      const pinCode = scanf('%s');
-      if (pinCode.length != 4) {
-          reject(new Error("Bad pin code"));
-          return;
-      }
-      resolve(pinCode);
-  });
+const pinCodeReader = function (msg) {
+  return function() {
+    return new Promise((resolve, reject) => {
+        console.log("Enter pinCodeReader : " + msg);
+        const pinCode = scanf('%s');
+        if (pinCode.length != 4) {
+            reject(new Error("Pin code mismatch"));
+            return;
+        }
+        resolve(pinCode);
+    });
+  }
 };
 
 module.exports = {

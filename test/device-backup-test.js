@@ -1,5 +1,6 @@
 const deviceWallet = require('../device-wallet');
-const pinCodeReader = require('../utils').pinCodeReader;
+utils = require('../utils')
+const pinCodeReader = utils.pinCodeReader("Device backup test");
 
 describe('Device Backup test', function() {
 
