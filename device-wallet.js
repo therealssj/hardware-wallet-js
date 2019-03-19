@@ -137,82 +137,82 @@ class DeviceHandler {
   getDeviceHandler() {
     console.log("Device Open");
     switch (this.deviceType) {
-      case DeviceTypeEnum.USB:
-        {
-          const dev = getDevice();
-          if (dev === null) {
-            throw new Error("Device not connected");
-          }
-          return dev;
-        }
-      case DeviceTypeEnum.EMULATOR:
-        {
-          const client = dgram.createSocket('udp4');
-          return client;
-        }
-      default:
-        throw new Error("Device type not defined");
+    case DeviceTypeEnum.USB:
+    {
+      const dev = getDevice();
+      if (dev === null) {
+        throw new Error("Device not connected");
+      }
+      return dev;
+    }
+    case DeviceTypeEnum.EMULATOR:
+    {
+      const client = dgram.createSocket('udp4');
+      return client;
+    }
+    default:
+      throw new Error("Device type not defined");
     }
   }
 
   read(devReadCallback) {
     const bufferReceiver = new bufReceiver.BufferReceiver();
     switch (this.deviceType) {
-      case DeviceTypeEnum.USB:
-        {
-          const devHandle = this.devHandle;
-          const devHandleCallback = function(err, data) {
-            if (err) {
-              console.error(err);
-              return;
-            }
-            bufferReceiver.receiveBuffer(data, devReadCallback);
-            if (bufferReceiver.bytesToGet > 0) {
-              console.log("Reading one more time", devHandle);
-              devHandle.read(devHandleCallback);
-            }
-          };
-          devHandle.read(devHandleCallback);
-        }
-        break;
-      case DeviceTypeEnum.EMULATOR:
-        this.devHandle.on('message', function(data, rinfo) {
-          if (rinfo) {
-            console.log(`server got:
-                        ${data} from ${rinfo.address}:${rinfo.port}`);
+    case DeviceTypeEnum.USB:
+      {
+        const devHandle = this.devHandle;
+        const devHandleCallback = function(err, data) {
+          if (err) {
+            console.error(err);
+            return;
           }
           bufferReceiver.receiveBuffer(data, devReadCallback);
-        });
-        break;
-      default:
-        throw new Error("Device type not defined");
+          if (bufferReceiver.bytesToGet > 0) {
+            console.log("Reading one more time", devHandle);
+            devHandle.read(devHandleCallback);
+          }
+        };
+        devHandle.read(devHandleCallback);
+      }
+      break;
+    case DeviceTypeEnum.EMULATOR:
+      this.devHandle.on('message', function(data, rinfo) {
+        if (rinfo) {
+          console.log(`server got:
+                        ${data} from ${rinfo.address}:${rinfo.port}`);
+        }
+        bufferReceiver.receiveBuffer(data, devReadCallback);
+      });
+      break;
+    default:
+      throw new Error("Device type not defined");
     }
   }
 
   // eslint-disable-next-line max-statements
   write(dataBytes) {
     switch (this.deviceType) {
-      case DeviceTypeEnum.USB:
-        {
-          console.log("Writing a buffer of length ", dataBytes.length, "to the device");
-          let j = 0;
-          let lengthToWrite = dataBytes.length;
-          do{
-            const u64pack = dataBytes.slice(64 * j, 64 * (j + 1));
-            if (os.platform() == 'win32') {
-              u64pack.unshift(0x00);
-            }
-            this.devHandle.write(u64pack);
-            j += 1;
-            lengthToWrite -= 64;
-          } while (lengthToWrite > 0);
-          break;
+    case DeviceTypeEnum.USB:
+    {
+      console.log("Writing a buffer of length ", dataBytes.length, "to the device");
+      let j = 0;
+      let lengthToWrite = dataBytes.length;
+      do{
+        const u64pack = dataBytes.slice(64 * j, 64 * (j + 1));
+        if (os.platform() == 'win32') {
+          u64pack.unshift(0x00);
         }
-      case DeviceTypeEnum.EMULATOR:
-        emulatorSend(this.devHandle, Buffer.from(dataBytes));
-        break;
-      default:
-        throw new Error("Device type not defined");
+        this.devHandle.write(u64pack);
+        j += 1;
+        lengthToWrite -= 64;
+      } while (lengthToWrite > 0);
+      break;
+    }
+    case DeviceTypeEnum.EMULATOR:
+      emulatorSend(this.devHandle, Buffer.from(dataBytes));
+      break;
+    default:
+      throw new Error("Device type not defined");
     }
   }
 
@@ -224,14 +224,14 @@ class DeviceHandler {
   close() {
     console.log("Device Close");
     switch (this.deviceType) {
-      case DeviceTypeEnum.USB:
-        this.devHandle.close();
-        break;
-      case DeviceTypeEnum.EMULATOR:
-        this.devHandle.close();
-        break;
-      default:
-        throw new Error("Device type not defined");
+    case DeviceTypeEnum.USB:
+      this.devHandle.close();
+      break;
+    case DeviceTypeEnum.EMULATOR:
+      this.devHandle.close();
+      break;
+    default:
+      throw new Error("Device type not defined");
     }
   }
 }
@@ -260,7 +260,7 @@ const createGetFeaturesRequest = function() {
 
 const createApplySettings = function(usePassphrase, deviceLabel) {
   const msgStructure = {
-        "label": deviceLabel,
+    "label": deviceLabel,
     "language": "",
     usePassphrase
   };
@@ -348,17 +348,17 @@ const createSetMnemonicRequest = function(mnemonic) {
 };
 
 const createEntropyAckRequest = function(bufferSize) {
-    const entropy = randomBytes(bufferSize);
-    const msgStructure = {
-        entropy
-    };
-    const msg = messages.GenerateMnemonic.create(msgStructure);
-    const buffer = messages.GenerateMnemonic.encode(msg).finish();
-    const chunks = makeTrezorMessage(
-        buffer,
-        messages.MessageType.MessageType_EntropyAck
-    );
-    return dataBytesFromChunks(chunks);
+  const entropy = randomBytes(bufferSize);
+  const msgStructure = {
+    entropy
+  };
+  const msg = messages.GenerateMnemonic.create(msgStructure);
+  const buffer = messages.GenerateMnemonic.encode(msg).finish();
+  const chunks = makeTrezorMessage(
+    buffer,
+    messages.MessageType.MessageType_EntropyAck
+  );
+  return dataBytesFromChunks(chunks);
 };
 
 const createGenerateMnemonicRequest = function(wordCount, usePassphrase) {
@@ -843,24 +843,24 @@ const devAddressGen = function(addressN, startIndex, confirmAddress, pinCodeRead
     const addressGenHandler = function(kind, dataBuffer) {
       console.log("Addresses generation received message kind: ", messages.MessageType[kind]);
       switch (kind) {
-        case messages.MessageType.MessageType_Failure:
-          reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
-          break;
-        case messages.MessageType.MessageType_ResponseSkycoinAddress:
-          resolve(decodeAddressGenAnswer(kind, dataBuffer));
-          break;
-        case messages.MessageType.MessageType_PinMatrixRequest:
-          devSendPinCodeRequest(addressGenHandler, pinCodeReader);
-          break;
-        case messages.MessageType.MessageType_PassphraseRequest:
-          devSendPassphraseAck(addressGenHandler, passphraseReader);
-          break;
-        case messages.MessageType.MessageType_ButtonRequest:
-          devButtonRequestCallback(kind, dataBuffer, addressGenHandler);
-          break;
-        default:
-          reject(new Error(`Unexpected answer from the device: ${kind}`));
-          break;
+      case messages.MessageType.MessageType_Failure:
+        reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
+        break;
+      case messages.MessageType.MessageType_ResponseSkycoinAddress:
+        resolve(decodeAddressGenAnswer(kind, dataBuffer));
+        break;
+      case messages.MessageType.MessageType_PinMatrixRequest:
+        devSendPinCodeRequest(addressGenHandler, pinCodeReader);
+        break;
+      case messages.MessageType.MessageType_PassphraseRequest:
+        devSendPassphraseAck(addressGenHandler, passphraseReader);
+        break;
+      case messages.MessageType.MessageType_ButtonRequest:
+        devButtonRequestCallback(kind, dataBuffer, addressGenHandler);
+        break;
+      default:
+        reject(new Error(`Unexpected answer from the device: ${kind}`));
+        break;
       }
     };
     devSendAddressGen(addressN, startIndex, confirmAddress, addressGenHandler);
@@ -871,24 +871,24 @@ const devApplySettings = function(usePassphrase, deviceLabel, pinCodeReader) {
   return new Promise((resolve, reject) => {
     const applySettingsCallback = function(kind, dataBuffer) {
       switch (kind) {
-        case messages.MessageType.MessageType_Success:
-          resolve(decodeSuccess(kind, dataBuffer));
-          break;
-        case messages.MessageType.MessageType_Failure:
-          reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
-          break;
-        case messages.MessageType.MessageType_PinMatrixRequest:
-          devSendPinCodeRequest(applySettingsCallback, pinCodeReader);
-          break;
-        case messages.MessageType.MessageType_ButtonRequest:
-          devButtonRequestCallback(kind, dataBuffer, applySettingsCallback);
-          break;
-        default:
-          reject(new Error(`Unexpected answer from the device: ${kind}`));
-          break;
+      case messages.MessageType.MessageType_Success:
+        resolve(decodeSuccess(kind, dataBuffer));
+        break;
+      case messages.MessageType.MessageType_Failure:
+        reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
+        break;
+      case messages.MessageType.MessageType_PinMatrixRequest:
+        devSendPinCodeRequest(applySettingsCallback, pinCodeReader);
+        break;
+      case messages.MessageType.MessageType_ButtonRequest:
+        devButtonRequestCallback(kind, dataBuffer, applySettingsCallback);
+        break;
+      default:
+        reject(new Error(`Unexpected answer from the device: ${kind}`));
+        break;
       }
     };
-        const dataBytes = createApplySettings(usePassphrase, deviceLabel);
+    const dataBytes = createApplySettings(usePassphrase, deviceLabel);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, dataBuffer) {
       deviceHandle.close();
@@ -927,21 +927,21 @@ const devSkycoinSignMessage = function(addressN, message, pinCodeReader, passphr
     const skycoinSignHander = function(kind, dataBuffer) {
       console.log("Signature generation received message kind:", messages.MessageType[kind]);
       switch (kind) {
-        case messages.MessageType.MessageType_Failure:
-          reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
-          break;
-        case messages.MessageType.MessageType_ResponseSkycoinSignMessage:
-          resolve(decodeSignMessageAnswer(kind, dataBuffer));
-          break;
-        case messages.MessageType.MessageType_PassphraseRequest:
-          devSendPassphraseAck(skycoinSignHander, passphraseReader);
-          break;
-        case messages.MessageType.MessageType_PinMatrixRequest:
-          devSendPinCodeRequest(skycoinSignHander, pinCodeReader);
-          break;
-        default:
-          reject(new Error(`Unexpected answer from the device: ${kind}`));
-          break;
+      case messages.MessageType.MessageType_Failure:
+        reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
+        break;
+      case messages.MessageType.MessageType_ResponseSkycoinSignMessage:
+        resolve(decodeSignMessageAnswer(kind, dataBuffer));
+        break;
+      case messages.MessageType.MessageType_PassphraseRequest:
+        devSendPassphraseAck(skycoinSignHander, passphraseReader);
+        break;
+      case messages.MessageType.MessageType_PinMatrixRequest:
+        devSendPinCodeRequest(skycoinSignHander, pinCodeReader);
+        break;
+      default:
+        reject(new Error(`Unexpected answer from the device: ${kind}`));
+        break;
       }
     };
     devSendSkycoinSignMessage(addressN, message, skycoinSignHander);
@@ -959,27 +959,27 @@ const devSkycoinTransactionSign = function(
     const skycoinTransactionSignHander = function(kind, dataBuffer) {
       console.log("TransactionSign received message kind:", messages.MessageType[kind]);
       switch (kind) {
-        case messages.MessageType.MessageType_ResponseTransactionSign:
-          resolve(decodeTransactionSignAnswer(kind, dataBuffer));
-          break;
-        case messages.MessageType.MessageType_Success:
-          reject(new Error("Should end with ResponseTransactionSign request"));
-          break;
-        case messages.MessageType.MessageType_Failure:
-          reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
-          break;
-        case messages.MessageType.MessageType_ButtonRequest:
-          devButtonRequestCallback(kind, dataBuffer, skycoinTransactionSignHander);
-          break;
-        case messages.MessageType.MessageType_PassphraseRequest:
-          devSendPassphraseAck(skycoinTransactionSignHander, passphraseReader);
-          break;
-        case messages.MessageType.MessageType_PinMatrixRequest:
-          devSendPinCodeRequest(skycoinTransactionSignHander, pinCodeReader);
-          break;
-        default:
-          reject(new Error(`Unexpected answer from the device: ${kind}`));
-          break;
+      case messages.MessageType.MessageType_ResponseTransactionSign:
+        resolve(decodeTransactionSignAnswer(kind, dataBuffer));
+        break;
+      case messages.MessageType.MessageType_Success:
+        reject(new Error("Should end with ResponseTransactionSign request"));
+        break;
+      case messages.MessageType.MessageType_Failure:
+        reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
+        break;
+      case messages.MessageType.MessageType_ButtonRequest:
+        devButtonRequestCallback(kind, dataBuffer, skycoinTransactionSignHander);
+        break;
+      case messages.MessageType.MessageType_PassphraseRequest:
+        devSendPassphraseAck(skycoinTransactionSignHander, passphraseReader);
+        break;
+      case messages.MessageType.MessageType_PinMatrixRequest:
+        devSendPinCodeRequest(skycoinTransactionSignHander, pinCodeReader);
+        break;
+      default:
+        reject(new Error(`Unexpected answer from the device: ${kind}`));
+        break;
       }
     };
     devSendSkycoinTransactionSign(inputTransactions, outputTransactions, skycoinTransactionSignHander);
@@ -1035,10 +1035,14 @@ const devWipeDevice = function() {
   });
 };
 
+// eslint-disable-next-line max-lines-per-function
 const devBackupDevice = function(pinCodeReader) {
+  // eslint-disable-next-line max-lines-per-function
   return new Promise((resolve, reject) => {
     const dataBytes = createBackupDeviceRequest();
     const deviceHandle = new DeviceHandler(deviceType);
+
+    // eslint-disable-next-line max-statements
     const buttonAckLoop = function(kind) {
       if (kind != messages.MessageType.MessageType_ButtonRequest) {
         if (kind == messages.MessageType.MessageType_Success) {
@@ -1055,6 +1059,15 @@ const devBackupDevice = function(pinCodeReader) {
         buttonAckLoop(k);
       });
       buttonDevHandle.write(buttonAckBytes);
+      if ( autoPressButtons === true ) {
+        if ( autoPressValue === 'R' ) {
+          pressButtonRight(buttonDevHandle.devHandle);
+        } else if ( autoPressValue === 'L' ) {
+          pressButtonLeft(buttonDevHandle.devHandle);
+        } else {
+          pressButtonLeftAndRight(buttonDevHandle.devHandle);
+        }
+      }
     };
     const backupReader = function(kind) {
       deviceHandle.close();
@@ -1162,30 +1175,30 @@ const devSetMnemonic = function(mnemonic) {
 };
 
 const devGenerateMnemonic = function(wordCount, usePassphrase) {
-    return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const dataBytes = createGenerateMnemonicRequest(wordCount, usePassphrase);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, d) {
       deviceHandle.close();
       devButtonRequestCallback(kind, d, (datakind) => {
         if (datakind === messages.MessageType.MessageType_Success) {
-            resolve("Generate Mnemonic operation completed");
+          resolve("Generate Mnemonic operation completed");
         } else if (datakind === messages.MessageType.MessageType_EntropyRequest) {
-            console.warn('internal device entropy is not enough, trying to send external...');
-            const deviceHandleForEntropyAck = new DeviceHandler(deviceType);
-            const devReadCallbackAfterEntropyAck = function(kindAfterEntropyAck) {
-                deviceHandleForEntropyAck.close();
-                if (kindAfterEntropyAck === messages.MessageType.MessageType_Success) {
-                    resolve("Generate Mnemonic operation completed");
-                } else {
-                    reject(new Error("Generate Mnemonic operation failed or refused"));
-                }
-            };
-            deviceHandleForEntropyAck.read(devReadCallbackAfterEntropyAck);
-            const entropyAckDataBytes = createEntropyAckRequest(32);
-            deviceHandleForEntropyAck.write(entropyAckDataBytes);
+          console.warn('internal device entropy is not enough, trying to send external...');
+          const deviceHandleForEntropyAck = new DeviceHandler(deviceType);
+          const devReadCallbackAfterEntropyAck = function(kindAfterEntropyAck) {
+            deviceHandleForEntropyAck.close();
+            if (kindAfterEntropyAck === messages.MessageType.MessageType_Success) {
+              resolve("Generate Mnemonic operation completed");
+            } else {
+              reject(new Error("Generate Mnemonic operation failed or refused"));
+            }
+          };
+          deviceHandleForEntropyAck.read(devReadCallbackAfterEntropyAck);
+          const entropyAckDataBytes = createEntropyAckRequest(32);
+          deviceHandleForEntropyAck.write(entropyAckDataBytes);
         } else {
-            reject(new Error("Generate Mnemonic operation failed or refused"));
+          reject(new Error("Generate Mnemonic operation failed or refused"));
         }
       });
     };
