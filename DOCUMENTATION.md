@@ -143,7 +143,6 @@ Edit device configuration.
 
 *Params:*
 - usePassphrase: Indicates if the passphrase protection must be enabled (true) or disable (false). If set to `null` this value will be ignored and passphrase will remain unchanged
-
 - deviceLabel: Label to identify the device through application and/or device screen (32 characters or less). If set to `null` this value will be ignored and label will remain unchanged.
 - pinCodeReader: [Auxiliary function to obtain the PIN.](#auxiliary-function-to-obtain-the-PIN)
 
@@ -289,7 +288,7 @@ asking for it very frequently).
 *Return value:*
 
 A promise that receives a text string that depends on the result of the operation:
-- If the hardware wallet already has a mnemonic or `wordCount` has an invalid value (promise rejected): `Error: Generate Mnemonic operation failed or refused.
+- If the hardware wallet already has a mnemonic or `wordCount` has an invalid value (promise rejected): `Error: Generate Mnemonic operation failed or refused`.
 - If the operation ends correctly: `Generate Mnemonic operation completed`.
 
 *Notes:*
@@ -356,8 +355,8 @@ asking for it very frequently).
 *Return value:*
 
 A promise that receives a text string that depends on the result of the operation:
-- If the wallet already has a mnemonic or the user cancels the operation (promise rejected):
-`Error: Expected WordAck after Button confirmation`.
+- If the wallet already has a mnemonic, the user cancels the operation or `wordCount` has an invalid value
+(promise rejected): `Error: Expected WordAck after Button confirmation`.
 - If the hardware wallet asks for a specific word and a different word is entered (promise rejected):
 `Error: Wrong word retyped`.
 - If the user enters a word that is not part of the dictionary (promise rejected):
