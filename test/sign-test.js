@@ -65,20 +65,19 @@ describe('Sign message', function () {
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
   }
 
-  const testPromise = new Promise(function (resolve, reject) {
-    setTimeout(function () {
-      sample1().then(() => sample2()).
-        then(() => {
-          resolve(0);
-        }).
-        catch(reject);
-    }, 200);
-  });
-
   it('Should have a result equal to zero', function() {
     this.timeout(0);
-    return testPromise.then(function(result) {
-      assert.equal(result, 0);
+    return new Promise(function (resolve, reject) {
+      setTimeout(function () {
+        sample1().
+          then(sample2).
+          then(() => {
+            reject(new Error('Expected to fail!!!!'));
+          }).
+          catch((msg) => resolve(msg.message));
+      }, 200);
+    }).then(function(result) {
+      assert.equal(result, "Error: Not implement");
     });
   });
 
