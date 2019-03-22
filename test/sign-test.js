@@ -69,7 +69,8 @@ describe('Sign message', function () {
     this.timeout(0);
     return new Promise(function (resolve, reject) {
       setTimeout(function () {
-        sample1().then(() => sample2()).
+        sample1().
+          then(sample2).
           then(() => {
             reject(new Error('Expected to fail!!!!'));
           }).
