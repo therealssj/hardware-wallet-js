@@ -128,6 +128,21 @@ DeviceTypeEnum = {
   'USB': 2
 };
 
+const handlers = [];
+let latestDataBytes = [];
+
+const closeAll = function () {
+
+  for (let i = handlers.length - 1; i >= 0; i -= 1) {
+    try {
+      handlers[i].close();
+    } catch(e) {}
+  }
+
+  handlers.length = 0;
+
+};
+
 class DeviceHandler {
   constructor(devType) {
     this.deviceType = devType;
@@ -176,12 +191,19 @@ class DeviceHandler {
       }
       break;
     case DeviceTypeEnum.EMULATOR:
+      handlers.push(this);
       this.devHandle.on('message', function(data, rinfo) {
         if (rinfo) {
           console.log(`server got:
                         ${data} from ${rinfo.address}:${rinfo.port}`);
         }
-        bufferReceiver.receiveBuffer(data, devReadCallback);
+        bufferReceiver.receiveBuffer(data, function(kind) {
+          devReadCallback.apply(null, arguments);
+          if ( latestDataBytes.equals(Buffer.from(createCancelRequest())) &&
+            kind === messages.MessageType.MessageType_Failure ) {
+            closeAll();
+          }
+        });
       });
       break;
     default:
@@ -209,6 +231,7 @@ class DeviceHandler {
       break;
     }
     case DeviceTypeEnum.EMULATOR:
+      latestDataBytes = Buffer.from(dataBytes);
       emulatorSend(this.devHandle, Buffer.from(dataBytes));
       break;
     default:
