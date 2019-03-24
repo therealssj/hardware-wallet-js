@@ -328,8 +328,8 @@ const createSetMnemonicRequest = function(mnemonic) {
 const createEntropyAckRequest = function(bufferSize) {
   const entropy = randomBytes(bufferSize);
   const msgStructure = {entropy};
-  const msg = messages.GenerateMnemonic.create(msgStructure);
-  const buffer = messages.GenerateMnemonic.encode(msg).finish();
+  const msg = messages.EntropyAck.create(msgStructure);
+  const buffer = messages.EntropyAck.encode(msg).finish();
   const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_EntropyAck);
   return dataBytesFromChunks(chunks);
 };
