@@ -1,20 +1,7 @@
 const deviceWallet = require('../device-wallet');
-const rejectPromise = require('../utils').rejectPromise;
-
-const setup = function () {
-  return new Promise(function(resolve, reject) {
-    deviceWallet.devWipeDevice().
-      then(
-        () => {
-          resolve('Set up done');
-        },
-        (msg) => {
-          rejectPromise("setup failed");
-          reject(msg);
-        }
-      );
-  });
-};
+const utils = require('../utils');
+const rejectPromise = utils.rejectPromise;
+const setup = utils.deviceSetup;
 
 describe('Apply Setting -> label', function () {
   it("Should apply device label settings", function() {
@@ -28,10 +15,11 @@ describe('Apply Setting -> label', function () {
       deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
     }
 
+    const deviceLabel = 'My dev device';
+
     return setup().
       then(deviceWallet.devGetFeatures).
       then(function(features1) {
-        const deviceLabel = 'My dev device';
         if (features1.label === deviceLabel) {
           return Promise.reject(new Error("Label should be different at test startup."));
         }
@@ -39,15 +27,11 @@ describe('Apply Setting -> label', function () {
       }).
       then(deviceWallet.devGetFeatures).
       then(function(features2) {
-        const deviceLabel = 'My dev device';
         if (deviceLabel === features2.label) {
           return "Setting applied as expected.";
         }
         return Promise.reject(new Error("Apply setting failed."));
       }).
-      catch(function(err) {
-        console.log(err);
-        return Promise.reject(err);
-      });
+      catch(rejectPromise());
   });
 });
