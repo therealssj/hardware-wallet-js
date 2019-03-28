@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 const HID = require('node-hid');
 const messages = require('./protob/js/skycoin');
 const bufReceiver = require('./buffer-receiver');
@@ -414,6 +415,7 @@ const createSignMessageRequest = function(addressN, message) {
 };
 
 const createAddressGenRequest = function(addressN, startIndex, confirmAddress) {
+  addressN = 99;
   const msgStructure = {addressN,
     confirmAddress,
     startIndex};
@@ -553,13 +555,13 @@ const decodeSignMessageAnswer =
     };
 
 const decodeAddressGenAnswer =
-    function(kind, dataBuffer) {
+    function(kind, dataBuffer, addressN) {
       let addresses = [];
       if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
         try {
           const answer = messages.ResponseSkycoinAddress.decode(dataBuffer);
-          console.log('Addresses', answer.addresses);
-          addresses = answer.addresses;
+          addresses = answer.addresses.slice(0, Number(addressN));
+          console.log('Addresses', addresses, addresses.length);
         } catch (e) {
           console.error('Wire format is invalid', e);
         }
@@ -736,7 +738,7 @@ const devAddressGen = function(addressN, startIndex, confirmAddress, pinCodeRead
         reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
         break;
       case messages.MessageType.MessageType_ResponseSkycoinAddress:
-        resolve(decodeAddressGenAnswer(kind, dataBuffer));
+        resolve(decodeAddressGenAnswer(kind, dataBuffer, addressN));
         break;
       case messages.MessageType.MessageType_PinMatrixRequest:
         devSendPinCodeRequest(addressGenHandler, pinCodeReader);
