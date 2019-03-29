@@ -556,7 +556,7 @@ const decodeSignMessageAnswer =
 const decodeAddressGenAnswer =
     function(kind, dataBuffer) {
       let addresses = [];
-      if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
+      if (kind === messages.MessageType.MessageType_ResponseSkycoinAddress) {
         try {
           console.log(dataBuffer.slice(-5), dataBuffer.length);
           const answer = messages.ResponseSkycoinAddress.decode(dataBuffer);
