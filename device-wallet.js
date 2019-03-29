@@ -415,8 +415,6 @@ const createSignMessageRequest = function(addressN, message) {
 };
 
 const createAddressGenRequest = function(addressN, startIndex, confirmAddress) {
-  // eslint-disable-next-line no-param-reassign
-  addressN = 99;
   const msgStructure = {addressN,
     confirmAddress,
     startIndex};
@@ -556,12 +554,12 @@ const decodeSignMessageAnswer =
     };
 
 const decodeAddressGenAnswer =
-    function(kind, dataBuffer, addressN) {
+    function(kind, dataBuffer) {
       let addresses = [];
       if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
         try {
           const answer = messages.ResponseSkycoinAddress.decode(dataBuffer);
-          addresses = answer.addresses.slice(0, Number(addressN));
+          addresses = answer.addresses;
           console.log('Addresses', addresses, addresses.length);
         } catch (e) {
           console.error('Wire format is invalid', e);
@@ -739,7 +737,7 @@ const devAddressGen = function(addressN, startIndex, confirmAddress, pinCodeRead
         reject(new Error(decodeFailureAndPinCode(kind, dataBuffer)));
         break;
       case messages.MessageType.MessageType_ResponseSkycoinAddress:
-        resolve(decodeAddressGenAnswer(kind, dataBuffer, addressN));
+        resolve(decodeAddressGenAnswer(kind, dataBuffer));
         break;
       case messages.MessageType.MessageType_PinMatrixRequest:
         devSendPinCodeRequest(addressGenHandler, pinCodeReader);
