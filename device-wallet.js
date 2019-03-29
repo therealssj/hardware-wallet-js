@@ -415,6 +415,7 @@ const createSignMessageRequest = function(addressN, message) {
 };
 
 const createAddressGenRequest = function(addressN, startIndex, confirmAddress) {
+  // eslint-disable-next-line no-param-reassign
   addressN = 99;
   const msgStructure = {addressN,
     confirmAddress,
