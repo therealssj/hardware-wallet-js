@@ -558,6 +558,7 @@ const decodeAddressGenAnswer =
       let addresses = [];
       if (kind == messages.MessageType.MessageType_ResponseSkycoinAddress) {
         try {
+          console.log(dataBuffer.slice(-5), dataBuffer.length);
           const answer = messages.ResponseSkycoinAddress.decode(dataBuffer);
           addresses = answer.addresses;
           console.log('Addresses', addresses, addresses.length);

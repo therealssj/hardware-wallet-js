@@ -97,7 +97,6 @@ const testAddressGen = true;
 
 if (testAddressGen) {
   const promise = deviceWallet.devAddressGen(12, 0, false, pinCodeReader, wordReader);
-  // Const promise = deviceWallet.devAddressGen(12);
   promise.then(console.log, rejectPromise);
 }
 
