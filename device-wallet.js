@@ -555,12 +555,35 @@ const decodeSignMessageAnswer =
 
 const decodeAddressGenAnswer =
     function(kind, dataBuffer) {
-      let addresses = [];
+      const addresses = [];
       if (kind === messages.MessageType.MessageType_ResponseSkycoinAddress) {
         try {
-          console.log(dataBuffer.slice(-5), dataBuffer.length);
-          const answer = messages.ResponseSkycoinAddress.decode(dataBuffer);
-          addresses = answer.addresses;
+          for (let addr = "", findAddr = false, len, m = 0; m <= dataBuffer.length; m += 1 ) {
+            len = 0;
+            if (dataBuffer[m] === 10) {
+              len = dataBuffer[m + 1];
+              findAddr = true;
+            }
+            if(findAddr) {
+              // eslint-disable-next-line max-depth
+              for (let i = 2; i <= len + 1; i) {
+                // eslint-disable-next-line max-depth
+                if(dataBuffer[m + i] !== 0) {
+                  addr += String.fromCharCode(dataBuffer[m + i]);
+                }
+                i += 1;
+              }
+
+              addresses.push(addr);
+              addr = "";
+              findAddr = false;
+            }
+          }
+
+          /*
+           * Const answer = messages.ResponseSkycoinAddress.decode(dataBuffer);
+           * addresses = answer.addresses;
+           */
           console.log('Addresses', addresses, addresses.length);
         } catch (e) {
           console.error('Wire format is invalid', e);
