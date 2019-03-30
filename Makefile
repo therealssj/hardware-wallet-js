@@ -24,7 +24,7 @@ format: build-deps ## Format source code
 	npm format
 
 test: build-deps ## Run project test suite
-	./node_modules/.bin/serial-mocha --bail ./test/*
+	./node_modules/.bin/serial-mocha ./test/* --bail --exit
 
 check: lint test # Perform self-tests
 
