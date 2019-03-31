@@ -188,8 +188,9 @@ class DeviceHandler {
       handlers.push(this);
       this.devHandle.on('message', function(data, rinfo) {
         if (rinfo) {
-          console.log(`server got:
-                        ${data} from ${rinfo.address}:${rinfo.port}`);
+          console.log("server got:")
+          console.log(data);
+          console.log("from", rinfo.address,":",rinfo.port);
         }
         bufferReceiver.receiveBuffer(data, function(kind) {
           devReadCallback.apply(null, arguments);
@@ -555,7 +556,7 @@ const decodeSignMessageAnswer =
 
 const decodeAddressGenAnswer =
     function(kind, dataBuffer) {
-      const addresses = [];
+      let addresses = [];
       if (kind === messages.MessageType.MessageType_ResponseSkycoinAddress) {
         try {
           for (let addr = "", findAddr = false, len, m = 0; m <= dataBuffer.length; m += 1 ) {
