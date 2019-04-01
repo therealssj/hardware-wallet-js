@@ -16,9 +16,7 @@ const generateSeedFail = function (wordCount) {
   return setup().
     then(() => deviceWallet.devGenerateMnemonic(wordCount, false)).
     then((msg) => Promise.reject(new Error(`Should work with 12 or 24 word count only ${msg}`))).
-    catch(() => {
-      resolve(`Test generate with ${wordCount} words failed as expected.`);
-    });
+    catch(() => Promise.resolve(`Test generate with ${wordCount} words failed as expected.`));
 };
 
 describe('Transactions', function () {
