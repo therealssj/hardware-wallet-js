@@ -44,9 +44,7 @@ const deviceSetup = function () {
 
 const testNotImplementedInFirmware = function(promise) {
   return promise.
-    then(() => {
-      reject(new Error('Expected to fail. Should be not implemented in firmware.'));
-    }).
+    then(() => Promise.reject(new Error('Expected to fail. Should be not implemented in firmware.'))).
     catch((err) => err.message).
     then(function(result) {
       assert.equal(result, "Error: Not implement");
