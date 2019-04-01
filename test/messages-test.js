@@ -8,7 +8,7 @@ const setup = utils.deviceSetup;
 const generateSeedOk = function (wordCount) {
   return setup().
     then(() => deviceWallet.devGenerateMnemonic(wordCount, false)).
-    then(() => resolve(`Test generate with ${wordCount} words succeeded.`)).
+    then(() => `Test generate with ${wordCount} words succeeded.`).
     catch(rejectPromise());
 };
 
