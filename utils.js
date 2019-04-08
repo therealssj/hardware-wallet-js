@@ -1,4 +1,3 @@
-const assert = require('chai').assert;
 const deviceWallet = require('./device-wallet');
 
 const rejectPromise = function (reject) {
