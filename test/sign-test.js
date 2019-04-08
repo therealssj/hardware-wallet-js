@@ -17,21 +17,6 @@ const setup = function () {
   });
 };
 
-const testSignMessageHash = function (messageHash) {
-  return setup().
-    then(() => deviceWallet.devAddressGen(1)).
-    then(function (addresses) {
-      return deviceWallet.devSkycoinSignMessage(0, messageHash).
-        then(function (signature) {
-          return deviceWallet.devCheckMessageSignature(addresses[0], messageHash, signature);
-        }).
-        then(function (strResponse) {
-          return Promise.resolve(`Test success ${strResponse}`);
-        });
-    }).
-    catch(rejectPromise());
-};
-
 describe('Sign message', function () {
   if (deviceWallet.getDevice() === null) {
     console.log("Skycoin hardware NOT FOUND, using emulator");
@@ -42,12 +27,26 @@ describe('Sign message', function () {
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
   }
 
-  it('Message signing disabled in formware', function() {
+  const testSignMessageHash = function (messageHash) {
+    return setup().
+      then(() => deviceWallet.devAddressGen(1)).
+      then(function (addresses) {
+        return deviceWallet.devSkycoinSignMessage(0, messageHash).
+          then(function (signature) {
+            return deviceWallet.devCheckMessageSignature(addresses[0], messageHash, signature);
+          }).
+          then(function (strResponse) {
+            return Promise.resolve(`Test success ${strResponse}`);
+          });
+      }).
+      catch(rejectPromise());
+  };
+
+  it('Verify that address signed hash', function() {
     this.timeout(0);
     return timeout(200).
-      // eslint
-      then(() => testNotImplementedInFirmware(testSignMessageHash("181bd5656115172fe81451fae4fb56498a97744d89702e73da75ba91ed5200f9"))).
-      then(() => testNotImplementedInFirmware(testSignMessageHash("01a9ef6c25271229ef9760e1536c3dc5ccf0ead7de93a64c12a01340670d87e9")));
+      then(() => testSignMessageHash("181bd5656115172fe81451fae4fb56498a97744d89702e73da75ba91ed5200f9")).
+      then(() => testSignMessageHash("01a9ef6c25271229ef9760e1536c3dc5ccf0ead7de93a64c12a01340670d87e9"));
   });
 
 });
