@@ -2,7 +2,6 @@ const deviceWallet = require('../device-wallet');
 const utils = require('../utils');
 const rejectPromise = utils.rejectPromise;
 const timeout = utils.timeout;
-const testNotImplementedInFirmware = utils.testNotImplementedInFirmware;
 
 const setup = function () {
   return new Promise((resolve, reject) => {
