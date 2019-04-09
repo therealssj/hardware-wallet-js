@@ -236,6 +236,7 @@ A promise that receives a text string that depends on the result of the operatio
 - A security alert must accepted in the hardware wallet for the operation to be completed.
 - To know if the hardware wallet has a PIN, call the [devGetFeatures](#devGetFeatures) function.
 - This function can be called even when the hardware wallet does not have a seed.
+- If the new PIN in `null`, the PIN code protection is deactivated.
 
 ### devCheckMessageSignature
 
