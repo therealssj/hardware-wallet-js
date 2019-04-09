@@ -1,57 +1,18 @@
 const deviceWallet = require('../device-wallet');
-const assert = require('chai').assert;
-const rejectPromise = require('../utils').rejectPromise;
+const utils = require('../utils');
+const rejectPromise = utils.rejectPromise;
+const timeout = utils.timeout;
 
 const setup = function () {
   return new Promise((resolve, reject) => {
-    const wipePromise = deviceWallet.devWipeDevice();
-    wipePromise.then(() => {
-      const genMneonicPromise = deviceWallet.devGenerateMnemonic(12, false);
-      genMneonicPromise.then(() => resolve("Set up done."), rejectPromise);
-    }, (msg) => {
-      console.log(msg);
-      reject(new Error("setup failed"));
-    });
-  });
-};
-
-const sample1 = function () {
-  return new Promise((resolve, reject) => {
-    const setupPromise = setup();
-    setupPromise.then(() => {
-      const genAddrPromise = deviceWallet.devAddressGen(1);
-      genAddrPromise.then((addresses) => {
-        const messageHash = "181bd5656115172fe81451fae4fb56498a97744d89702e73da75ba91ed5200f9";
-        const signMessagePromise = deviceWallet.devSkycoinSignMessage(0, messageHash);
-        signMessagePromise.then((signature) => {
-          const checkMsgPromise = deviceWallet.devCheckMessageSignature(addresses[0], messageHash, signature);
-          checkMsgPromise.then((strResponse) => {
-            resolve(`Test success ${strResponse}`);
-          }, (err) => {
-            rejectPromise(err);
-          });
-        }, rejectPromise(reject));
-      }, rejectPromise(reject));
-    }, rejectPromise(reject));
-  });
-};
-
-const sample2 = function () {
-  return new Promise((resolve, reject) => {
-    const setupPromise = setup();
-    setupPromise.then(() => {
-      const genAddrPromise = deviceWallet.devAddressGen(1);
-      genAddrPromise.then((addresses) => {
-        const messageHash = "01a9ef6c25271229ef9760e1536c3dc5ccf0ead7de93a64c12a01340670d87e9";
-        const signMessagePromise = deviceWallet.devSkycoinSignMessage(0, messageHash);
-        signMessagePromise.then((signature) => {
-          const checkMsgPromise = deviceWallet.devCheckMessageSignature(addresses[0], messageHash, signature);
-          checkMsgPromise.then((strResponse) => {
-            resolve(`Test success ${strResponse}`);
-          }, rejectPromise(reject));
-        }, rejectPromise(reject));
-      }, rejectPromise(reject));
-    }, rejectPromise(reject));
+    deviceWallet.devWipeDevice().
+      then(() => deviceWallet.devGenerateMnemonic(12, false)).
+      then(() => {
+        resolve("Set up done.");
+      }, (msg) => {
+        console.log(msg);
+        reject(new Error("setup failed"));
+      });
   });
 };
 
@@ -65,20 +26,26 @@ describe('Sign message', function () {
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
   }
 
-  it('Should have a result equal to zero', function() {
-    this.timeout(0);
-    return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        sample1().
-          then(sample2).
-          then(() => {
-            reject(new Error('Expected to fail!!!!'));
+  const testSignMessageHash = function (messageHash) {
+    return setup().
+      then(() => deviceWallet.devAddressGen(1)).
+      then(function (addresses) {
+        return deviceWallet.devSkycoinSignMessage(0, messageHash).
+          then(function (signature) {
+            return deviceWallet.devCheckMessageSignature(addresses[0], messageHash, signature);
           }).
-          catch((msg) => resolve(msg.message));
-      }, 200);
-    }).then(function(result) {
-      assert.equal(result, "Error: Not implement");
-    });
+          then(function (strResponse) {
+            return Promise.resolve(`Test success ${strResponse}`);
+          });
+      }).
+      catch(rejectPromise());
+  };
+
+  it('Verify that address signed hash', function() {
+    this.timeout(0);
+    return timeout(200).
+      then(() => testSignMessageHash("181bd5656115172fe81451fae4fb56498a97744d89702e73da75ba91ed5200f9")).
+      then(() => testSignMessageHash("01a9ef6c25271229ef9760e1536c3dc5ccf0ead7de93a64c12a01340670d87e9"));
   });
 
 });

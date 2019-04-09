@@ -64,7 +64,7 @@ script:
   - npm run lint
   - screen -ls || true
   - ps aux | grep emulator
-  - npm test
+  - make test
 after_script:
   - kill -s KILL $(pgrep emulator)
   # screen -S xvfbsrv -X quit

@@ -24,7 +24,6 @@ describe('Device Backup test', function() {
       then(function() {
         return deviceWallet.devBackupDevice(pinCodeReader);
       });
-
   });
 
 });
