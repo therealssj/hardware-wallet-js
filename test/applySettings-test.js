@@ -44,7 +44,7 @@ describe('Apply Setting -> label', function () {
           if (err.toString() == "No setting provided") {
             return Promise.resolve("Ok");
           }
-          return Promise.reject(new Error("Unexpected failure message " + err.toString()));
+          return Promise.reject(new Error(`Unexpected failure message ${err.toString()}`));
         }
       );
   });
