@@ -48,4 +48,18 @@ describe('Apply Setting -> label', function () {
         }
       );
   });
+
+  it("Should not accept invalid languages", function() {
+    return setup().
+      then(() => deviceWallet.devApplySettings(null, null)).
+      then(
+        () => Promise.reject(new Error("Expected failure")),
+        (err) => {
+          if (err.toString() == "No setting provided") {
+            return Promise.resolve("Ok");
+          }
+          return Promise.reject(new Error(`Unexpected failure message ${err.toString()}`));
+        }
+      );
+  });
 });
