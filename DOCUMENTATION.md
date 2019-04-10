@@ -223,6 +223,7 @@ Assigns a PIN to the hardware wallet (if it does not have one) or changes the cu
 
 *Params:*
 - pinCodeReader: [Auxiliary function to obtain the PIN.](#auxiliary-function-to-obtain-the-PIN)
+- remove: Boolean that indicates whether the PIN should be removed or not.
 
 *Return value:*
 
@@ -230,7 +231,7 @@ A promise that receives a text string that depends on the result of the operatio
 - If the user cancels the operation (promise rejected): `Error: Action cancelled by user`.
 - If the promise returned by `pinCodeReader` is rejected: The function returns nothing.
 - If the PINs entered by the user do not match (promise rejected): `Error: PIN mismatch`.
-- If the operation ends correctly: `PIN changed`.
+- If the operation ends correctly: `PIN changed` or `PIN removed`.
 
 *Notes:*
 - A security alert must accepted in the hardware wallet for the operation to be completed.

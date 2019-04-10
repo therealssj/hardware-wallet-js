@@ -51,7 +51,6 @@ module.exports = {
   deviceSetup,
   pinCodeReader,
   rejectPromise,
-  testNotImplementedInFirmware,
   timeout,
   wordReader
 };

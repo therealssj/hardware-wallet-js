@@ -301,8 +301,8 @@ const createCancelRequest = function() {
   return dataBytesFromChunks(chunks);
 };
 
-const createChangePinRequest = function(mnemonic) {
-  const msgStructure = {mnemonic};
+const createChangePinRequest = function(remove) {
+  const msgStructure = {remove};
   const msg = messages.ChangePin.create(msgStructure);
   const buffer = messages.ChangePin.encode(msg).finish();
   const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_ChangePin);
@@ -1095,9 +1095,9 @@ const devGenerateMnemonic = function(wordCount, usePassphrase) {
   });
 };
 
-const devChangePin = function(pinCodeReader) {
+const devChangePin = function(pinCodeReader, remove) {
   return new Promise((resolve, reject) => {
-    const dataBytes = createChangePinRequest();
+    const dataBytes = createChangePinRequest( Boolean(remove) );
     const deviceHandle = new DeviceHandler(deviceType);
     const pinCodeMatrixCallback = function(datakind, dataBuffer) {
       console.log('pinCodeMatrixCallback kind:', datakind, messages.MessageType[datakind]);
