@@ -269,7 +269,7 @@ const createGetFeaturesRequest = function() {
 
 const createApplySettings = function(usePassphrase, deviceLabel) {
   const msgStructure = {'label': deviceLabel,
-    'language': '',
+    'language': null,
     usePassphrase};
   const msg = messages.ApplySettings.create(msgStructure);
   const buffer = messages.ApplySettings.encode(msg).finish();
