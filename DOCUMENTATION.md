@@ -327,12 +327,14 @@ Features {
   pinCached: false,
   passphraseCached: false,
   needsBackup: false,
-  model: '1'
+  model: '1',
+  firmwareFeatures: '1'
 }
 ```
 
 *Notes:*
 - This function can be called even when the hardware wallet does not have a seed.
+- `firmwareFeatures` is interpreted like a bit slice, bit at `0` is active if user confirmation required prior to returning internal entropy, and in bit `1` if is enabled support for sending internal entropy back to the peer.
 
 ### devRecoveryDevice
 
