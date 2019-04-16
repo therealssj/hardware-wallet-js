@@ -15,6 +15,7 @@ This documentation contains general information about how to use the library.
   - [devBackupDevice](#devBackupDevice)
   - [devCancelRequest](#devCancelRequest)
   - [devChangePin](#devChangePin)
+  - [devRemovePin](#devRemovePin)
   - [devCheckMessageSignature](#devCheckMessageSignature)
   - [devGenerateMnemonic](#devGenerateMnemonic)
   - [devGetFeatures](#devGetFeatures)
@@ -42,6 +43,7 @@ The following actions are possible
 - Configure device mnemonic - see [devSetMnemonic](#devSetMnemonic)
 - Ask device to generate mnemonic - see [devGenerateMnemonic](#devGenerateMnemonic)
 - Configure device PIN code - see [devChangePin](#devChangePin)
+- Remove device PIN code - see [devRemovePin](#devRemovePin)
 - Ask device to sign message - see [devSkycoinSignMessage](#devSkycoinSignMessage)
 - Ask device to check signature - see [devCheckMessageSignature](#devCheckMessageSignature)
 - Wipe device - see [devWipeDevice](#devWipeDevice)
@@ -82,6 +84,7 @@ don't do that, so it is important to be aware of the particular way in which eac
 - [devBackupDevice](#devBackupDevice)
 - [devCancelRequest](#devCancelRequest)
 - [devChangePin](#devChangePin)
+- [devRemovePin](#devRemovePin)
 - [devCheckMessageSignature](#devCheckMessageSignature)
 - [devGenerateMnemonic](#devGenerateMnemonic)
 - [devGetFeatures](#devGetFeatures)
@@ -223,7 +226,6 @@ Assigns a PIN to the hardware wallet (if it does not have one) or changes the cu
 
 *Params:*
 - pinCodeReader: [Auxiliary function to obtain the PIN.](#auxiliary-function-to-obtain-the-PIN)
-- remove: Boolean that indicates whether the PIN should be removed or not.
 
 *Return value:*
 
@@ -231,7 +233,35 @@ A promise that receives a text string that depends on the result of the operatio
 - If the user cancels the operation (promise rejected): `Error: Action cancelled by user`.
 - If the promise returned by `pinCodeReader` is rejected: The function returns nothing.
 - If the PINs entered by the user do not match (promise rejected): `Error: PIN mismatch`.
-- If the operation ends correctly: `PIN changed` or `PIN removed`.
+- If the operation ends correctly: `PIN changed`.
+
+*Notes:*
+- A security alert must accepted in the hardware wallet for the operation to be completed.
+- To know if the hardware wallet has a PIN, call the [devGetFeatures](#devGetFeatures) function.
+- This function can be called even when the hardware wallet does not have a seed.
+- If the new PIN in `null`, the PIN code protection is deactivated.
+
+### devRemovePin
+
+*Signature:*
+```
+devRemovePin(pinCodeReader)
+```
+
+*Purpose:*
+
+Ensure that the hardware wallet PIN protection is removed.
+
+*Params:*
+- pinCodeReader: [Auxiliary function to obtain the PIN.](#auxiliary-function-to-obtain-the-PIN)
+
+*Return value:*
+
+A promise that receives a text string that depends on the result of the operation:
+- If the user cancels the operation (promise rejected): `Error: Action cancelled by user`.
+- If the promise returned by `pinCodeReader` is rejected: The function returns nothing.
+- If the PINs entered by the user do not match (promise rejected): `Error: PIN mismatch`.
+- If the operation ends correctly: `PIN removed`.
 
 *Notes:*
 - A security alert must accepted in the hardware wallet for the operation to be completed.
