@@ -21,7 +21,7 @@ const wordReader = function () {
 const customPinCodeReader = function (func, msg) {
   return function() {
     return new Promise((resolve, reject) => {
-      const pinCode = func();
+      const pinCode = func(msg);
       if (pinCode === null || pinCode === "") {
         reject(new Error("Pin code operation canceled"));
         return;
