@@ -51,7 +51,7 @@ describe('Apply Setting -> label', function () {
 
   it("Should not accept invalid languages", function() {
     return setup().
-      then(() => deviceWallet.devApplySettings(null, null)).
+      then(() => deviceWallet.devApplySettings(null, null, 'italiano')).
       then(
         () => Promise.reject(new Error("Expected failure")),
         (err) => {
