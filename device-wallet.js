@@ -756,6 +756,7 @@ const devAddressGen = function(addressN, startIndex, confirmAddress, pinCodeRead
   });
 };
 
+// eslint-disable-next-line max-params
 const devApplySettings = function(usePassphrase, deviceLabel, language, pinCodeReader) {
   return new Promise((resolve, reject) => {
     const applySettingsCallback = function(kind, dataBuffer) {

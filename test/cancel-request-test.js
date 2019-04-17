@@ -1,7 +1,7 @@
 const deviceWallet = require('../device-wallet');
 const utils = require('../utils');
 const setup = utils.deviceSetup;
-const constCodeReader = utils.constCodeReader;
+const constPinCodeReader = utils.constPinCodeReader;
 const expect = require('chai').expect;
 
 describe('Cancel Request test', function () {
