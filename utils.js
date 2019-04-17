@@ -18,18 +18,28 @@ const wordReader = function () {
   });
 };
 
-const pinCodeReader = function (msg) {
+const customPinCodeReader = function (func, msg) {
   return function() {
     return new Promise((resolve, reject) => {
-      console.log(`Enter pinCodeReader : ${msg}`);
-      const pinCode = scanf('%s');
-      if (pinCode.length != 4) {
-        reject(new Error("Pin code mismatch"));
+      const pinCode = func();
+      if (pinCode === null || pinCode === "") {
+        reject(new Error("Pin code operation canceled"));
         return;
       }
       resolve(pinCode);
     });
   };
+};
+
+const pinCodeReader = function (msg) {
+  return customPinCodeReader(function() {
+    console.log(`Enter pinCodeReader : ${msg}`);
+    return scanf('%s');
+  }, msg);
+};
+
+const constCodeReader = function(pinCode, msg) {
+  return customPinCodeReader(() => pinCode, msg);
 };
 
 const deviceSetup = function () {
@@ -50,6 +60,7 @@ const timeout = function(ms) {
 module.exports = {
   deviceSetup,
   pinCodeReader,
+  constCodeReader,
   rejectPromise,
   timeout,
   wordReader
