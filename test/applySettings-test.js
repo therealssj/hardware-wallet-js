@@ -23,7 +23,7 @@ describe('Apply Setting -> label', function () {
         if (features1.label === deviceLabel) {
           return Promise.reject(new Error("Label should be different at test startup."));
         }
-        return deviceWallet.devApplySettings(false, deviceLabel);
+        return deviceWallet.devApplySettings(false, deviceLabel, null);
       }).
       then(deviceWallet.devGetFeatures).
       then(function(features2) {
