@@ -130,5 +130,60 @@ describe('ResponseSkycoinAddress message', function () {
   it('Should match first address', function () {
     assert.equal(responseSkycoinAddress.addresses[1], "2ARhYQsMmMZuw5LPmZQvyWoTm1VUH8kSZ14");
   });
+});
 
+describe('ApplySettings message empty', function () {
+  const msg = messages.ApplySettings.create({
+    'label': null,
+    'language': null,
+    'usePassphrase': null
+  });
+  const buffer = messages.ApplySettings.encode(msg).finish();
+  const chunks = deviceWallet.makeTrezorMessage(buffer, messages.MessageType.MessageType_ApplySettings);
+
+  it('Should have chunks with length 1', function () {
+    assert.equal(chunks.length, 1);
+  });
+
+  it('Should encode usePassphrase, label, language for apply settings', function () {
+    assert.equal(
+      chunks[0].toString(),
+      new Uint8Array([
+        63, 35, 35, 0, 25, 0, 0, 0, 14, 10, 7, 101,
+        110, 103, 108, 105, 115, 104, 18, 1, 120, 24, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0
+      ]).toString()
+    );
+  });
+});
+
+describe('ApplySettings message all fields', function () {
+  const msg = messages.ApplySettings.create({
+    'label': 'x',
+    'language': 'english',
+    'usePassphrase': true
+  });
+  const buffer = messages.ApplySettings.encode(msg).finish();
+  const chunks = deviceWallet.makeTrezorMessage(buffer, messages.MessageType.MessageType_ApplySettings);
+
+  it('Should have chunks with length 1', function () {
+    assert.equal(chunks.length, 1);
+  });
+
+  it('Should encode empty apply settings', function () {
+    assert.equal(
+      chunks[0].toString(),
+      new Uint8Array([
+        63, 35, 35, 0, 25, 0, 0, 0, 0, 10, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0
+      ]).toString()
+    );
+  });
 });
