@@ -267,9 +267,9 @@ const createGetFeaturesRequest = function() {
   return dataBytesFromChunks(chunks);
 };
 
-const createApplySettings = function(usePassphrase, deviceLabel) {
+const createApplySettings = function(usePassphrase, deviceLabel, language) {
   const msgStructure = {'label': deviceLabel,
-    'language': null,
+    language,
     usePassphrase};
   const msg = messages.ApplySettings.create(msgStructure);
   const buffer = messages.ApplySettings.encode(msg).finish();
@@ -756,7 +756,7 @@ const devAddressGen = function(addressN, startIndex, confirmAddress, pinCodeRead
   });
 };
 
-const devApplySettings = function(usePassphrase, deviceLabel, pinCodeReader) {
+const devApplySettings = function(usePassphrase, deviceLabel, language, pinCodeReader) {
   return new Promise((resolve, reject) => {
     const applySettingsCallback = function(kind, dataBuffer) {
       switch (kind) {
@@ -777,7 +777,7 @@ const devApplySettings = function(usePassphrase, deviceLabel, pinCodeReader) {
         break;
       }
     };
-    const dataBytes = createApplySettings(usePassphrase, deviceLabel);
+    const dataBytes = createApplySettings(usePassphrase, deviceLabel, language);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, dataBuffer) {
       deviceHandle.close();

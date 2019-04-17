@@ -137,7 +137,7 @@ process will be slower if addresses with high indexes are requested.
 
 *Signature:*
 ```
-devApplySettings(usePassphrase, deviceLabel, pinCodeReader)
+devApplySettings(usePassphrase, deviceLabel, language, pinCodeReader)
 ```
 
 *Purpose:*
@@ -147,6 +147,7 @@ Edit device configuration.
 *Params:*
 - usePassphrase: Indicates if the passphrase protection must be enabled (true) or disable (false). If set to `null` this value will be ignored and passphrase will remain unchanged
 - deviceLabel: Label to identify the device through application and/or device screen (32 characters or less). If set to `null` this value will be ignored and label will remain unchanged.
+- language: Device language. Only `english` supported.
 - pinCodeReader: [Auxiliary function to obtain the PIN.](#auxiliary-function-to-obtain-the-PIN)
 
 
