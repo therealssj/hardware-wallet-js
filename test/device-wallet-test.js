@@ -7,7 +7,7 @@ describe('Fail message', function () {
     "message": "Ahyo"
   });
   const buffer = messages.Failure.encode(msg).finish();
-  const chunks = deviceWallet.makeTrezorMessage(buffer, messages.MessageType.MessageType_Failure);
+  const chunks = deviceWallet.makeSkywalletMessage(buffer, messages.MessageType.MessageType_Failure);
 
   it('Should have chunks with length 1', function () {
     assert.equal(chunks.length, 1);
@@ -27,7 +27,7 @@ describe('Success message', function () {
     "message": "Congratulations!"
   });
   const buffer = messages.Success.encode(msg).finish();
-  const chunks = deviceWallet.makeTrezorMessage(buffer, messages.MessageType.MessageType_Success);
+  const chunks = deviceWallet.makeSkywalletMessage(buffer, messages.MessageType.MessageType_Success);
 
   it('Should have chunks with length 1', function () {
     assert.equal(chunks.length, 1);
@@ -48,7 +48,7 @@ describe('SkycoinAddress message', function () {
     "startIndex": 0
   });
   const buffer = messages.SkycoinAddress.encode(msg).finish();
-  const chunks = deviceWallet.makeTrezorMessage(buffer, messages.MessageType.MessageType_SkycoinAddress);
+  const chunks = deviceWallet.makeSkywalletMessage(buffer, messages.MessageType.MessageType_SkycoinAddress);
 
   it('Should have chunks with length 1', function () {
     assert.equal(chunks.length, 1);
@@ -87,7 +87,7 @@ describe('ResponseSkycoinAddress message', function () {
     ]).toString());
   });
 
-  const chunks = deviceWallet.makeTrezorMessage(buffer, messages.MessageType.MessageType_ResponseSkycoinAddress);
+  const chunks = deviceWallet.makeSkywalletMessage(buffer, messages.MessageType.MessageType_ResponseSkycoinAddress);
 
   it('Should have 2 chunks', function () {
     assert.equal(chunks.length, 2);
@@ -139,7 +139,7 @@ describe('ApplySettings message empty', function () {
     'usePassphrase': null
   });
   const buffer = messages.ApplySettings.encode(msg).finish();
-  const chunks = deviceWallet.makeTrezorMessage(buffer, messages.MessageType.MessageType_ApplySettings);
+  const chunks = deviceWallet.makeSkywalletMessage(buffer, messages.MessageType.MessageType_ApplySettings);
 
   it('Should have chunks with length 1', function () {
     assert.equal(chunks.length, 1);
@@ -167,7 +167,7 @@ describe('ApplySettings message all fields', function () {
     'usePassphrase': true
   });
   const buffer = messages.ApplySettings.encode(msg).finish();
-  const chunks = deviceWallet.makeTrezorMessage(buffer, messages.MessageType.MessageType_ApplySettings);
+  const chunks = deviceWallet.makeSkywalletMessage(buffer, messages.MessageType.MessageType_ApplySettings);
 
   it('Should have chunks with length 1', function () {
     assert.equal(chunks.length, 1);
@@ -195,7 +195,7 @@ describe('ApplySettings message empty', function () {
     'usePassphrase': null
   });
   const buffer = messages.ApplySettings.encode(msg).finish();
-  const chunks = deviceWallet.makeTrezorMessage(buffer, messages.MessageType.MessageType_ApplySettings);
+  const chunks = deviceWallet.makeSkywalletMessage(buffer, messages.MessageType.MessageType_ApplySettings);
 
   it('Should have chunks with length 1', function () {
     assert.equal(chunks.length, 1);
