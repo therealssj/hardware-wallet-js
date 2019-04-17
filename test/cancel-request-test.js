@@ -34,18 +34,18 @@ describe('Cancel Request test', function () {
   it("Should change and remove PIN if not canceled", function(done) {
     return setup().
       then(deviceWallet.devGetFeatures).
-      then((features) => {
-        expect(features.pinProtection).to.be.false();
+      then((features1) => {
+        expect(features1.pinProtection).to.be.false();
       }).
-      then(deviceWallet.devChangePin(constPinReader('1234'))).
+      then(deviceWallet.devChangePin(constPinCodeReader('1234'))).
       then(deviceWallet.devGetFeatures).
-      then((features) => {
-        expect(features.pinProtection).to.be.true();
+      then((features2) => {
+        expect(features2.pinProtection).to.be.true();
       }).
-      then(deviceWallet.devRemovePin(constPinReader('1234'))).
+      then(deviceWallet.devRemovePin(constPinCodeReader('1234'))).
       then(deviceWallet.devGetFeatures).
-      then((features) => {
-        expect(features.pinProtection).to.be.false();
+      then((features3) => {
+        expect(features3.pinProtection).to.be.false();
         done();
       });
   });
