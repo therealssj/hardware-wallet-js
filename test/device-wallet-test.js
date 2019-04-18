@@ -145,16 +145,16 @@ describe('ApplySettings message empty', function () {
     assert.equal(chunks.length, 1);
   });
 
-  it('Should encode usePassphrase, label, language for apply settings', function () {
+  it('Should encode empty apply settings', function () {
     assert.equal(
       chunks[0].toString(),
       new Uint8Array([
-        63, 35, 35, 0, 25, 0, 0, 0, 14, 10, 7, 101,
-        110, 103, 108, 105, 115, 104, 18, 1, 120, 24, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0
+        0x3f, 0x23, 0x23, 0x00, 0x19, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x0
       ]).toString()
     );
   });
@@ -173,25 +173,25 @@ describe('ApplySettings message all fields', function () {
     assert.equal(chunks.length, 1);
   });
 
-  it('Should encode empty apply settings', function () {
+  it('Should encode usePassphrase, label, language for apply settings', function () {
     assert.equal(
       chunks[0].toString(),
       new Uint8Array([
-        63, 35, 35, 0, 25, 0, 0, 0, 0, 10, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0
+        0x3f, 0x23, 0x23, 0x00, 0x19, 0x00, 0x00, 0x00, 0x0e, 0x0a, 0x07, 0x65,
+        0x6e, 0x67, 0x6c, 0x69, 0x73, 0x68, 0x12, 0x01, 0x78, 0x18, 0x01, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x0
       ]).toString()
     );
   });
 });
 
-describe('ApplySettings message empty', function () {
+describe('ApplySettings message language only', function () {
   const msg = messages.ApplySettings.create({
-    'label': null,
-    'language': null,
+    'label': "",
+    'language': "english",
     'usePassphrase': null
   });
   const buffer = messages.ApplySettings.encode(msg).finish();
@@ -201,16 +201,12 @@ describe('ApplySettings message empty', function () {
     assert.equal(chunks.length, 1);
   });
 
-  it('Should encode usePassphrase, label, language for apply settings', function () {
+  it('Should encode language only for apply settings', function () {
     assert.equal(
       chunks[0].toString(),
       new Uint8Array([
-        63, 35, 35, 0, 25, 0, 0, 0, 14, 10, 7, 101,
-        110, 103, 108, 105, 115, 104, 18, 1, 120, 24, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0
+        0,
+        0
       ]).toString()
     );
   });
