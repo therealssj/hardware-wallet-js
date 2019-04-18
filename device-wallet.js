@@ -1096,39 +1096,37 @@ const devGenerateMnemonic = function(wordCount, usePassphrase) {
   });
 };
 
-let pinFunc = function(_remove) {
-  remove = Boolean(_remove);
-
-  return function(pinCodeReader) {
-    return new Promise((resolve, reject) => {
-      const dataBytes = createChangePinRequest(remove);
-      const deviceHandle = new DeviceHandler(deviceType);
-      const pinCodeMatrixCallback = function(datakind, dataBuffer) {
-        console.log('pinCodeMatrixCallback kind:', datakind, messages.MessageType[datakind]);
-        if (datakind == messages.MessageType.MessageType_PinMatrixRequest) {
-          devSendPinCodeRequest(pinCodeMatrixCallback, pinCodeReader);
-        }
-        if (datakind == messages.MessageType.MessageType_Failure) {
-          reject(new Error(decodeFailureAndPinCode(datakind, dataBuffer)));
-        }
-        if (datakind == messages.MessageType.MessageType_Success) {
-          resolve(decodeSuccess(datakind, dataBuffer));
-        }
-      };
-      const devReadCallback = function(kind, d) {
-        deviceHandle.close();
-        devButtonRequestCallback(kind, d, pinCodeMatrixCallback);
-      };
-      deviceHandle.read(devReadCallback);
-      deviceHandle.write(dataBytes);
-    });
-  };
+const pinFunc = function(remove, pinCodeReader) {
+  return new Promise((resolve, reject) => {
+    const dataBytes = createChangePinRequest(remove);
+    const deviceHandle = new DeviceHandler(deviceType);
+    const pinCodeMatrixCallback = function(datakind, dataBuffer) {
+      console.log('pinCodeMatrixCallback kind:', datakind, messages.MessageType[datakind]);
+      if (datakind == messages.MessageType.MessageType_PinMatrixRequest) {
+        devSendPinCodeRequest(pinCodeMatrixCallback, pinCodeReader);
+      }
+      if (datakind == messages.MessageType.MessageType_Failure) {
+        reject(new Error(decodeFailureAndPinCode(datakind, dataBuffer)));
+      }
+      if (datakind == messages.MessageType.MessageType_Success) {
+        resolve(decodeSuccess(datakind, dataBuffer));
+      }
+    };
+    const devReadCallback = function(kind, d) {
+      deviceHandle.close();
+      devButtonRequestCallback(kind, d, pinCodeMatrixCallback);
+    };
+    deviceHandle.read(devReadCallback);
+    deviceHandle.write(dataBytes);
+  });
 };
 
-const devChangePin = pinFunc(false);
-const devRemovePin = pinFunc(true);
-
-pinFunc = null;
+const devChangePin = function(pinCodeReader) {
+  return pinFunc(false, pinCodeReader);
+};
+const devRemovePin = function(pinCodeReader) {
+  return pinFunc(true, pinCodeReader);
+};
 
 const devGetFeatures = function() {
   return new Promise((resolve) => {
