@@ -23,7 +23,7 @@ describe('Apply Setting -> label', function () {
         if (features1.label === deviceLabel) {
           return Promise.reject(new Error("Label should be different at test startup."));
         }
-        return deviceWallet.devApplySettings(false, deviceLabel);
+        return deviceWallet.devApplySettings(false, deviceLabel, null);
       }).
       then(deviceWallet.devGetFeatures).
       then(function(features2) {
@@ -41,7 +41,7 @@ describe('Apply Setting -> label', function () {
       then(
         () => Promise.reject(new Error("Expected failure")),
         (err) => {
-          if (err.toString() == "No setting provided") {
+          if (err.toString() == "Error: No setting provided") {
             return Promise.resolve("Ok");
           }
           return Promise.reject(new Error(`Unexpected failure message ${err.toString()}`));
@@ -51,11 +51,11 @@ describe('Apply Setting -> label', function () {
 
   it("Should not accept invalid languages", function() {
     return setup().
-      then(() => deviceWallet.devApplySettings(null, null)).
+      then(() => deviceWallet.devApplySettings(null, null, 'italiano')).
       then(
         () => Promise.reject(new Error("Expected failure")),
         (err) => {
-          if (err.toString() == "No setting provided") {
+          if (err.toString() == "Error: Invalid argument") {
             return Promise.resolve("Ok");
           }
           return Promise.reject(new Error(`Unexpected failure message ${err.toString()}`));
