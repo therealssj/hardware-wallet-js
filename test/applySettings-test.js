@@ -55,7 +55,7 @@ describe('Apply Setting -> label', function () {
       then(
         () => Promise.reject(new Error("Expected failure")),
         (err) => {
-          if (err.toString() == "Invalid argument") {
+          if (err.toString() == "Error: Invalid argument") {
             return Promise.resolve("Ok");
           }
           return Promise.reject(new Error(`Unexpected failure message ${err.toString()}`));
