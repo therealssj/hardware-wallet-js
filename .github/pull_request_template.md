@@ -15,3 +15,9 @@ Requires testing
 yes | no
 
 Comments about testing , should you have some
+
+Related issues:
+
+PR skycoin/hardware-wallet# for issue skycoin/hardware-wallet#
+PR skycoin/hardware-wallet-protob# for issue skycoin/hardware-wallet-protob#
+
