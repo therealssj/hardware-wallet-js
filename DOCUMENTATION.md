@@ -53,6 +53,8 @@ The following actions are possible
 - Ask the device to cancel the ongoing procedure - see [devCancelRequest](#devCancelRequest)
 - Ask the device to sign a transaction using the provided information - see [devSkycoinTransactionSign](#devSkycoinTransactionSign)
 
+**Note**: The javascript library provides no support for neither `GetRawEntropy` nor `GetMixedEntropy` messages.
+
 ## General characteristics to take into account
 
 - As many of the operations performed by the hardware wallet can be slow, most of the functions of the library
