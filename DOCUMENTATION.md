@@ -364,7 +364,9 @@ Features {
 
 *Notes:*
 - This function can be called even when the hardware wallet does not have a seed.
-- `firmwareFeatures` is interpreted like a bit slice, bit at `0` is active if user confirmation required prior to returning internal entropy, and in bit `1` if is enabled support for sending internal entropy back to the peer.
+- `firmwareFeatures` is interpreted as a bits slice as follows
+  * bit `0` (i.e. mask `0x1`) is active if user confirmation required prior to returning internal entropy
+  * bit `1` (i.e. mask `0x2`) if support for sending internal entropy back to the peer is enabled in firmware.
 
 ### devRecoveryDevice
 
