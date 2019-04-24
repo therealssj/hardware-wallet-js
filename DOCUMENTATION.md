@@ -502,6 +502,7 @@ hardware wallet returns one signature for each input. Example response:
 - Since the hardware wallet internally recovers the addresses sequentially, starting with the first one, the
 process will be slower if an address with high index is used.
 - A security alert must accepted in the hardware wallet for the operation to be completed.
+- Until the next version, only 7 inputs and 7 outputs are available at the most.
 
 ### devUpdateFirmware
 
