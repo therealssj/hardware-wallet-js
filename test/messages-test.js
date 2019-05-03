@@ -1,55 +1,22 @@
 const deviceWallet = require('../device-wallet');
 const assert = require('chai').assert;
-const rejectPromise = require('../utils').rejectPromise;
+const utils = require('../utils');
+const rejectPromise = utils.rejectPromise;
 
-const setup = function () {
-  return new Promise((resolve, reject) => {
-    const wipePromise = deviceWallet.devWipeDevice();
-    wipePromise.then(() => {
-      resolve("Device cleaned up.");
-    }, (msg) => {
-      console.log(msg);
-      reject(new Error("setup failed"));
-    });
-  });
+const setup = utils.deviceSetup;
+
+const generateSeedOk = function (wordCount) {
+  return setup().
+    then(() => deviceWallet.devGenerateMnemonic(wordCount, false)).
+    then(() => `Test generate with ${wordCount} words succeeded.`).
+    catch(rejectPromise());
 };
 
-const generateTwelveWordsSeedOk = function () {
-  return new Promise((resolve, reject) => {
-    const setupPromise = setup();
-    setupPromise.then(() => {
-      const gMnemonicPromise = deviceWallet.devGenerateMnemonic(12, false);
-      gMnemonicPromise.then(() => {
-        resolve("Test generate with 12 words success.");
-      }, rejectPromise(reject));
-    }, rejectPromise(reject));
-  });
-};
-
-const generateTwentyFourWordsSeedOk = function () {
-  return new Promise((resolve, reject) => {
-    const setupPromise = setup();
-    setupPromise.then(() => {
-      const gMnemonicPromise = deviceWallet.devGenerateMnemonic(24, false);
-      gMnemonicPromise.then(() => {
-        resolve("Test generate with 24 words success.");
-      }, rejectPromise(reject));
-    }, rejectPromise(reject));
-  });
-};
-
-const generateSeventeenWordsSeedFail = function () {
-  return new Promise((resolve, reject) => {
-    const setupPromise = setup();
-    setupPromise.then(() => {
-      const gMnemonicPromise = deviceWallet.devGenerateMnemonic(17, false);
-      gMnemonicPromise.then((msg) => {
-        rejectPromise(reject)(`Should work with 12 or 24 word count only${msg}`);
-      }, (msg) => {
-        resolve("Test generate with 17 words failed as expected.", msg);
-      });
-    }, rejectPromise(reject));
-  });
+const generateSeedFail = function (wordCount) {
+  return setup().
+    then(() => deviceWallet.devGenerateMnemonic(wordCount, false)).
+    then((msg) => Promise.reject(new Error(`Should work with 12 or 24 word count only ${msg}`))).
+    catch(() => Promise.resolve(`Test generate with ${wordCount} words failed as expected.`));
 };
 
 describe('Transactions', function () {
@@ -66,12 +33,13 @@ describe('Transactions', function () {
     this.timeout(0);
     return new Promise(function (resolve, reject) {
       setTimeout(function () {
-        generateTwelveWordsSeedOk().then(() => generateTwentyFourWordsSeedOk()).
-          then(() => generateSeventeenWordsSeedFail()).
+        generateSeedOk(12).
+          then(() => generateSeedOk(24)).
+          then(() => generateSeedFail(17)).
           then(() => {
             resolve(0);
           }).
-          catch(reject);
+          catch(rejectPromise(reject));
       }, 200);
     }).then(function(result) {
       assert.equal(result, 0);

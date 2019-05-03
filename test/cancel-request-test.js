@@ -1,17 +1,6 @@
 const deviceWallet = require('../device-wallet');
-const rejectPromise = require('../utils').rejectPromise;
-
-const setup = function () {
-  return new Promise(function(resolve, reject) {
-    deviceWallet.devWipeDevice().
-      then(
-        () => {
-          resolve('Set up done');
-        },
-        rejectPromise(reject)
-      );
-  });
-};
+const utils = require('../utils');
+const setup = utils.deviceSetup;
 
 describe('Cancel Request test', function () {
   it("Should cancel pending requests", function(done) {
@@ -31,7 +20,7 @@ describe('Cancel Request test', function () {
     }, 2000);
 
     setup().
-      then(() => deviceWallet.devChangePin).
+      then(deviceWallet.devChangePin).
       then(() => {
         done(new Error('The Cancel Request is not working'));
       }).
