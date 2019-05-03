@@ -5,10 +5,10 @@
   "scripts": {
     "start": "node main.js",
     "lint": "./node_modules/.bin/eslint ./*.js test/*.js",
-    "format": "./node_modules/.bin/eslint ./*.js test/*.js",
+    "format": "./node_modules/.bin/eslint --fix ./*.js test/*.js",
     "make-device-detection": "./node_modules/.bin/babel ./device-detection/*.js ./device-detection/hw-transport/*.js -d device-detection-lib/",
     "make-protobuf-files": "make -C protob build-js",
-    "test": "./node_modules/.bin/serial-mocha ./test/*.js"
+    "test": "ls -1 ./test | xargs -I FILE ./node_modules/.bin/serial-mocha ./test/FILE"
   },
   "repository": {
     "type": "git",

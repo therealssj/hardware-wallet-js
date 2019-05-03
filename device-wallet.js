@@ -81,10 +81,10 @@ const getDevice = function() {
 
 // Prepares buffer containing message to device
 // eslint-disable-next-line max-statements
-const makeTrezorMessage = function(buffer, msgId) {
+const makeSkywalletMessage = function(buffer, msgId) {
   const u8Array = new Uint8Array(buffer);
-  const trezorMsg = new ArrayBuffer(10 + u8Array.byteLength - 1);
-  const dv = new DataView(trezorMsg);
+  const skywalletMsg = new ArrayBuffer(10 + u8Array.byteLength - 1);
+  const dv = new DataView(skywalletMsg);
   // Adding the '##' at the begining of the header
   dv.setUint8(0, 35);
   dv.setUint8(1, 35);
@@ -92,15 +92,15 @@ const makeTrezorMessage = function(buffer, msgId) {
   dv.setUint32(4, u8Array.byteLength);
   // Adding '\n' at the end of the header
   dv.setUint8(8, 10);
-  const trezorMsg8 = new Uint8Array(trezorMsg);
-  trezorMsg8.set(u8Array.slice(1), 9);
+  const skywalletMsg8 = new Uint8Array(skywalletMsg);
+  skywalletMsg8.set(u8Array.slice(1), 9);
   let lengthToWrite = u8Array.byteLength + 9;
   const chunks = [];
   let j = 0;
   do {
     const u64pack = new Uint8Array(64);
     u64pack[0] = 63;
-    u64pack.set(trezorMsg8.slice(63 * j, 63 * (j + 1)), 1);
+    u64pack.set(skywalletMsg8.slice(63 * j, 63 * (j + 1)), 1);
     lengthToWrite -= 63;
     chunks[j] = u64pack;
     j += 1;
@@ -257,7 +257,7 @@ const createInitializeRequest = function() {
   const msgStructure = {};
   const msg = messages.Initialize.create(msgStructure);
   const buffer = messages.Initialize.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_Initialize);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_Initialize);
   return dataBytesFromChunks(chunks);
 };
 
@@ -265,17 +265,17 @@ const createGetFeaturesRequest = function() {
   const msgStructure = {};
   const msg = messages.GetFeatures.create(msgStructure);
   const buffer = messages.GetFeatures.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_GetFeatures);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_GetFeatures);
   return dataBytesFromChunks(chunks);
 };
 
-const createApplySettings = function(usePassphrase, deviceLabel) {
-  const msgStructure = {'label': deviceLabel,
-    'language': '',
+const createApplySettings = function(usePassphrase, deviceLabel, language) {
+  const msgStructure = {'label': deviceLabel || "",
+    'language': language || "",
     usePassphrase};
   const msg = messages.ApplySettings.create(msgStructure);
   const buffer = messages.ApplySettings.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_ApplySettings);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_ApplySettings);
   return dataBytesFromChunks(chunks);
 };
 
@@ -283,7 +283,7 @@ const createPassphraseRequest = function(passphrase) {
   const msgStructure = {passphrase};
   const msg = messages.PassphraseAck.create(msgStructure);
   const buffer = messages.PassphraseAck.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_PassphraseAck);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_PassphraseAck);
   return dataBytesFromChunks(chunks);
 };
 
@@ -291,7 +291,7 @@ const createButtonAckRequest = function() {
   const msgStructure = {};
   const msg = messages.ButtonAck.create(msgStructure);
   const buffer = messages.ButtonAck.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_ButtonAck);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_ButtonAck);
   return dataBytesFromChunks(chunks);
 };
 
@@ -299,15 +299,15 @@ const createCancelRequest = function() {
   const msgStructure = {};
   const msg = messages.Cancel.create(msgStructure);
   const buffer = messages.Cancel.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_Cancel);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_Cancel);
   return dataBytesFromChunks(chunks);
 };
 
-const createChangePinRequest = function(mnemonic) {
-  const msgStructure = {mnemonic};
+const createChangePinRequest = function(remove) {
+  const msgStructure = {remove};
   const msg = messages.ChangePin.create(msgStructure);
   const buffer = messages.ChangePin.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_ChangePin);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_ChangePin);
   return dataBytesFromChunks(chunks);
 };
 
@@ -315,7 +315,7 @@ const createWordAckRequest = function(word) {
   const msgStructure = {word};
   const msg = messages.WordAck.create(msgStructure);
   const buffer = messages.WordAck.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_WordAck);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_WordAck);
   return dataBytesFromChunks(chunks);
 };
 
@@ -323,7 +323,7 @@ const createSetMnemonicRequest = function(mnemonic) {
   const msgStructure = {mnemonic};
   const msg = messages.SetMnemonic.create(msgStructure);
   const buffer = messages.SetMnemonic.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_SetMnemonic);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_SetMnemonic);
   return dataBytesFromChunks(chunks);
 };
 
@@ -332,7 +332,7 @@ const createEntropyAckRequest = function(bufferSize) {
   const msgStructure = {entropy};
   const msg = messages.EntropyAck.create(msgStructure);
   const buffer = messages.EntropyAck.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_EntropyAck);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_EntropyAck);
   return dataBytesFromChunks(chunks);
 };
 
@@ -341,7 +341,7 @@ const createGenerateMnemonicRequest = function(wordCount, usePassphrase) {
     wordCount};
   const msg = messages.GenerateMnemonic.create(msgStructure);
   const buffer = messages.GenerateMnemonic.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_GenerateMnemonic);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_GenerateMnemonic);
   return dataBytesFromChunks(chunks);
 };
 
@@ -349,7 +349,7 @@ const createWipeDeviceRequest = function() {
   const msgStructure = {};
   const msg = messages.WipeDevice.create(msgStructure);
   const buffer = messages.WipeDevice.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_WipeDevice);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_WipeDevice);
   return dataBytesFromChunks(chunks);
 };
 
@@ -359,7 +359,7 @@ const createRecoveryDeviceRequest = function(wordCount, usePassphrase, dryRun) {
     wordCount};
   const msg = messages.RecoveryDevice.create(msgStructure);
   const buffer = messages.RecoveryDevice.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_RecoveryDevice);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_RecoveryDevice);
   return dataBytesFromChunks(chunks);
 };
 
@@ -367,7 +367,7 @@ const createBackupDeviceRequest = function() {
   const msgStructure = {};
   const msg = messages.BackupDevice.create(msgStructure);
   const buffer = messages.BackupDevice.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_BackupDevice);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_BackupDevice);
   return dataBytesFromChunks(chunks);
 };
 
@@ -402,7 +402,7 @@ const createTransactionSignRequest = function(inputTransactions, outputTransacti
     transactionOut};
   const msg = messages.TransactionSign.create(msgStructure);
   const buffer = messages.TransactionSign.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_TransactionSign);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_TransactionSign);
   return dataBytesFromChunks(chunks);
 };
 
@@ -411,7 +411,7 @@ const createSignMessageRequest = function(addressN, message) {
     message};
   const msg = messages.SkycoinSignMessage.create(msgStructure);
   const buffer = messages.SkycoinSignMessage.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_SkycoinSignMessage);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_SkycoinSignMessage);
   return dataBytesFromChunks(chunks);
 };
 
@@ -421,7 +421,7 @@ const createAddressGenRequest = function(addressN, startIndex, confirmAddress) {
     startIndex};
   const msg = messages.SkycoinAddress.create(msgStructure);
   const buffer = messages.SkycoinAddress.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_SkycoinAddress);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_SkycoinAddress);
   return dataBytesFromChunks(chunks);
 };
 
@@ -431,7 +431,7 @@ const createCheckMessageSignatureRequest = function(address, message, signature)
     signature};
   const msg = messages.SkycoinCheckMessageSignature.create(msgStructure);
   const buffer = messages.SkycoinCheckMessageSignature.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_SkycoinCheckMessageSignature);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_SkycoinCheckMessageSignature);
   return dataBytesFromChunks(chunks);
 };
 
@@ -440,7 +440,7 @@ const createFirmwareUploadRequest = function(payload, hash) {
     payload};
   const msg = messages.FirmwareUpload.create(msgStructure);
   const buffer = messages.FirmwareUpload.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_FirmwareUpload);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_FirmwareUpload);
   return dataBytesFromChunks(chunks);
 };
 
@@ -448,15 +448,15 @@ const createFirmwareEraseRequest = function(length) {
   const msgStructure = {length};
   const msg = messages.FirmwareErase.create(msgStructure);
   const buffer = messages.FirmwareErase.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_FirmwareErase);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_FirmwareErase);
   return dataBytesFromChunks(chunks);
 };
 
 const createSendPinCodeRequest = function(pin) {
-  const msgStructure = {pin};
+  const msgStructure = {'pin': pin || ''};
   const msg = messages.PinMatrixAck.create(msgStructure);
   const buffer = messages.PinMatrixAck.encode(msg).finish();
-  const chunks = makeTrezorMessage(buffer, messages.MessageType.MessageType_PinMatrixAck);
+  const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_PinMatrixAck);
   return dataBytesFromChunks(chunks);
 };
 
@@ -783,7 +783,8 @@ const devAddressGen = function(addressN, startIndex, confirmAddress, pinCodeRead
   });
 };
 
-const devApplySettings = function(usePassphrase, deviceLabel, pinCodeReader) {
+// eslint-disable-next-line max-params
+const devApplySettings = function(usePassphrase, deviceLabel, language, pinCodeReader) {
   return new Promise((resolve, reject) => {
     const applySettingsCallback = function(kind, dataBuffer) {
       switch (kind) {
@@ -804,7 +805,7 @@ const devApplySettings = function(usePassphrase, deviceLabel, pinCodeReader) {
         break;
       }
     };
-    const dataBytes = createApplySettings(usePassphrase, deviceLabel);
+    const dataBytes = createApplySettings(usePassphrase, deviceLabel, language);
     const deviceHandle = new DeviceHandler(deviceType);
     const devReadCallback = function(kind, dataBuffer) {
       deviceHandle.close();
@@ -1122,9 +1123,9 @@ const devGenerateMnemonic = function(wordCount, usePassphrase) {
   });
 };
 
-const devChangePin = function(pinCodeReader) {
+const pinFunc = function(remove, pinCodeReader) {
   return new Promise((resolve, reject) => {
-    const dataBytes = createChangePinRequest();
+    const dataBytes = createChangePinRequest(remove);
     const deviceHandle = new DeviceHandler(deviceType);
     const pinCodeMatrixCallback = function(datakind, dataBuffer) {
       console.log('pinCodeMatrixCallback kind:', datakind, messages.MessageType[datakind]);
@@ -1145,6 +1146,13 @@ const devChangePin = function(pinCodeReader) {
     deviceHandle.read(devReadCallback);
     deviceHandle.write(dataBytes);
   });
+};
+
+const devChangePin = function(pinCodeReader) {
+  return pinFunc(false, pinCodeReader);
+};
+const devRemovePin = function(pinCodeReader) {
+  return pinFunc(true, pinCodeReader);
 };
 
 const devGetFeatures = function() {
@@ -1170,13 +1178,14 @@ module.exports = {
   devGenerateMnemonic,
   devGetFeatures,
   devRecoveryDevice,
+  devRemovePin,
   devSetMnemonic,
   devSkycoinSignMessage,
   devSkycoinTransactionSign,
   devUpdateFirmware,
   devWipeDevice,
   getDevice,
-  makeTrezorMessage,
+  makeSkywalletMessage,
   setAutoPressButton,
   setDeviceType
 };
