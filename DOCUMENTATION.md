@@ -15,6 +15,7 @@ This documentation contains general information about how to use the library.
   - [devBackupDevice](#devBackupDevice)
   - [devCancelRequest](#devCancelRequest)
   - [devChangePin](#devChangePin)
+  - [devRemovePin](#devRemovePin)
   - [devCheckMessageSignature](#devCheckMessageSignature)
   - [devGenerateMnemonic](#devGenerateMnemonic)
   - [devGetFeatures](#devGetFeatures)
@@ -42,6 +43,7 @@ The following actions are possible
 - Configure device mnemonic - see [devSetMnemonic](#devSetMnemonic)
 - Ask device to generate mnemonic - see [devGenerateMnemonic](#devGenerateMnemonic)
 - Configure device PIN code - see [devChangePin](#devChangePin)
+- Remove device PIN code - see [devRemovePin](#devRemovePin)
 - Ask device to sign message - see [devSkycoinSignMessage](#devSkycoinSignMessage)
 - Ask device to check signature - see [devCheckMessageSignature](#devCheckMessageSignature)
 - Wipe device - see [devWipeDevice](#devWipeDevice)
@@ -50,6 +52,8 @@ The following actions are possible
 - Ask the device Features - see [devGetFeatures](#devGetFeatures)
 - Ask the device to cancel the ongoing procedure - see [devCancelRequest](#devCancelRequest)
 - Ask the device to sign a transaction using the provided information - see [devSkycoinTransactionSign](#devSkycoinTransactionSign)
+
+**Note**: The javascript library provides no support for neither `GetRawEntropy` nor `GetMixedEntropy` messages.
 
 ## General characteristics to take into account
 
@@ -82,6 +86,7 @@ don't do that, so it is important to be aware of the particular way in which eac
 - [devBackupDevice](#devBackupDevice)
 - [devCancelRequest](#devCancelRequest)
 - [devChangePin](#devChangePin)
+- [devRemovePin](#devRemovePin)
 - [devCheckMessageSignature](#devCheckMessageSignature)
 - [devGenerateMnemonic](#devGenerateMnemonic)
 - [devGetFeatures](#devGetFeatures)
@@ -134,7 +139,7 @@ process will be slower if addresses with high indexes are requested.
 
 *Signature:*
 ```
-devApplySettings(usePassphrase, deviceLabel, pinCodeReader)
+devApplySettings(usePassphrase, deviceLabel, language, pinCodeReader)
 ```
 
 *Purpose:*
@@ -144,6 +149,7 @@ Edit device configuration.
 *Params:*
 - usePassphrase: Indicates if the passphrase protection must be enabled (true) or disable (false). If set to `null` this value will be ignored and passphrase will remain unchanged
 - deviceLabel: Label to identify the device through application and/or device screen (32 characters or less). If set to `null` this value will be ignored and label will remain unchanged.
+- language: Device language. Only `english` supported.
 - pinCodeReader: [Auxiliary function to obtain the PIN.](#auxiliary-function-to-obtain-the-PIN)
 
 
@@ -236,7 +242,33 @@ A promise that receives a text string that depends on the result of the operatio
 - A security alert must accepted in the hardware wallet for the operation to be completed.
 - To know if the hardware wallet has a PIN, call the [devGetFeatures](#devGetFeatures) function.
 - This function can be called even when the hardware wallet does not have a seed.
-- If the new PIN in `null`, the PIN code protection is deactivated.
+
+### devRemovePin
+
+*Signature:*
+```
+devRemovePin(pinCodeReader)
+```
+
+*Purpose:*
+
+Ensure that the hardware wallet PIN protection is removed.
+
+*Params:*
+- pinCodeReader: [Auxiliary function to obtain the PIN.](#auxiliary-function-to-obtain-the-PIN)
+
+*Return value:*
+
+A promise that receives a text string that depends on the result of the operation:
+- If the user cancels the operation (promise rejected): `Error: Action cancelled by user`.
+- If the promise returned by `pinCodeReader` is rejected: The function returns nothing.
+- If the PINs entered by the user do not match (promise rejected): `Error: PIN mismatch`.
+- If the operation ends correctly: `PIN removed`.
+
+*Notes:*
+- A security alert must accepted in the hardware wallet for the operation to be completed.
+- To know if the hardware wallet has a PIN, call the [devGetFeatures](#devGetFeatures) function.
+- This function can be called even when the hardware wallet does not have a seed.
 
 ### devCheckMessageSignature
 
@@ -327,12 +359,16 @@ Features {
   pinCached: false,
   passphraseCached: false,
   needsBackup: false,
-  model: '1'
+  model: '1',
+  firmwareFeatures: '1'
 }
 ```
 
 *Notes:*
 - This function can be called even when the hardware wallet does not have a seed.
+- `firmwareFeatures` is interpreted as a bits slice as follows
+  * bit `0` (i.e. mask `0x1`) is active if user confirmation required prior to returning internal entropy
+  * bit `1` (i.e. mask `0x2`) set if support for sending internal entropy back to the peer is enabled in firmware.
 
 ### devRecoveryDevice
 
@@ -466,6 +502,7 @@ hardware wallet returns one signature for each input. Example response:
 - Since the hardware wallet internally recovers the addresses sequentially, starting with the first one, the
 process will be slower if an address with high index is used.
 - A security alert must accepted in the hardware wallet for the operation to be completed.
+- Until the next version, only 7 inputs and 7 outputs are available at the most.
 
 ### devUpdateFirmware
 
