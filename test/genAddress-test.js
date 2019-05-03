@@ -5,12 +5,11 @@ const rejectPromise = utils.rejectPromise;
 const pinCodeReader = utils.pinCodeReader;
 const wordReader = utils.wordReader;
 
-const setup = function (has_mnemonic) {
-  has_mnemonic = Boolean(has_mnemonic);
+const setup = function (hasMnemonic) {
   return new Promise((resolve, reject) => {
     const wipePromise = deviceWallet.devWipeDevice();
     wipePromise.then(() => {
-      if ( has_mnemonic ) {
+      if ( hasMnemonic ) {
         const genMnemonicPromise = deviceWallet.devGenerateMnemonic(12, false);
         genMnemonicPromise.then(() => resolve("Set up done with mnemonic."), rejectPromise(reject));
       } else {
