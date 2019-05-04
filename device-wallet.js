@@ -10,7 +10,7 @@ const randomBytes = require('randombytes');
 let deviceType = 0;
 let autoPressButtons = false;
 let autoPressCircular = true;
-let autoPressSequence = [ 'R' ];
+let autoPressSequence = ['R'];
 let autoPressId = 0;
 
 const setDeviceType = function(devType) {
@@ -47,9 +47,12 @@ const setAutoPressButton = function(value, def, circular) {
     autoPressSequence = [].concat(sequence);
     autoPressId = 0;
 
-    return null; /// Done
+    return null;
 
   }
+
+  return 'Not in emulator';
+
 };
 
 /*
@@ -196,10 +199,9 @@ const closeAll = function () {
 
   for (let i = handlers.length - 1; i >= 0; i -= 1) {
     try {
-      if ( handlers[i].called ) {
-        continue;
+      if ( !handlers[i].called ) {
+        handlers[i].apply(null, arguments);
       }
-      handlers[i].apply(null, arguments);
     } catch(e) {}
   }
 
