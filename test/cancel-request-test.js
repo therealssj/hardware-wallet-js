@@ -9,30 +9,25 @@ describe("Cancel Request test", function() {
   if (deviceWallet.getDevice() === null) {
     console.log("Skycoin hardware NOT FOUND, using emulator");
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
-    deviceWallet.setAutoPressButton(true, "R", false);
+    //deviceWallet.setAutoPressButton(true, "R", false);
   } else {
     console.log("Skycoin hardware is plugged in");
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
   }
 
   it("Should cancel pending requests", function(done) {
+    console.log('Autopress: ', deviceWallet.setAutoPressButton(true, "R", false));
     setTimeout(function() {
       deviceWallet.
         devCancelRequest().
         then(() => {
           // Done();
-          console.log("Cancel request sent");
+          console.log("Cancel request Done");
         }).
         catch((err) => {
           console.log("Cancel request error: ", err);
         });
     }, 2000);
-
-    setTimeout(function() {
-      deviceWallet.devCancelRequest().then(() => {
-        // Done();
-      });
-    }, 4000);
 
     setup().
       then(deviceWallet.devChangePin).
@@ -44,8 +39,22 @@ describe("Cancel Request test", function() {
       });
   });
 
-  it("Should change and remove PIN if not canceled", function() {
-    return setup().
+  it("Should change and remove PIN if not canceled", function(done) {
+    console.log('Autopress: ', deviceWallet.setAutoPressButton(true, "R"));
+
+    setTimeout(function() {
+      deviceWallet.
+        devCancelRequest().
+        then(() => {
+          // Done();
+          console.log("Cancel request Done 2");
+        }).
+        catch((err) => {
+          console.log("Cancel request error 2: ", err);
+        });
+    }, 2000);
+
+    setup().
       then(deviceWallet.devGetFeatures).
       then((features1) => {
         expect(features1.pinProtection).to.be.false();
@@ -62,6 +71,7 @@ describe("Cancel Request test", function() {
       }).
       catch((err) => {
         console.log("ERROR: ", err);
+        done();
       });
   });
 });
