@@ -28,18 +28,18 @@ const setAutoPressButton = function(value, def, circular) {
     } else if ( Array.isArray(def) ) {
       sequence = [].concat(def);
     } else {
-      return 'Only string or Array allowed as parameter';
+      throw new TypeError('Only string or Array allowed as parameter');
     }
 
     for ( let i = 0, maxi = sequence.length; i < maxi; i += 1 ) {
       if (['R', 'L', 'B'].indexOf(sequence[i]) === -1) {
-        return `${sequence[i]} does not belong to the set { "R", "L", "B" }`;
+        throw new TypeError(`${sequence[i]} does not belong to the set { "R", "L", "B" }`);
       }
     }
 
     if ( sequence.length === 0 ) {
       autoPressButtons = false;
-      return 'Sequence provided is empty';
+      throw new ReferenceError('Sequence provided is empty');
     }
 
     autoPressButtons = Boolean(value);
@@ -47,11 +47,9 @@ const setAutoPressButton = function(value, def, circular) {
     autoPressSequence = [].concat(sequence);
     autoPressId = 0;
 
-    return null;
-
   }
 
-  return 'Not in emulator';
+  throw new Error('Not in emulator');
 
 };
 
