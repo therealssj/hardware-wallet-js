@@ -10,7 +10,7 @@ const randomBytes = require('randombytes');
 let deviceType = 0;
 let autoPressButtons = false;
 let autoPressCircular = true;
-let autoPressSequence = [];
+let autoPressSequence = ['R'];
 let autoPressId = 0;
 
 const setDeviceType = function(devType) {
@@ -28,18 +28,18 @@ const setAutoPressButton = function(value, def, circular) {
     } else if ( Array.isArray(def) ) {
       sequence = [].concat(def);
     } else {
-      return;
+      throw new TypeError('Only string or Array allowed as parameter');
     }
 
     for ( let i = 0, maxi = sequence.length; i < maxi; i += 1 ) {
       if (['R', 'L', 'B'].indexOf(sequence[i]) === -1) {
-        return;
+        throw new TypeError(`${sequence[i]} does not belong to the set { "R", "L", "B" }`);
       }
     }
 
     if ( sequence.length === 0 ) {
       autoPressButtons = false;
-      return;
+      throw new ReferenceError('Sequence provided is empty');
     }
 
     autoPressButtons = Boolean(value);
@@ -48,6 +48,9 @@ const setAutoPressButton = function(value, def, circular) {
     autoPressId = 0;
 
   }
+
+  throw new Error('Not in emulator');
+
 };
 
 /*
@@ -82,6 +85,10 @@ const pressButtonLeftAndRight = function(socket) {
 };
 
 const pressNextButton = function(socket) {
+
+  if ( autoPressButtons === false ) {
+    return;
+  }
 
   if ( autoPressCircular === false && autoPressId >= autoPressSequence.length ) {
     autoPressButtons = false;
@@ -190,7 +197,9 @@ const closeAll = function () {
 
   for (let i = handlers.length - 1; i >= 0; i -= 1) {
     try {
-      handlers[i].close();
+      if ( !handlers[i].called ) {
+        handlers[i].apply(null, arguments);
+      }
     } catch(e) {}
   }
 
@@ -242,7 +251,7 @@ class DeviceHandler {
       devHandle.read(devHandleCallback);
     } break;
     case DeviceTypeEnum.EMULATOR:
-      handlers.push(this);
+      handlers.push(devReadCallback);
       this.devHandle.on('message', function(data, rinfo) {
         if (rinfo) {
           console.log("server got:");
@@ -253,7 +262,8 @@ class DeviceHandler {
           devReadCallback.apply(null, arguments);
           if ( latestDataBytes.equals(Buffer.from(createCancelRequest())) &&
             kind === messages.MessageType.MessageType_Failure ) {
-            closeAll();
+            devReadCallback.called = true;
+            closeAll.apply(null, arguments);
           }
         });
       });
