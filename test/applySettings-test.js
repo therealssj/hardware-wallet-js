@@ -35,9 +35,9 @@ describe('Apply Setting -> label', function () {
       catch(rejectPromise());
   });
 
-  it("Should fail if empty settings supplied", function(done) {
+  it("Should not accept invalid languages", function(done) {
     setup().
-      then(() => deviceWallet.devApplySettings(null, null)).
+      then(() => deviceWallet.devApplySettings(false, null, 'italiano')).
       then(() => done(new Error("Expected failure"))).
       catch(() => {
         done();

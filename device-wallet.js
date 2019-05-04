@@ -9,19 +9,44 @@ const randomBytes = require('randombytes');
 
 let deviceType = 0;
 let autoPressButtons = false;
-let autoPressValue = 'R';
+let autoPressCircular = true;
+let autoPressSequence = [];
+let autoPressId = 0;
 
 const setDeviceType = function(devType) {
   deviceType = devType;
 };
 
-const setAutoPressButton = function(value, def) {
+const setAutoPressButton = function(value, def, circular) {
   if (deviceType === DeviceTypeEnum.EMULATOR) {
     // eslint-disable-next-line array-element-newline
-    if (['R', 'L', 'B'].indexOf(def) > -1) {
-      autoPressButtons = Boolean(value);
-      autoPressValue = def;
+
+    let sequence = [];
+
+    if ( typeof def === 'string' ) {
+      sequence = [def];
+    } else if ( Array.isArray(def) ) {
+      sequence = [].concat(def);
+    } else {
+      return;
     }
+
+    for ( let i = 0, maxi = sequence.length; i < maxi; i += 1 ) {
+      if (['R', 'L', 'B'].indexOf(sequence[i]) === -1) {
+        return;
+      }
+    }
+
+    if ( sequence.length === 0 ) {
+      autoPressButtons = false;
+      return;
+    }
+
+    autoPressButtons = Boolean(value);
+    autoPressCircular = Boolean(circular === undefined | circular);
+    autoPressSequence = [].concat(sequence);
+    autoPressId = 0;
+
   }
 };
 
@@ -54,6 +79,38 @@ const pressButtonRight = function(socket) {
 
 const pressButtonLeftAndRight = function(socket) {
   pressButton(socket, 2);
+};
+
+const pressNextButton = function(socket) {
+
+  if ( autoPressCircular === false && autoPressId >= autoPressSequence.length ) {
+    autoPressButtons = false;
+    return;
+  }
+
+  let nextButton = '';
+
+  nextButton = autoPressSequence[autoPressId];
+
+  if ( autoPressCircular === true ) {
+    autoPressId = (autoPressId + 1) % autoPressSequence.length;
+  } else {
+    autoPressId += 1;
+  }
+
+  switch(nextButton) {
+  case 'R': {
+    pressButtonRight(socket);
+    break;
+  }
+  case 'L': {
+    pressButtonLeft(socket);
+    break;
+  }
+  default:
+    pressButtonLeftAndRight(socket);
+    break;
+  }
 };
 
 const dataBytesFromChunks = function(chunks) {
@@ -270,9 +327,11 @@ const createGetFeaturesRequest = function() {
 };
 
 const createApplySettings = function(usePassphrase, deviceLabel, language) {
-  const msgStructure = {'label': deviceLabel || "",
+  const msgStructure = {
+    'label': deviceLabel || "",
     'language': language || "",
-    usePassphrase};
+    'usePassphrase': Boolean(usePassphrase)
+  };
   const msg = messages.ApplySettings.create(msgStructure);
   const buffer = messages.ApplySettings.encode(msg).finish();
   const chunks = makeSkywalletMessage(buffer, messages.MessageType.MessageType_ApplySettings);
@@ -612,13 +671,7 @@ const devButtonRequestCallback = function(kind, data, callback) {
     deviceHandle.write(dataBytes);
 
     if (autoPressButtons === true) {
-      if (autoPressValue === 'R') {
-        pressButtonRight(deviceHandle.devHandle);
-      } else if (autoPressValue === 'L') {
-        pressButtonLeft(deviceHandle.devHandle);
-      } else {
-        pressButtonLeftAndRight(deviceHandle.devHandle);
-      }
+      pressNextButton(deviceHandle.devHandle);
     }
 
     return;
@@ -970,13 +1023,7 @@ const devBackupDevice = function(pinCodeReader) {
       });
       buttonDevHandle.write(buttonAckBytes);
       if (autoPressButtons === true) {
-        if (autoPressValue === 'R') {
-          pressButtonRight(buttonDevHandle.devHandle);
-        } else if (autoPressValue === 'L') {
-          pressButtonLeft(buttonDevHandle.devHandle);
-        } else {
-          pressButtonLeftAndRight(buttonDevHandle.devHandle);
-        }
+        pressNextButton(deviceHandle.devHandle);
       }
     };
     const backupReader = function(kind) {
