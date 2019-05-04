@@ -93,10 +93,10 @@ if (testSign) {
   );
 }
 
-const testAddressGen = false;
+const testAddressGen = true;
 
 if (testAddressGen) {
-  const promise = deviceWallet.devAddressGen(9, 3, true, pinCodeReader, wordReader);
+  const promise = deviceWallet.devAddressGen(12, 0, false, pinCodeReader, wordReader);
   promise.then(console.log, rejectPromise);
 }
 

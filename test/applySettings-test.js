@@ -35,31 +35,13 @@ describe('Apply Setting -> label', function () {
       catch(rejectPromise());
   });
 
-  it("Should fail if empty settings supplied", function() {
-    return setup().
-      then(() => deviceWallet.devApplySettings(null, null)).
-      then(
-        () => Promise.reject(new Error("Expected failure")),
-        (err) => {
-          if (err.toString() == "Error: No setting provided") {
-            return Promise.resolve("Ok");
-          }
-          return Promise.reject(new Error(`Unexpected failure message ${err.toString()}`));
-        }
-      );
+  it("Should not accept invalid languages", function(done) {
+    setup().
+      then(() => deviceWallet.devApplySettings(false, null, 'italiano')).
+      then(() => done(new Error("Expected failure"))).
+      catch(() => {
+        done();
+      });
   });
 
-  it("Should not accept invalid languages", function() {
-    return setup().
-      then(() => deviceWallet.devApplySettings(null, null, 'italiano')).
-      then(
-        () => Promise.reject(new Error("Expected failure")),
-        (err) => {
-          if (err.toString() == "Error: Invalid argument") {
-            return Promise.resolve("Ok");
-          }
-          return Promise.reject(new Error(`Unexpected failure message ${err.toString()}`));
-        }
-      );
-  });
 });

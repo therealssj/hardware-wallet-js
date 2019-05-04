@@ -1,15 +1,15 @@
-const deviceWallet = require('../device-wallet');
-const utils = require('../utils');
+const deviceWallet = require("../device-wallet");
+const utils = require("../utils");
 const setup = utils.deviceSetup;
-const constPinCodeReader = utils.constPinCodeReader;
-const expect = require('chai').expect;
+const constPinCodeReader = utils.pinCodeReader;
+const expect = require("chai").expect;
 
-describe('Cancel Request test', function () {
+describe("Cancel Request test", function() {
   this.timeout(0);
   if (deviceWallet.getDevice() === null) {
     console.log("Skycoin hardware NOT FOUND, using emulator");
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.EMULATOR);
-    deviceWallet.setAutoPressButton(true, 'R');
+    deviceWallet.setAutoPressButton(true, "R", false);
   } else {
     console.log("Skycoin hardware is plugged in");
     deviceWallet.setDeviceType(deviceWallet.DeviceTypeEnum.USB);
@@ -17,38 +17,51 @@ describe('Cancel Request test', function () {
 
   it("Should cancel pending requests", function(done) {
     setTimeout(function() {
-      deviceWallet.devCancelRequest().then(() => {
-        done();
-      });
+      deviceWallet.
+        devCancelRequest().
+        then(() => {
+          // Done();
+          console.log("Cancel request sent");
+        }).
+        catch((err) => {
+          console.log("Cancel request error: ", err);
+        });
     }, 2000);
+
+    setTimeout(function() {
+      deviceWallet.devCancelRequest().then(() => {
+        // Done();
+      });
+    }, 4000);
 
     setup().
       then(deviceWallet.devChangePin).
       then(() => {
-        done(new Error('The Cancel Request is not working'));
+        done(new Error("The Cancel Request is not working"));
       }).
       catch(() => {
         done();
       });
   });
 
-  it("Should change and remove PIN if not canceled", function(done) {
+  it("Should change and remove PIN if not canceled", function() {
     return setup().
       then(deviceWallet.devGetFeatures).
       then((features1) => {
         expect(features1.pinProtection).to.be.false();
       }).
-      then(deviceWallet.devChangePin(constPinCodeReader('1234'))).
+      then(deviceWallet.devChangePin(constPinCodeReader("1234"))).
       then(deviceWallet.devGetFeatures).
       then((features2) => {
         expect(features2.pinProtection).to.be.true();
       }).
-      then(deviceWallet.devRemovePin(constPinCodeReader('1234'))).
+      then(deviceWallet.devRemovePin(constPinCodeReader("1234"))).
       then(deviceWallet.devGetFeatures).
       then((features3) => {
         expect(features3.pinProtection).to.be.false();
-        done();
+      }).
+      catch((err) => {
+        console.log("ERROR: ", err);
       });
   });
-
 });
