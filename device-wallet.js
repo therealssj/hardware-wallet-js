@@ -47,9 +47,9 @@ const setAutoPressButton = function(value, def, circular) {
     autoPressSequence = [].concat(sequence);
     autoPressId = 0;
 
+  } else {
+    throw new Error('Not in emulator');
   }
-
-  throw new Error('Not in emulator');
 
 };
 
@@ -917,6 +917,9 @@ const devSkycoinSignMessage = function(addressN, message, pinCodeReader, passphr
         break;
       case messages.MessageType.MessageType_PinMatrixRequest:
         devSendPinCodeRequest(skycoinSignHander, pinCodeReader);
+        break;
+      case messages.MessageType.MessageType_ButtonRequest:
+        devButtonRequestCallback(kind, dataBuffer, skycoinSignHander);
         break;
       default:
         reject(new Error(`Unexpected answer from the device: ${kind}`));
