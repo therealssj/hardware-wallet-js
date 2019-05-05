@@ -47,9 +47,9 @@ const setAutoPressButton = function(value, def, circular) {
     autoPressSequence = [].concat(sequence);
     autoPressId = 0;
 
+  } else {
+    throw new Error('Not in emulator');
   }
-
-  throw new Error('Not in emulator');
 
 };
 
