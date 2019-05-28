@@ -1076,7 +1076,7 @@ const wordAckLoop = function(kind, wordReader, callback) {
           wordAckCallback(knd, dta);
         });
         deviceHandle.write(dataBytes);
-      }, deviceHandle.close());
+      }, deviceHandle.close);
       return;
     }
     deviceHandle.close();
